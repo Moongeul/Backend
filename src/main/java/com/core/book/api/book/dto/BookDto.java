@@ -22,6 +22,6 @@ public class BookDto {
     private String pubdate;
 
     public Book toEntity() {
-        return new Book(id, title, link, image, author, discount, publisher, isbn, description, pubdate);
+        return new Book(id, title, image, author, publisher, description, pubdate);
     }
 }

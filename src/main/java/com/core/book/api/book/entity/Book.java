@@ -20,23 +20,14 @@ public class Book {
 
     private String title;
 
-    private String link;
-
     private String book_image;
 
     private String author;
 
-    private String discount;
-
     private String publisher;
-
-    private String isbn;
 
     @Column(length = 5000)
     private String description;
 
     private String pubdate;
-
-//    @Column
-//    private String category;
 }
