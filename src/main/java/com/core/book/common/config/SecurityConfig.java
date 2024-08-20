@@ -2,6 +2,7 @@ package com.core.book.common.config;
 
 import com.core.book.common.config.jwt.JwtConfig;
 import com.core.book.common.config.oauth2.OAuth2Config;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -30,11 +36,25 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable()) // FormLogin 사용 X
                 .httpBasic(basic -> basic.disable()) // httpBasic 사용 X
                 .csrf(csrf -> csrf.disable()) // csrf 보안 사용 X
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                        CorsConfiguration config = new CorsConfiguration();
+                        config.setAllowedOrigins(Arrays.asList(
+                                "https://moongeul.kro.kr",
+                                "http://localhost:3000"
+                        ));
+                        config.setAllowedMethods(Collections.singletonList("*"));
+                        config.setAllowCredentials(true);
+                        config.setAllowedHeaders(Collections.singletonList("*"));
+                        config.setMaxAge(3600L); //1시간
+                        return config;
+                    }
+                }))
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers( "/api-doc", "/health","/v3/api-docs/**", "/swagger-resources/**","/swagger-ui/**", "/h2-console/**").permitAll()
-
                         .requestMatchers("/oauth2/authorization/kakao").permitAll() // 카카오 로그인 접근 가능
                         .anyRequest().authenticated() // 위의 경로 이외에는 모두 인증된 사용자만 접근 가능
                 )
