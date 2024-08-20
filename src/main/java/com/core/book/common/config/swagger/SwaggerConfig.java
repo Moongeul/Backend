@@ -42,6 +42,7 @@ public class SwaggerConfig {
                 .components(new Components()
                         .addSecuritySchemes("accessToken", accessTokenScheme)
                         .addSecuritySchemes("refreshToken", refreshTokenScheme))
+                .addServersItem(server)
                 .addSecurityItem(securityRequirement);
     }
 }
