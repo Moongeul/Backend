@@ -14,8 +14,8 @@ public class ApiResponse<T> {
     private final String message;
     private T data;
 
-    public static ApiResponse success(SuccessStatus status, Object data) {
-        return ApiResponse.builder()
+    public static <T> ApiResponse<T> success(SuccessStatus status, T data) {
+        return ApiResponse.<T>builder()
                 .status(status.getStatusCode())
                 .success(true)
                 .message(status.getMessage())
@@ -23,16 +23,16 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static ApiResponse success(int status, String message) {
-        return ApiResponse.builder()
-                .status(status)
+    public static ApiResponse<Void> success_only(SuccessStatus status) {
+        return ApiResponse.<Void>builder()
+                .status(status.getStatusCode())
                 .success(true)
-                .message(message)
+                .message(status.getMessage())
                 .build();
     }
 
-    public static ApiResponse fail(int status, String message) {
-        return ApiResponse.builder()
+    public static ApiResponse<Void> fail(int status, String message) {
+        return ApiResponse.<Void>builder()
                 .status(status)
                 .success(false)
                 .message(message)

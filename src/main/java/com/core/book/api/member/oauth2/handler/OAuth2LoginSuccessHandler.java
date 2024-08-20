@@ -41,8 +41,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private void handleGuestLogin(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
         String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
         jwtService.sendAccessToken(response, accessToken);
-        response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
-        response.sendRedirect("https://www.google.com");
+        //response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
+        //response.sendRedirect("https://www.google.com");
+
+        String redirectUrl = "http://localhost:3000?accessToken=" + accessToken;
+        response.sendRedirect(redirectUrl);
     }
 
     private void handleUserLogin(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
@@ -51,8 +54,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
         jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
 
-        response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
-        response.addHeader(jwtService.getRefreshHeader(), "Bearer " + refreshToken);
-        response.sendRedirect("https://www.naver.com");
+        //response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
+        //response.addHeader(jwtService.getRefreshHeader(), "Bearer " + refreshToken);
+        //response.sendRedirect("https://www.naver.com");
+
+        String redirectUrl = "http://localhost:3000?accessToken=" + accessToken + "&refreshToken=" + refreshToken;
+        response.sendRedirect(redirectUrl);
     }
 }

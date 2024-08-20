@@ -6,14 +6,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.*;
-
 import java.util.Collection;
 import java.util.Collections;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Builder
+@Builder(toBuilder = true)  // toBuilder 옵션을 사용하여 기존 객체를 복사하는 빌더 생성 가능
 @Table(name = "MEMBER")
 @AllArgsConstructor
 public class Member extends BaseTimeEntity implements UserDetails {
@@ -26,6 +25,7 @@ public class Member extends BaseTimeEntity implements UserDetails {
     private String email; // 이메일
     private String nickname; // 닉네임
     private String imageUrl; // 프로필 이미지
+    private Boolean marketing_allow;
 
     @Enumerated(EnumType.STRING)
     private Role role; // 권한
@@ -34,19 +34,37 @@ public class Member extends BaseTimeEntity implements UserDetails {
 
     private String refreshToken; // 리프레시 토큰
 
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    private UserTag userTag;
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    private InfoOpen infoOpen;
+
     // 유저 권한 설정 메소드
-    public void authorizeUser() {
-        this.role = Role.USER;
+    public Member authorizeUser() {
+        return this.toBuilder()
+                .role(Role.USER)
+                .build();
     }
 
     // 닉네임 필드 업데이트
-    public void updateNickname(String updateNickname) {
-        this.nickname = updateNickname;
+    public Member updateNickname(String updateNickname) {
+        return this.toBuilder()
+                .nickname(updateNickname)
+                .build();
     }
 
     // 리프레시토큰 필드 업데이트
-    public void updateRefreshToken(String updateRefreshToken) {
-        this.refreshToken = updateRefreshToken;
+    public Member updateRefreshToken(String updateRefreshToken) {
+        return this.toBuilder()
+                .refreshToken(updateRefreshToken)
+                .build();
+    }
+
+    // 마케팅 동의 여부 필드 업데이트
+    public Member updateMarketingAllow(Boolean updateMarketingAllow) {
+        return this.toBuilder()
+                .marketing_allow(updateMarketingAllow)
+                .build();
     }
 
     @Override
@@ -64,4 +82,3 @@ public class Member extends BaseTimeEntity implements UserDetails {
         return null;
     }
 }
-
