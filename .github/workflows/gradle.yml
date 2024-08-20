@@ -20,11 +20,29 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # 2. application.yml 파일 생성
+    # 2-1. application.yml 파일 생성
     - name: Create application.yml
       run: |
         mkdir -p src/main/resources
         echo "${{ secrets.APPLICATION_YML }}" > src/main/resources/application.yml
+
+    # 2-2. application-book.yml 파일 생성
+    - name: Create application-book.yml
+      run: |
+        mkdir -p src/main/resources
+        echo "${{ secrets.APPLICATION_BOOK_YML }}" > src/main/resources/application-book.yml
+
+    # 2-3. application-jwt.yml 파일 생성
+    - name: Create application-jwt.yml
+      run: |
+        mkdir -p src/main/resources
+        echo "${{ secrets.APPLICATION_JWT_YML }}" > src/main/resources/application-jwt.yml
+
+    # 2-4. application-oauth.yml 파일 생성
+    - name: Create application-oauth.yml
+      run: |
+        mkdir -p src/main/resources
+        echo "${{ secrets.APPLICATION_OAUTH2_YML }}" > src/main/resources/application-oauth.yml
 
     # 3. Spring Boot 애플리케이션 빌드
     - name: Build with Gradle
