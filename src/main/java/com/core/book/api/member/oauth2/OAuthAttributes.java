@@ -1,5 +1,6 @@
 package com.core.book.api.member.oauth2;
 
+import com.core.book.api.member.entity.InfoOpen;
 import com.core.book.api.member.entity.Role;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,6 +41,7 @@ public class OAuthAttributes {
                 .nickname(oauth2UserInfo.getNickname())
                 .imageUrl(oauth2UserInfo.getImageUrl())
                 .role(Role.GUEST)
+                .marketing_allow(Boolean.FALSE)
                 .build();
     }
 }

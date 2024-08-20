@@ -38,27 +38,22 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             return; // return으로 이후 현재 필터 진행 막기
         }
 
-        // 사용자 요청 헤더에서 RefreshToken 추출
         String refreshToken = jwtService.extractRefreshToken(request)
                 .filter(jwtService::isTokenValid)
                 .orElse(null);
 
         if (refreshToken != null) {
-            // 리프레시 토큰이 존재하면, 새로운 엑세스 토큰 및 리프레시 토큰을 발급
             checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
 
-            // 새롭게 발급된 엑세스 토큰으로 SecurityContextHolder에 인증 정보 설정
             jwtService.extractAccessToken(request)
                     .ifPresent(accessToken -> jwtService.extractEmail(accessToken)
                             .ifPresent(email -> memberRepository.findByEmail(email)
                                     .ifPresent(this::saveAuthentication)));
 
-            // 필터 체인을 다시 실행하여 엔드포인트 작업이 수행되도록 함
             filterChain.doFilter(request, response);
-            return; // 이후 코드 진행 막기
+            return;
         }
 
-        // RefreshToken이 없거나 유효하지 않다면, AccessToken을 검사하고 인증을 처리하는 로직 수행
         checkAccessTokenAndAuthentication(request, response, filterChain);
     }
 
@@ -73,8 +68,10 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private String reIssueRefreshToken(Member user) {
         String reIssuedRefreshToken = jwtService.createRefreshToken();
-        user.updateRefreshToken(reIssuedRefreshToken);
-        memberRepository.saveAndFlush(user);
+        Member updatedMember = user.toBuilder()
+                .refreshToken(reIssuedRefreshToken)
+                .build();
+        memberRepository.saveAndFlush(updatedMember);
         return reIssuedRefreshToken;
     }
 
@@ -92,7 +89,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private void saveAuthentication(Member myUser) {
         String password = myUser.getPassword();
-        if (password == null) { // 소셜 로그인 유저의 비밀번호 임의로 설정하여 소셜 로그인 유저도 인증되도록 설정
+        if (password == null) {
             password = PasswordUtil.generateRandomPassword();
         }
 
