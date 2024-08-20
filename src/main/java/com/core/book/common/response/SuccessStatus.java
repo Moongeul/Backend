@@ -12,7 +12,7 @@ public enum SuccessStatus {
     /**
      * 200
      */
-    SEND_QUESTION_SUCCESS(HttpStatus.OK, "문제 발송 성공"),
+    SEND_USERDETAIL_SUCCESS(HttpStatus.OK, "유저 정보 발송 성공"),
 
     /**
      * 201

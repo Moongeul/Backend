@@ -18,6 +18,8 @@ public enum ErrorStatus {
      * 404 NOT_FOUND
      */
 
+    USER_NOTFOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다."),
+
     /**
      * 500 SERVER_ERROR
      */
