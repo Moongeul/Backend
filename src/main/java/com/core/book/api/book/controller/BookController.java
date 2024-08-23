@@ -2,6 +2,7 @@ package com.core.book.api.book.controller;
 
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.service.BookService;
+import com.core.book.common.exception.BadRequestException;
 import com.core.book.common.response.ApiResponse;
 import com.core.book.common.response.ErrorStatus;
 import com.core.book.common.response.SuccessStatus;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,14 +33,14 @@ public class BookController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값에 대한 반환 결과가 없습니다.")
     })
     @GetMapping("/api/v1/book")
-    public ApiResponse<Iterable<Book>> book(@RequestParam("title") String text) {
+    public ResponseEntity<ApiResponse<Iterable<Book>>> book(@RequestParam("title") String text) {
         log.info("Received text: {}", text);
-        if(text.isEmpty()){
-            ApiResponse.fail(ErrorStatus.VALIDATION_REQUEST_MISSING_EXCEPTION.getStatusCode(), ErrorStatus.VALIDATION_REQUEST_MISSING_EXCEPTION.getMessage());
+        //예외처리 - 검색어가 입력되지 않았을 경우
+        if(text.isEmpty()) {
+            throw new BadRequestException(ErrorStatus.VALIDATION_REQUEST_MISSING_EXCEPTION.getMessage());
         }
 
         Iterable<Book> book = bookService.book(text);
-
         return ApiResponse.success(SuccessStatus.BOOK_SEARCH_SUCCESS, book);
     }
 }
