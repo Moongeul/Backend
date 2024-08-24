@@ -10,7 +10,6 @@ import lombok.*;
 @Builder(toBuilder = true)
 @Table(name = "INFO_OPEN")
 @AllArgsConstructor
-
 public class InfoOpen extends BaseTimeEntity {
 
     @Id
@@ -26,5 +25,14 @@ public class InfoOpen extends BaseTimeEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Member member;
+
+    public InfoOpen updateInfoOpen(Boolean followOpen, Boolean contentOpen, Boolean commentOpen, Boolean likeOpen) {
+        return this.toBuilder()
+                .follow_open(followOpen)
+                .content_open(contentOpen)
+                .comment_open(commentOpen)
+                .like_open(likeOpen)
+                .build();
+    }
 
 }

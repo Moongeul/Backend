@@ -117,10 +117,8 @@ public class JwtService {
     @Transactional
     public void updateRefreshToken(String email, String refreshToken) {
         memberRepository.findByEmail(email).ifPresent(member -> {
-            Member updatedMember = member.toBuilder()
-                    .refreshToken(refreshToken)
-                    .build();
-            memberRepository.save(updatedMember); // 새로 생성된 객체를 저장
+            Member updatedMember = member.updateRefreshToken(refreshToken);
+            memberRepository.save(updatedMember);
         });
     }
 
