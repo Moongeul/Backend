@@ -1,8 +1,6 @@
 package com.core.book.api.member.controller;
 
-import com.core.book.api.member.dto.InfoOpenRequestDTO;
-import com.core.book.api.member.dto.UserInfoResponseDTO;
-import com.core.book.api.member.dto.UserTagRequestDTO;
+import com.core.book.api.member.dto.*;
 import com.core.book.api.member.service.MemberService;
 import com.core.book.common.exception.BadRequestException;
 import com.core.book.common.exception.InternalServerException;
@@ -24,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Tag(name = "Member", description = "Member 관련 API 입니다.")
 @RestController
@@ -39,7 +38,7 @@ public class MemberController {
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "사용자 정보 조회 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다.")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다.")
     })
     @GetMapping("/user-info")
     public ResponseEntity<ApiResponse<UserInfoResponseDTO>> getUserInfo(@AuthenticationPrincipal UserDetails userDetails) {
@@ -150,7 +149,7 @@ public class MemberController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "정보 공개 수정 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "정보 공개 여부 값이 입력되지 않았습니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다.")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다.")
     })
     @PutMapping("/change-info-open")
     public ResponseEntity<ApiResponse<Void>> changeInfoOpen(@AuthenticationPrincipal UserDetails userDetails,
@@ -168,7 +167,7 @@ public class MemberController {
     @Operation(summary = "회원 탈퇴 API", description = "회원 탈퇴 시 연관된 모든 데이터를 삭제합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "회원 탈퇴 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다.")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다.")
     })
     @DeleteMapping("/quit")
     public ResponseEntity<ApiResponse<Void>> quitMember(@AuthenticationPrincipal UserDetails userDetails) {
@@ -176,5 +175,39 @@ public class MemberController {
         memberService.quitMember(userDetails.getUsername());
         return ApiResponse.success_only(SuccessStatus.DELETE_MEMBER_SUCCESS);
     }
+
+    // 회원 팔로우, 언팔로우 API
+    @Operation(summary = "사용자 팔로우, 언팔로우 API", description = "특정 사용자를 팔로우하거나, 이미 팔로우한 경우 해지합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "팔로우 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다.")
+    })
+    @PostMapping("/follow")
+    public ResponseEntity<ApiResponse<Void>> followMember(@AuthenticationPrincipal UserDetails userDetails,
+                                                          @RequestBody FollowRequestDTO followRequestDTO) {
+        boolean isFollowed = memberService.followOrUnfollowMember(userDetails.getUsername(), followRequestDTO.getFollowingId());
+
+        if(isFollowed){
+            return ApiResponse.success_only(SuccessStatus.USER_FOLLOW_SUCCESS);
+        }else{
+            return ApiResponse.success_only(SuccessStatus.USER_UNFOLLOW_SUCCESS);
+        }
+    }
+
+    // 팔로우한 사용자 목록 조회 API
+    @Operation(
+            summary = "팔로우 중인 사용자 목록 조회 API",
+            description = "현재 사용자가 팔로우하고 있는 사용자 목록을 반환합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "팔로우 중인 사용자 목록 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다.")
+    })
+    @GetMapping("/follow")
+    public ResponseEntity<ApiResponse<List<FollowedUserDTO>>> getFollowedUsers(@AuthenticationPrincipal UserDetails userDetails) {
+        List<FollowedUserDTO> followedUsers = memberService.getFollowedUsers(userDetails.getUsername());
+        return ApiResponse.success(SuccessStatus.GET_FOLLOWED_USERS_SUCCESS, followedUsers);
+    }
+
 
 }
