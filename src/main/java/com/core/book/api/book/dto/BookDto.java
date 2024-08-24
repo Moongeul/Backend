@@ -1,6 +1,7 @@
 package com.core.book.api.book.dto;
 
 import com.core.book.api.book.entity.Book;
+import com.core.book.api.book.entity.BookTag;
 import lombok.*;
 
 @ToString
@@ -21,7 +22,9 @@ public class BookDto {
     private String description;
     private String pubdate;
 
+    private BookTag bookTag = new BookTag();
+
     public Book toEntity() {
-        return new Book(id, title, image, author, publisher, description, pubdate);
+        return new Book(id, title, image, author, publisher, description, pubdate, bookTag);
     }
 }
