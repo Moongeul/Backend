@@ -1,9 +1,6 @@
 package com.core.book.api.member.service;
 
-import com.core.book.api.member.dto.FollowedUserDTO;
-import com.core.book.api.member.dto.InfoOpenRequestDTO;
-import com.core.book.api.member.dto.UserInfoResponseDTO;
-import com.core.book.api.member.dto.UserTagRequestDTO;
+import com.core.book.api.member.dto.*;
 import com.core.book.api.member.entity.Follow;
 import com.core.book.api.member.entity.InfoOpen;
 import com.core.book.api.member.entity.Member;
@@ -328,5 +325,23 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
                 ))
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public OtherUserInfoResponseDTO getOtherUserInfo(Long id) {
+        // 조회하려는 타 사용자를 찾습니다.
+        Member targetMember = memberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 필요한 정보만 DTO로 변환하여 반환
+        int followedCount = targetMember.getFollowing().size();
+
+        return OtherUserInfoResponseDTO.builder()
+                .id(targetMember.getId())
+                .nickname(targetMember.getNickname())
+                .imageUrl(targetMember.getImageUrl())
+                .followedCount(followedCount)
+                .build();
+    }
+
 
 }

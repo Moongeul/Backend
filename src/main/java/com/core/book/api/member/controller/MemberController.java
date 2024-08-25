@@ -209,5 +209,32 @@ public class MemberController {
         return ApiResponse.success(SuccessStatus.GET_FOLLOWED_USERS_SUCCESS, followedUsers);
     }
 
+    @Operation(
+            summary = "타인 사용자 정보 조회 API",
+            description = "사용자의 ID를 통해 해당 사용자의 정보를 조회합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "타인 사용자 정보 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다.")
+    })
+    @GetMapping("/user-info/{id}")
+    public ResponseEntity<ApiResponse<OtherUserInfoResponseDTO>> getOtherUserInfo(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(description = "조회할 사용자의 ID", required = true)
+            @PathVariable Long id) {
+
+        // 상대방 ID 미입력인 경우 예외 처리
+        if (id == null) {
+            throw new BadRequestException(ErrorStatus.VALIDATION_REQUEST_MISSING_EXCEPTION.getMessage());
+        }
+
+        // 조회 사용자 미인증인 경우 예외 처리
+        if (userDetails.getUsername() == null) {
+            throw new BadRequestException(ErrorStatus.USER_UNAUTHORIZED.getMessage());
+        }
+
+        OtherUserInfoResponseDTO userInfo = memberService.getOtherUserInfo(id);
+        return ApiResponse.success(SuccessStatus.GET_USERINFO_SUCCESS, userInfo);
+    }
 
 }

@@ -26,6 +26,11 @@ public enum ErrorStatus {
     MISSING_INFOOPEN(HttpStatus.BAD_REQUEST,"정보 공개 여부 값이 입력되지 않았습니다."),
 
     /**
+     * 401 UNAUTHORIZED
+     */
+    USER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"인증되지 않은 사용자입니다."),
+
+    /**
      * 404 NOT_FOUND
      */
 
