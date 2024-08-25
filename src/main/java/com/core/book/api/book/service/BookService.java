@@ -19,9 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,16 +35,18 @@ public class BookService {
     @Value("${naver-client-secret}")
     private String clientSecret;
 
-    public Iterable<Book> book(String text){
+    public Map<String, Object> book(String text, int page, int size){
+
+        int start = (page - 1) * size + 1; //검색 시작 위치 변수
 
         //String apiURL
         URI uri = UriComponentsBuilder
                 .fromUriString("https://openapi.naver.com")
                 .path("/v1/search/book.json")
-                .queryParam("query", text)
-                .queryParam("display", 10)
-                .queryParam("start", 1)
-                .queryParam("sort", "sim")
+                .queryParam("query", text) //검색어
+                .queryParam("display", size) //한 번에 표시할 검색 결과 개수
+                .queryParam("start", start) //검색 시작 위치
+                .queryParam("sort", "sim") //검색 결과 정렬 방법
                 .encode()
                 .build()
                 .toUri();
@@ -73,22 +73,36 @@ public class BookService {
             log.error("JsonProcessingException occurred while reading value", e);
         }
 
+        log.info("resultDto: {}", resultDto.toString());
+
+        //예외 처리 - 해당 도서를 찾을 수 없습니다."
+        if(resultDto.getTotal() == 0){
+            throw new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage());
+        }
+
+        //예외 처리 - "더 이상 검색 결과가 없습니다."
+        if(resultDto.getTotal() < start){
+            throw new NotFoundException(ErrorStatus.BOOK_NO_MORE_FOUND_EXCEPTION.getMessage());
+        }
+
         //책 정보 데이터 담긴 List 변수 : bookDtos
         List<BookDto> bookDtos = Optional.ofNullable(resultDto)
                 .map(ResultDto::getItems)
                 .orElse(Collections.emptyList());
-
-        //예외처리 - 검색한 도서 정보가 없을 경우
-        if (bookDtos.isEmpty()) {
-            throw new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage());
-        }
 
         //Dto 에 담긴 데이터 Entity로 변경 : books
         List<Book> books = bookDtos.stream()
                 .map(BookDto::toEntity)
                 .collect(Collectors.toList());
 
-        //DB 저장
-        return bookRepository.saveAll(books);
+        Iterable<Book> savedBooks = bookRepository.saveAll(books);
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("book", savedBooks);
+        responseMap.put("page", page);
+        responseMap.put("size", size);
+        responseMap.put("totalSize", resultDto.getTotal()); //총 검색 결과 개수
+
+        return responseMap;
     }
 }
