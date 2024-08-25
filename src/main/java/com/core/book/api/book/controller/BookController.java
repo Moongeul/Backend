@@ -23,12 +23,12 @@ public class BookController {
     private BookService bookService;
 
     @Operation(
-            summary = "처음 사용자용 마케팅 정보 동의 등록 API",
-            description = "처음 사용자 추가 정보 등록페이지 에서 마케팅 동의 여부를 확인 후 동의 여부 등록합니다."
+            summary = "도서 데이터 요청 및 저장 API",
+            description = "도서 데이터를 외부 API에 요청해 가져오고 이를 DB에 저장합니다."
     )
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "책 결과 반환 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "최소 한개 이상의 USERTAG가 발송되지 않았습니다.")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책 결과 반환 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값에 대한 반환 결과가 없습니다.")
     })
     @GetMapping("/api/v1/book")
     public ApiResponse<Iterable<Book>> book(@RequestParam("title") String text) {
