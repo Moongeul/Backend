@@ -2,10 +2,7 @@ package com.core.book.api.book.entity;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @AllArgsConstructor
@@ -16,18 +13,19 @@ public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long book_id;
+    @Column(name = "book_id")
+    private Long id;
 
-    private String title;
-
-    private String book_image;
-
-    private String author;
-
-    private String publisher;
+    private String title; // 책 제목
+    private String book_image; // 책 이미지
+    private String author; // 저자
+    private String publisher; // 출판사
 
     @Column(length = 5000)
-    private String description;
+    private String description; //책 소개
+    private String pubdate; // 출판연도
 
-    private String pubdate;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "book_tag_id")
+    private BookTag bookTag; //책 태그 - entity
 }

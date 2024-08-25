@@ -73,21 +73,22 @@ public class BookService {
             log.error("JsonProcessingException occurred while reading value", e);
         }
 
-        //책 정보 데이터 담긴 List 변수 : books
-        List<BookDto> books = Optional.ofNullable(resultDto)
+        //책 정보 데이터 담긴 List 변수 : bookDtos
+        List<BookDto> bookDtos = Optional.ofNullable(resultDto)
                 .map(ResultDto::getItems)
                 .orElse(Collections.emptyList());
 
         //예외처리 - 검색한 도서 정보가 없을 경우
-        if (books.isEmpty()) {
+        if (bookDtos.isEmpty()) {
             throw new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage());
         }
 
-        List<Book> book = books.stream()
+        //Dto 에 담긴 데이터 Entity로 변경 : books
+        List<Book> books = bookDtos.stream()
                 .map(BookDto::toEntity)
                 .collect(Collectors.toList());
 
         //DB 저장
-        return bookRepository.saveAll(book);
+        return bookRepository.saveAll(books);
     }
 }
