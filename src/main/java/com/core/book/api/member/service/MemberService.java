@@ -1,12 +1,15 @@
 package com.core.book.api.member.service;
 
+import com.core.book.api.member.dto.FollowedUserDTO;
 import com.core.book.api.member.dto.InfoOpenRequestDTO;
 import com.core.book.api.member.dto.UserInfoResponseDTO;
 import com.core.book.api.member.dto.UserTagRequestDTO;
+import com.core.book.api.member.entity.Follow;
 import com.core.book.api.member.entity.InfoOpen;
 import com.core.book.api.member.entity.Member;
 import com.core.book.api.member.entity.UserTag;
 import com.core.book.api.member.jwt.service.JwtService;
+import com.core.book.api.member.repository.FollowRepository;
 import com.core.book.api.member.repository.InfoOpenRepository;
 import com.core.book.api.member.repository.MemberRepository;
 import com.core.book.api.member.oauth2.CustomOAuth2User;
@@ -35,6 +38,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -44,6 +48,7 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
     private final MemberRepository memberRepository;
     private final UserTagRepository userTagRepository;
     private final InfoOpenRepository infoOpenRepository;
+    private final FollowRepository followRepository;
     private final JwtService jwtService;
     private final S3Service s3Service;
 
@@ -278,7 +283,50 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         UserTag userTag = userTagRepository.findByMember(member).orElse(null);
         InfoOpen infoOpen = infoOpenRepository.findByMember(member).orElse(null);
 
-        return new UserInfoResponseDTO(member, userTag, infoOpen);
+        int followedCount = member.getFollowing().size();
+
+        return new UserInfoResponseDTO(member, userTag, infoOpen, followedCount);
+    }
+
+    @Transactional
+    public boolean followOrUnfollowMember(String followerEmail, Long followingId) {
+        // 팔로우 하는 유저를 찾을 수 없을 경우 예외처리
+        Member follower = memberRepository.findByEmail(followerEmail)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 팔로우 할려는 유저를 찾을 수 없을 경우 예외처리
+        Member following = memberRepository.findById(followingId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 팔로우 상태인지 확인
+        return followRepository.findByFollowerAndFollowing(follower, following)
+                .map(follow -> {
+                    followRepository.delete(follow);
+                    return false; // 팔로우 해지됨
+                })
+                .orElseGet(() -> {
+                    Follow newFollow = Follow.builder()
+                            .follower(follower)
+                            .following(following)
+                            .build();
+                    followRepository.save(newFollow);
+                    return true; // 팔로우 추가됨
+                });
+    }
+
+    @Transactional(readOnly = true)
+    public List<FollowedUserDTO> getFollowedUsers(String email) {
+        // 해당 유저를 찾을 수 없을 경우 예외처리
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        return member.getFollowing().stream()
+                .map(follow -> new FollowedUserDTO(
+                        follow.getFollowing().getId(),
+                        follow.getFollowing().getNickname(),
+                        follow.getFollowing().getImageUrl()
+                ))
+                .collect(Collectors.toList());
     }
 
 }

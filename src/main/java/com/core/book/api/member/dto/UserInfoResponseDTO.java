@@ -13,12 +13,14 @@ public class UserInfoResponseDTO {
     private final Boolean marketingAllow;
     private final UserTagDTO userTag;
     private final InfoOpenDTO infoOpen;
+    private final int followedCount;
 
-    public UserInfoResponseDTO(Member member, UserTag userTag, InfoOpen infoOpen) {
+    public UserInfoResponseDTO(Member member, UserTag userTag, InfoOpen infoOpen, int followedCount) {
         this.id = member.getId();
         this.nickname = member.getNickname();
         this.imageUrl = member.getImageUrl();
         this.marketingAllow = member.getMarketing_allow();
+        this.followedCount = followedCount;
         this.userTag = userTag != null ? new UserTagDTO(userTag) : null;
         this.infoOpen = infoOpen != null ? new InfoOpenDTO(infoOpen) : null;
     }
