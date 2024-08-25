@@ -184,6 +184,11 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
+        // 파일 타입 검사 (이미지 파일만 허용)
+        if (!isImageFile(image)) {
+            throw new BadRequestException(ErrorStatus.NOT_ALLOW_IMG_MIME.getMessage());
+        }
+
         // 기존 이미지가 S3에 있는 경우 삭제
         s3Service.deleteFile(member.getImageUrl());
 
@@ -192,6 +197,18 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
 
         Member updatedMember = member.updateImageUrl(imageUrl);
         memberRepository.save(updatedMember);
+    }
+
+    private boolean isImageFile(MultipartFile file) {
+        // 허용되는 이미지 MIME 타입
+        String contentType = file.getContentType();
+        return contentType != null && (
+                contentType.equals("image/jpeg") ||
+                contentType.equals("image/png") ||
+                contentType.equals("image/jpg") ||
+                contentType.equals("image/bmp") ||
+                contentType.equals("image/webp")
+        );
     }
 
     @Transactional
