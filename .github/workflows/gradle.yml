@@ -44,6 +44,18 @@ jobs:
         mkdir -p src/main/resources
         echo "${{ secrets.APPLICATION_OAUTH2_YML }}" > src/main/resources/application-oauth.yml
 
+    # 2-5. application-prohibit_nickname.yml 파일 생성
+    - name: Create application-prohibit_nickname.yml
+      run: |
+        mkdir -p src/main/resources
+        echo "${{ secrets.APPLICATION_PROHIBIT_NICKNAME_YML }}" > src/main/resources/application-prohibit_nickname.yml
+
+    # 2-6. application-aws.yml 파일 생성
+    - name: Create application-aws.yml
+      run: |
+        mkdir -p src/main/resources
+        echo "${{ secrets.APPLICATION_AWS_YML }}" > src/main/resources/application-aws.yml
+
     # 3. Spring Boot 애플리케이션 빌드
     - name: Build with Gradle
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
@@ -82,7 +94,7 @@ jobs:
 
       # 3. 최신 이미지를 컨테이너화하여 실행시킵니다
       - name: docker run new container
-        run: sudo docker run --name github-actions-demo --rm -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action
+        run: sudo docker run --name moongeul --rm -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action
 
       # 4. 미사용 이미지를 정리합니다
       - name: delete old docker image

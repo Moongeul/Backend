@@ -45,7 +45,6 @@ public class MemberController {
     public ResponseEntity<ApiResponse<UserInfoResponseDTO>> getUserInfo(@AuthenticationPrincipal UserDetails userDetails) {
         UserInfoResponseDTO userInfo = memberService.getUserInfo(userDetails.getUsername());
         return ApiResponse.success(SuccessStatus.GET_USERINFO_SUCCESS, userInfo);
-    }
 
     // 최초 회원가입 사용자 유저 태그 등록 API
     @Operation(
@@ -58,12 +57,11 @@ public class MemberController {
     })
     @PostMapping("/initial-tags")
     public ResponseEntity<ApiResponse<Void>> registerInitialTags(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserTagRequestDTO userTagRequest, HttpServletResponse response) {
-
         // 사용자 태그가 입력되지 않았을 경우 예외 처리
         if (userTagRequest == null) {
             throw new BadRequestException(ErrorStatus.MISSING_USERTAG.getMessage());
         }
-
+      
         memberService.registerInitialTags(userDetails.getUsername(), userTagRequest, response);
         return ApiResponse.success_only(SuccessStatus.CREATE_USERTAG_SUCCESS);
     }

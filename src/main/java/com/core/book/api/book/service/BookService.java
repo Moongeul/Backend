@@ -4,6 +4,8 @@ import com.core.book.api.book.dto.BookDto;
 import com.core.book.api.book.dto.ResultDto;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
+import com.core.book.common.exception.NotFoundException;
+import com.core.book.common.response.ErrorStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -71,16 +73,22 @@ public class BookService {
             log.error("JsonProcessingException occurred while reading value", e);
         }
 
-        //책 정보 데이터 담긴 List 변수 : books
-        List<BookDto> books = Optional.ofNullable(resultDto)
+        //책 정보 데이터 담긴 List 변수 : bookDtos
+        List<BookDto> bookDtos = Optional.ofNullable(resultDto)
                 .map(ResultDto::getItems)
                 .orElse(Collections.emptyList());
 
-        List<Book> book = books.stream()
+        //예외처리 - 검색한 도서 정보가 없을 경우
+        if (bookDtos.isEmpty()) {
+            throw new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage());
+        }
+
+        //Dto 에 담긴 데이터 Entity로 변경 : books
+        List<Book> books = bookDtos.stream()
                 .map(BookDto::toEntity)
                 .collect(Collectors.toList());
 
         //DB 저장
-        return bookRepository.saveAll(book);
+        return bookRepository.saveAll(books);
     }
 }
