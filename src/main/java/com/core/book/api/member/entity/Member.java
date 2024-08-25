@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -34,10 +35,11 @@ public class Member extends BaseTimeEntity implements UserDetails {
 
     private String refreshToken; // 리프레시 토큰
 
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
-    private UserTag userTag;
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
-    private InfoOpen infoOpen;
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> following;  // 내가 팔로우 하는 사람들
+
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> followers;  // 나를 팔로우 하는 사람들
 
     // 유저 권한 설정 메소드
     public Member authorizeUser() {
@@ -57,6 +59,13 @@ public class Member extends BaseTimeEntity implements UserDetails {
     public Member updateRefreshToken(String updateRefreshToken) {
         return this.toBuilder()
                 .refreshToken(updateRefreshToken)
+                .build();
+    }
+
+    // 프로필이미지 필드 업데이트
+    public Member updateImageUrl(String updateImageUrl) {
+        return this.toBuilder()
+                .imageUrl(updateImageUrl)
                 .build();
     }
 

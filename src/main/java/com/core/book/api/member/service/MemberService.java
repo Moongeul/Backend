@@ -1,5 +1,7 @@
 package com.core.book.api.member.service;
 
+import com.core.book.api.member.dto.InfoOpenRequestDTO;
+import com.core.book.api.member.dto.UserInfoResponseDTO;
 import com.core.book.api.member.dto.UserTagRequestDTO;
 import com.core.book.api.member.entity.InfoOpen;
 import com.core.book.api.member.entity.Member;
@@ -15,6 +17,7 @@ import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -26,7 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -38,6 +45,11 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
     private final UserTagRepository userTagRepository;
     private final InfoOpenRepository infoOpenRepository;
     private final JwtService jwtService;
+    private final S3Service s3Service;
+
+    // 금지된 닉네임 리스트
+    @Value("${member.prohibited-nicknames}")
+    private List<String> prohibitedNicknames;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -89,13 +101,6 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         infoOpenRepository.save(infoOpen);
 
         return savedMember;
-    }
-
-    @Transactional(readOnly = true)
-    public Member getMemberDetails(String email) {
-        // 해당 유저를 찾을 수 없을 경우 예외처리
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
     }
 
     @Transactional
@@ -170,4 +175,110 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
 
         memberRepository.save(updatedMember);
     }
+
+    @Transactional
+    public void updateProfileImage(String email, MultipartFile image) throws IOException {
+        // 해당 유저를 찾을 수 없을 경우 예외처리
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 기존 이미지가 S3에 있는 경우 삭제
+        s3Service.deleteFile(member.getImageUrl());
+
+        // 새로운 이미지 업로드
+        String imageUrl = s3Service.uploadFile(email, image);
+
+        Member updatedMember = member.updateImageUrl(imageUrl);
+        memberRepository.save(updatedMember);
+    }
+
+    @Transactional
+    public void changeNickname(String email, String nickname) {
+        // 해당 유저를 찾을 수 없을 경우 예외처리
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 닉네임 필터링 조건 추가
+        validateNickname(nickname);
+
+        // 닉네임 업데이트
+        Member updatedMember = member.updateNickname(nickname);
+        memberRepository.save(updatedMember);
+    }
+
+    // 닉네임 필터링
+    private void validateNickname(String nickname) {
+        //10자 이하 인지 체크
+        if (nickname.length() > 10) {
+            throw new BadRequestException(ErrorStatus.NOT_ALLOW_NICKNAME_FILTER_UNDER_10.getMessage());
+        }
+
+        //한글, 영어, 숫자만 허용
+        if (!nickname.matches("^[a-zA-Z0-9가-힣]*$")) {
+            throw new BadRequestException(ErrorStatus.NOT_ALLOW_USERTAG_FILTER_ROLE.getMessage());
+        }
+
+        // 부적절한 닉네임 체크
+        for (String word : prohibitedNicknames) {
+            if (nickname.toLowerCase().contains(word)) {
+                throw new BadRequestException(ErrorStatus.NOT_ALLOW_USERTAG_FILTER_LIST.getMessage());
+            }
+        }
+
+        // 중복된 닉네임 체크
+        if (memberRepository.existsByNickname(nickname)) {
+            throw new BadRequestException(ErrorStatus.DUPLICATE_NICKNAME.getMessage());
+        }
+    }
+
+    @Transactional
+    public void updateInfoOpen(String email, InfoOpenRequestDTO infoOpenRequestDTO) {
+        // 해당 유저를 찾을 수 없을 경우 예외처리
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        // InfoOpen을 InfoOpenRepository에서 가져옵니다.
+        InfoOpen infoOpen = infoOpenRepository.findByMember(member)
+                .orElseThrow(() -> new NotFoundException("InfoOpen not found for the member."));
+
+        // InfoOpen 정보 업데이트
+        infoOpen = infoOpen.updateInfoOpen(
+                infoOpenRequestDTO.getFollow_open(),
+                infoOpenRequestDTO.getContent_open(),
+                infoOpenRequestDTO.getComment_open(),
+                infoOpenRequestDTO.getLike_open()
+        );
+
+        infoOpenRepository.save(infoOpen);
+    }
+
+
+    @Transactional
+    public void quitMember(String email) {
+        // 해당 유저를 찾을 수 없을 경우 예외처리
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        // InfoOpen 삭제
+        infoOpenRepository.findByMember(member).ifPresent(infoOpenRepository::delete);
+
+        // UserTag 삭제
+        userTagRepository.findByMember(member).ifPresent(userTagRepository::delete);
+
+        // Member 삭제
+        memberRepository.delete(member);
+    }
+
+    @Transactional(readOnly = true)
+    public UserInfoResponseDTO getUserInfo(String email) {
+        // 해당 유저를 찾을 수 없을 경우 예외처리
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        UserTag userTag = userTagRepository.findByMember(member).orElse(null);
+        InfoOpen infoOpen = infoOpenRepository.findByMember(member).orElse(null);
+
+        return new UserInfoResponseDTO(member, userTag, infoOpen);
+    }
+
 }
