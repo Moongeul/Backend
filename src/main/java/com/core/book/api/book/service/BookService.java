@@ -4,6 +4,8 @@ import com.core.book.api.book.dto.BookDto;
 import com.core.book.api.book.dto.ResultDto;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
+import com.core.book.common.exception.NotFoundException;
+import com.core.book.common.response.ErrorStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -75,6 +77,11 @@ public class BookService {
         List<BookDto> books = Optional.ofNullable(resultDto)
                 .map(ResultDto::getItems)
                 .orElse(Collections.emptyList());
+
+        //예외처리 - 검색한 도서 정보가 없을 경우
+        if (books.isEmpty()) {
+            throw new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage());
+        }
 
         List<Book> book = books.stream()
                 .map(BookDto::toEntity)

@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class MemberController {
     @Operation(
             summary = "[임시]")
     @GetMapping("/check")
-    public ApiResponse<Member> getMemberDetails(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<ApiResponse<Member>> getMemberDetails(@AuthenticationPrincipal UserDetails userDetails) {
         Member member = memberService.getMemberDetails(userDetails.getUsername());
         return ApiResponse.success(SuccessStatus.SEND_USERDETAIL_SUCCESS, member);
     }
@@ -44,7 +45,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "최소 한개 이상의 USERTAG가 발송되지 않았습니다.")
     })
     @PostMapping("/initial-tags")
-    public ApiResponse<Void> registerInitialTags(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserTagRequestDTO userTagRequest, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<Void>> registerInitialTags(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserTagRequestDTO userTagRequest, HttpServletResponse response) {
 
         memberService.registerInitialTags(userDetails.getUsername(), userTagRequest, response);
         return ApiResponse.success_only(SuccessStatus.CREATE_USERTAG_SUCCESS);
@@ -59,7 +60,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "유저 마케팅 동의 여부 설정 성공"),
     })
     @GetMapping("/initial-marketing")
-    public ApiResponse<Void> registerInitialMarketing(@AuthenticationPrincipal UserDetails userDetails,
+    public ResponseEntity<ApiResponse<Void>> registerInitialMarketing(@AuthenticationPrincipal UserDetails userDetails,
                                                       @Parameter(
                                                               description = "사용자의 마케팅 동의 여부를 나타내는 파라미터로, 'ok'는 승인, 'no'는 미승인을 의미합니다.",
                                                               example = "ok",
