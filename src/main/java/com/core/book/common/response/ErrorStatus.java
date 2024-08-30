@@ -25,6 +25,9 @@ public enum ErrorStatus {
     DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST,"중복된 닉네임입니다."),
     MISSING_INFOOPEN(HttpStatus.BAD_REQUEST,"정보 공개 여부 값이 입력되지 않았습니다."),
 
+    MISSING_BOOKSHELF_DATE(HttpStatus.BAD_REQUEST, "책장 등록 날짜가 입력되지 않았습니다."),
+    MISSING_BOOKSHELF_MEMBER(HttpStatus.BAD_REQUEST, "책장 등록을 요청하는 유저가 입력되지 않았습니다."),
+
     /**
      * 404 NOT_FOUND
      */

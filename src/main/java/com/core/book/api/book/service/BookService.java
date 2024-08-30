@@ -95,10 +95,8 @@ public class BookService {
                 .map(BookDto::toEntity)
                 .collect(Collectors.toList());
 
-        Iterable<Book> savedBooks = bookRepository.saveAll(books);
-
         Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("book", savedBooks);
+        responseMap.put("book", books);
         responseMap.put("page", page);
         responseMap.put("size", size);
         responseMap.put("totalSize", resultDto.getTotal()); //총 검색 결과 개수
