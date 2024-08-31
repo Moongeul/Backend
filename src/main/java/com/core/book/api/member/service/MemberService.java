@@ -6,11 +6,11 @@ import com.core.book.api.member.entity.InfoOpen;
 import com.core.book.api.member.entity.Member;
 import com.core.book.api.member.entity.UserTag;
 import com.core.book.api.member.jwt.service.JwtService;
+import com.core.book.api.member.oauth2.CustomOAuth2User;
+import com.core.book.api.member.oauth2.OAuthAttributes;
 import com.core.book.api.member.repository.FollowRepository;
 import com.core.book.api.member.repository.InfoOpenRepository;
 import com.core.book.api.member.repository.MemberRepository;
-import com.core.book.api.member.oauth2.CustomOAuth2User;
-import com.core.book.api.member.oauth2.OAuthAttributes;
 import com.core.book.api.member.repository.UserTagRepository;
 import com.core.book.common.exception.BadRequestException;
 import com.core.book.common.exception.NotFoundException;
@@ -18,6 +18,8 @@ import com.core.book.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -27,10 +29,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -106,9 +107,9 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
     }
 
     @Transactional
-    public void registerInitialTags(String email, UserTagRequestDTO userTagRequest, HttpServletResponse response) {
+    public void registerInitialTags(Long userId, UserTagRequestDTO userTagRequest, HttpServletResponse response) {
         // 해당 유저를 찾을 수 없을 경우 예외처리
-        Member member = memberRepository.findByEmail(email)
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
         // 이미 사용자가 초기 유저 태그 등록을 했을 경우 예외처리
@@ -161,10 +162,17 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         return StringUtils.hasText(tag) ? tag : null;
     }
 
-    @Transactional
-    public void registerInitialMarketing(String email, String approve) {
-        // 해당 유저를 찾을 수 없을 경우 예외처리
+    @Transactional(readOnly = true)
+    public Long getUserIdByEmail(String email) {
         Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+        return member.getId();
+    }
+
+    @Transactional
+    public void registerInitialMarketing(Long userId, String approve) {
+        // 해당 유저를 찾을 수 없을 경우 예외처리
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
         // OK 일 경우 마케팅 동의 여부 TRUE 변경, 그 외는 FALSE
@@ -179,9 +187,9 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
     }
 
     @Transactional
-    public void updateProfileImage(String email, MultipartFile image) throws IOException {
+    public void updateProfileImage(Long userId, MultipartFile image) throws IOException {
         // 해당 유저를 찾을 수 없을 경우 예외처리
-        Member member = memberRepository.findByEmail(email)
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
         // 파일 타입 검사 (이미지 파일만 허용)
@@ -193,7 +201,7 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         s3Service.deleteFile(member.getImageUrl());
 
         // 새로운 이미지 업로드
-        String imageUrl = s3Service.uploadFile(email, image);
+        String imageUrl = s3Service.uploadFile(member.getEmail(), image);
 
         Member updatedMember = member.updateImageUrl(imageUrl);
         memberRepository.save(updatedMember);
@@ -204,28 +212,25 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         String contentType = file.getContentType();
         return contentType != null && (
                 contentType.equals("image/jpeg") ||
-                contentType.equals("image/png") ||
-                contentType.equals("image/jpg") ||
-                contentType.equals("image/bmp") ||
-                contentType.equals("image/webp")
+                        contentType.equals("image/png") ||
+                        contentType.equals("image/jpg") ||
+                        contentType.equals("image/bmp") ||
+                        contentType.equals("image/webp")
         );
     }
 
     @Transactional
-    public void changeNickname(String email, String nickname) {
-        // 해당 유저를 찾을 수 없을 경우 예외처리
-        Member member = memberRepository.findByEmail(email)
+    public void changeNickname(Long userId, String nickname) {
+        // 유저 조회 및 닉네임 변경 로직
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
-        // 닉네임 필터링 조건 추가
         validateNickname(nickname);
 
-        // 닉네임 업데이트
         Member updatedMember = member.updateNickname(nickname);
-        memberRepository.save(updatedMember);
+        memberRepository.save(updatedMember); // Member 객체 반환
     }
 
-    // 닉네임 필터링
     private void validateNickname(String nickname) {
         //10자 이하 인지 체크
         if (nickname.length() > 10) {
@@ -251,9 +256,9 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
     }
 
     @Transactional
-    public void updateInfoOpen(String email, InfoOpenRequestDTO infoOpenRequestDTO) {
+    public void updateInfoOpen(Long userId, InfoOpenRequestDTO infoOpenRequestDTO) {
         // 해당 유저를 찾을 수 없을 경우 예외처리
-        Member member = memberRepository.findByEmail(email)
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
         // InfoOpen을 InfoOpenRepository에서 가져옵니다.
@@ -271,11 +276,10 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         infoOpenRepository.save(infoOpen);
     }
 
-
     @Transactional
-    public void quitMember(String email) {
+    public void quitMember(Long userId) {
         // 해당 유저를 찾을 수 없을 경우 예외처리
-        Member member = memberRepository.findByEmail(email)
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
         // InfoOpen 삭제
@@ -289,23 +293,25 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
     }
 
     @Transactional(readOnly = true)
-    public UserInfoResponseDTO getUserInfo(String email) {
+    public UserInfoResponseDTO getUserInfo(Long userId) {
         // 해당 유저를 찾을 수 없을 경우 예외처리
-        Member member = memberRepository.findByEmail(email)
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
         UserTag userTag = userTagRepository.findByMember(member).orElse(null);
         InfoOpen infoOpen = infoOpenRepository.findByMember(member).orElse(null);
 
-        int followedCount = member.getFollowing().size();
+        int followedCount = member.getFollowing().size(); //팔로잉 수 계산
+        int followerCount = member.getFollowers().size(); //팔로워 수 계산
 
-        return new UserInfoResponseDTO(member, userTag, infoOpen, followedCount);
+        return new UserInfoResponseDTO(member, userTag, infoOpen, followedCount, followerCount);
     }
 
     @Transactional
-    public boolean followOrUnfollowMember(String followerEmail, Long followingId) {
+    @CacheEvict(value = {"followers", "following", "userInfo"}, key = "#userId")
+    public boolean followOrUnfollowMember(Long userId, Long followingId) {
         // 팔로우 하는 유저를 찾을 수 없을 경우 예외처리
-        Member follower = memberRepository.findByEmail(followerEmail)
+        Member follower = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
         // 팔로우 할려는 유저를 찾을 수 없을 경우 예외처리
@@ -329,9 +335,10 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
     }
 
     @Transactional(readOnly = true)
-    public List<FollowedUserDTO> getFollowedUsers(String email) {
+    @Cacheable(value = "following", key = "#userId")
+    public List<FollowedUserDTO> getFollowedUsers(Long userId) {
         // 해당 유저를 찾을 수 없을 경우 예외처리
-        Member member = memberRepository.findByEmail(email)
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
         return member.getFollowing().stream()
@@ -344,21 +351,36 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
     }
 
     @Transactional(readOnly = true)
-    public OtherUserInfoResponseDTO getOtherUserInfo(Long id) {
-        // 조회하려는 타 사용자를 찾습니다.
-        Member targetMember = memberRepository.findById(id)
+    @Cacheable(value = "followers", key = "#userId")
+    public List<FollowerUserDTO> getFollowers(Long userId) {
+        // 해당 유저를 찾을 수 없을 경우 예외처리
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
-        // 필요한 정보만 DTO로 변환하여 반환
-        int followedCount = targetMember.getFollowing().size();
+        return member.getFollowers().stream()
+                .map(follow -> FollowerUserDTO.builder()
+                        .id(follow.getFollower().getId())
+                        .nickname(follow.getFollower().getNickname())
+                        .imageUrl(follow.getFollower().getImageUrl())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public OtherUserInfoResponseDTO getOtherUserInfo(Long userId) {
+        // 해당 유저를 찾을 수 없을 경우 예외처리
+        Member targetMember = memberRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        int followedCount = targetMember.getFollowing().size(); // 팔로잉 수 계산
+        int followerCount = targetMember.getFollowers().size(); // 팔로워 수 계산
 
         return OtherUserInfoResponseDTO.builder()
                 .id(targetMember.getId())
                 .nickname(targetMember.getNickname())
                 .imageUrl(targetMember.getImageUrl())
                 .followedCount(followedCount)
+                .followerCount(followerCount)
                 .build();
     }
-
-
 }

@@ -26,6 +26,7 @@ public enum SuccessStatus {
     USER_FOLLOW_SUCCESS(HttpStatus.OK,"팔로우 성공"),
     USER_UNFOLLOW_SUCCESS(HttpStatus.OK,"언팔로우 성공"),
     GET_FOLLOWED_USERS_SUCCESS(HttpStatus.OK,"팔로우 중인 사용자 목록 조회 성공"),
+    GET_FOLLOWER_USERS_SUCCESS(HttpStatus.OK, "팔로워 사용자 목록 조회 성공"),
 
     /**
      * 201
