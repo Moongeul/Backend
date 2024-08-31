@@ -261,9 +261,8 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
-        // InfoOpen을 InfoOpenRepository에서 가져옵니다.
         InfoOpen infoOpen = infoOpenRepository.findByMember(member)
-                .orElseThrow(() -> new NotFoundException("InfoOpen not found for the member."));
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.INFOOPEN_NOT_FOUND_EXCEPTION.getMessage()));
 
         // InfoOpen 정보 업데이트
         infoOpen = infoOpen.updateInfoOpen(
