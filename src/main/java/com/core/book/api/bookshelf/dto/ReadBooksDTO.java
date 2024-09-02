@@ -4,10 +4,12 @@ import com.core.book.api.book.entity.Book;
 import com.core.book.api.bookshelf.entity.ReadBooks;
 import com.core.book.api.bookshelf.entity.ReadBooksTag;
 import com.core.book.api.member.entity.Member;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
 
+@Builder
 @Getter
 public class ReadBooksDTO {
 
@@ -20,7 +22,7 @@ public class ReadBooksDTO {
 
     public ReadBooks toEntity(Book book, Member member, ReadBooksTag readBooksTag){
         return ReadBooks.builder()
-                .read_date(this.readDate)
+                .readDate(this.readDate)
                 .star_rating(this.starRating)
                 .one_line_review(this.oneLineReview)
                 .book(book)
@@ -29,6 +31,7 @@ public class ReadBooksDTO {
                 .build();
     }
 
+    @Builder
     @Getter
     public static class ReadBooksTagDTO {
 

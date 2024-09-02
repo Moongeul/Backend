@@ -4,14 +4,14 @@ import com.core.book.api.book.entity.Book;
 import com.core.book.api.member.entity.Member;
 import com.core.book.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
+@Getter
 @Table(name = "WISHBOOKS")
 public class WishBooks extends BaseTimeEntity {
 

@@ -2,10 +2,9 @@ package com.core.book.api.bookshelf.entity;
 
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.member.entity.Member;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -13,6 +12,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
+@Getter
 @Table(name = "READBOOKS")
 public class ReadBooks {
 
@@ -21,7 +22,8 @@ public class ReadBooks {
     @Column(name = "readbooks_id")
     private Long id;
 
-    private LocalDate read_date; //읽은 날짜
+    @Column(name = "read_date")
+    private LocalDate readDate; //읽은 날짜
     private double star_rating; //평점
     private String one_line_review; //한줄평
 

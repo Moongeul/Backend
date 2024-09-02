@@ -1,7 +1,8 @@
 package com.core.book.api.bookshelf.controller;
 
-import com.core.book.api.bookshelf.dto.ReadBookshelfDTO;
-import com.core.book.api.bookshelf.dto.WishBookshelfDTO;
+import com.core.book.api.book.entity.Book;
+import com.core.book.api.book.repository.BookRepository;
+import com.core.book.api.bookshelf.dto.*;
 import com.core.book.api.bookshelf.service.BookShelfService;
 import com.core.book.common.exception.BadRequestException;
 import com.core.book.common.response.ApiResponse;
@@ -15,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @Slf4j
 @Tag(name = "BOOKSHELF", description = "BOOKSHELF 관련 API 입니다.")
 @RestController
@@ -22,28 +26,119 @@ public class BookshelfController {
 
     @Autowired
     private BookShelfService bookShelfService;
+    @Autowired
+    private BookRepository bookRepository;
+
+    /*
+     *
+     * 책장 '조회' API
+     *
+     */
+
+    @Operation(
+            summary = "'읽은 책' 책장 전체 조회 API",
+            description = "'읽은 책' 책장에 불러올 전체 데이터를 조회합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값이 입력되지 않았습니다.")
+    })
+    @GetMapping("/api/v1/bookshelf/read")
+    public ResponseEntity<ApiResponse<List<ReadBookshelfResponseDTO>>> showReadBookshelf(@RequestParam("member-id") Long memberId){
+
+        List<ReadBookshelfResponseDTO> list = bookShelfService.showReadBooks(memberId);
+        log.info(list.toString());
+
+        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_INFO_SUCCESS, list);
+    }
+
+    @Operation(
+            summary = "'읽고 싶은 책' 책장 전체 조회 API",
+            description = "'읽고 싶은 책' 책장에 불러올 전체 데이터를 조회합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값이 입력되지 않았습니다.")
+    })
+    @GetMapping("/api/v1/bookshelf/wish")
+    public ResponseEntity<ApiResponse<List<WishBookshelfResponseDTO>>> showWishBookshelf(@RequestParam("member-id") Long memberId){
+
+        List<WishBookshelfResponseDTO> list = bookShelfService.showWishBooks(memberId);
+        log.info(list.toString());
+
+        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_INFO_SUCCESS, list);
+    }
+
+    /*
+     *
+     * 책장 '상세 조회' API
+     *
+     */
+
+    @Operation(
+            summary = "'읽은 책' 책장 상세 조회 API",
+            description = "'읽은 책' 책장에서 선택한 책의 상세 정보를 조회합니다. (읽은 책 상세 정보 : 날짜(required)/평점/태그/한줄평)"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 상세 정보 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
+    })
+    @GetMapping("/api/v1/bookshelf/read/{id}")
+    public ResponseEntity<ApiResponse<ReadBooksDTO>> showReadBookshelfDetails(@PathVariable Long id){
+
+        ReadBooksDTO showed = bookShelfService.showReadBooksDetails(id);
+        log.info(showed.toString());
+        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_INFO_SUCCESS, showed);
+    }
+
+    @Operation(
+            summary = "'읽고 싶은 책' 책장 상세 조회 API",
+            description = "'읽고 싶은 책' 책장에서 선택한 책의 상세 정보를 조회합니다. (읽고 싶은 책 상세 정보 : 읽고 싶은 이유)"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 상세 정보 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
+    })
+    @GetMapping("/api/v1/bookshelf/wish/{id}")
+    public ResponseEntity<ApiResponse<WishBooksDTO>> showWishBookshelfDetails(@PathVariable Long id){
+
+            WishBooksDTO showed = bookShelfService.showWishBooksDetails(id);
+            log.info(showed.toString());
+            return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_INFO_SUCCESS, showed);
+    }
+
+    /*
+     *
+     * 책장 '등록' API
+     *
+     */
 
     @Operation(
             summary = "'읽은 책' 책장 등록 API",
-            description = "'읽은 책' 책장에 선택한 책을 추가 정보와 함께 등록합니다. (읽은 책 추가 정보 : 날짜(required)/평점/태그/한줄평)"
+            description = "'읽은 책' 책장에 선택한 책을 상세 정보와 함께 등록합니다. (읽은 책 상세 정보 : 날짜(required)/평점/태그/한줄평)"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 등록 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값에 대한 반환 결과가 없습니다.")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다.")
     })
     @PostMapping("/api/v1/bookshelf/read")
-    public ResponseEntity<ApiResponse<Void>> createReadBookshelf(@RequestBody ReadBookshelfDTO readBookshelfDTO){
+    public ResponseEntity<ApiResponse<Void>> createReadBookshelf(@RequestBody ReadBookshelfRequestDTO readBookshelfDTO){
 
-        // 예외처리 : body 전체가 / 등록 날짜가 / 등록하는 유저가 입력되지 않은 경우
-        if(readBookshelfDTO == null){
-            throw new BadRequestException(ErrorStatus.VALIDATION_REQUEST_MISSING_EXCEPTION.getMessage());
-        }
+        // 예외처리 : 등록 날짜가 / 등록하는 유저가 정상적으로 입력되지 않은 경우 등록 불가
         if(readBookshelfDTO.getReadBooksDTO().getReadDate() == null){
             throw new BadRequestException(ErrorStatus.MISSING_BOOKSHELF_DATE.getMessage());
         }
         if(readBookshelfDTO.getReadBooksDTO().getMemberId() == null){
             throw new BadRequestException(ErrorStatus.MISSING_BOOKSHELF_MEMBER.getMessage());
         }
+
+        //예외처리 : 이미 책장에 등록된 책에 대하여 등록 불가
+        Long bookId = readBookshelfDTO.getBookDto().getId();
+        Optional<Book> bookOptional = bookRepository.findById(bookId);
+
+        bookOptional.ifPresent(book -> {
+            throw new BadRequestException(ErrorStatus.NOT_ALLOW_DUPLICATE_BOOKSHELF.getMessage());
+        });
 
         // 책 저장 - 날짜/평점/태그/한줄평 입력 후 저장
         bookShelfService.createReadBookshelf(readBookshelfDTO);
@@ -53,19 +148,16 @@ public class BookshelfController {
 
     @Operation(
             summary = "'읽고 싶은 책' 책장 등록 API",
-            description = "'읽고 싶은 책' 책장에 선택한 책을 추가 정보와 함께 등록합니다. (읽고 싶은 책 추가 정보 : 읽고 싶은 이유)"
+            description = "'읽고 싶은 책' 책장에 선택한 책을 상세 정보와 함께 등록합니다. (읽고 싶은 책 상세 정보 : 읽고 싶은 이유)"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 등록 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값에 대한 반환 결과가 없습니다.")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다.")
     })
     @PostMapping("/api/v1/bookshelf/wish")
-    public ResponseEntity<ApiResponse<Void>> createWishBookshelf(@RequestBody WishBookshelfDTO wishBookshelfDTO){
+    public ResponseEntity<ApiResponse<Void>> createWishBookshelf(@RequestBody WishBookshelfRequestDTO wishBookshelfDTO){
 
-        // 예외처리 : body 전체가 / 등록 날짜가 / 등록하는 유저가 입력되지 않은 경우
-        if(wishBookshelfDTO == null){
-            throw new BadRequestException(ErrorStatus.VALIDATION_REQUEST_MISSING_EXCEPTION.getMessage());
-        }
+        // 예외처리 : 등록하는 유저가 입력되지 정상적으로 않은 경우
         if(wishBookshelfDTO.getWishBooksDTO().getMemberId() == null){
             throw new BadRequestException(ErrorStatus.MISSING_BOOKSHELF_MEMBER.getMessage());
         }

@@ -1,14 +1,14 @@
 package com.core.book.api.bookshelf.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
+@Getter
 @Table(name = "READBOOKS_TAG")
 public class ReadBooksTag {
 
