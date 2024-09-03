@@ -42,9 +42,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
         jwtService.sendAccessToken(response, accessToken);
         //response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
-        //response.sendRedirect("https://www.google.com");
 
-        String redirectUrl = "http://localhost:3000/onboarding";
+        String redirectUrl = "http://localhost:8100/onboarding";
         response.sendRedirect(redirectUrl);
     }
 
@@ -53,12 +52,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = jwtService.createRefreshToken();
         jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
         jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
-
         //response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
         //response.addHeader(jwtService.getRefreshHeader(), "Bearer " + refreshToken);
-        //response.sendRedirect("https://www.naver.com");
 
-        String redirectUrl = "http://localhost:3000/home";
+        String redirectUrl = "http://localhost:8100/home";
         response.sendRedirect(redirectUrl);
     }
 }
