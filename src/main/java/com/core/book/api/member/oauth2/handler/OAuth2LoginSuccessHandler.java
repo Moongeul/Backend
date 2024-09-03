@@ -40,8 +40,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private void handleGuestLogin(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
         String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
-        jwtService.sendAccessToken(response, accessToken);
+        //jwtService.sendAccessToken(response, accessToken);
         //response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
+
+        // moongeul.kro.kr 도메인에 쿠키 설정
+        jwtService.sendAccessToken(response, accessToken, "moongeul.kro.kr");
+
+        // localhost 도메인에 쿠키 설정
+        jwtService.sendAccessToken(response, accessToken, "localhost");
 
         String redirectUrl = "http://localhost:8100/onboarding";
         response.sendRedirect(redirectUrl);
@@ -50,7 +56,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private void handleUserLogin(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
         String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
         String refreshToken = jwtService.createRefreshToken();
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+        //jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+
+        // moongeul.kro.kr 도메인에 쿠키 설정
+        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken, "moongeul.kro.kr");
+
+        // localhost 도메인에 쿠키 설정
+        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken, "localhost");
+
         jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
         //response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
         //response.addHeader(jwtService.getRefreshHeader(), "Bearer " + refreshToken);

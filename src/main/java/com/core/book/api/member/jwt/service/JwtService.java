@@ -56,15 +56,15 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
-    public void sendAccessToken(HttpServletResponse response, String accessToken) {
-        Cookie accessTokenCookie = createCookie("accessToken", accessToken, accessTokenExpirationPeriod.intValue());
+    public void sendAccessToken(HttpServletResponse response, String accessToken, String domain) {
+        Cookie accessTokenCookie = createCookie("accessToken", accessToken, accessTokenExpirationPeriod.intValue(), domain);
         response.addCookie(accessTokenCookie);
         log.info("재발급된 Access Token : {}", accessToken);
     }
 
-    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
-        Cookie accessTokenCookie = createCookie("accessToken", accessToken, accessTokenExpirationPeriod.intValue());
-        Cookie refreshTokenCookie = createCookie("refreshToken", refreshToken, refreshTokenExpirationPeriod.intValue());
+    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken, String domain) {
+        Cookie accessTokenCookie = createCookie("accessToken", accessToken, accessTokenExpirationPeriod.intValue(), domain);
+        Cookie refreshTokenCookie = createCookie("refreshToken", refreshToken, refreshTokenExpirationPeriod.intValue(), domain);
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
@@ -73,11 +73,12 @@ public class JwtService {
         log.info("Refresh Token : {}", refreshToken);
     }
 
-    private Cookie createCookie(String name, String value, int maxAge) {
-        Cookie cookie = new Cookie(name, value);  // "Bearer " 접두사를 제거
+    private Cookie createCookie(String name, String value, int maxAge, String domain) {
+        Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(true); // HTTPS에서만 전송되도록 설정
         cookie.setPath("/");
+        cookie.setDomain(domain); // 도메인 설정 추가
         cookie.setMaxAge(maxAge / 1000); // 쿠키의 maxAge는 초 단위
         return cookie;
     }

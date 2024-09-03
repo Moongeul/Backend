@@ -138,7 +138,9 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         String accessToken = jwtService.createAccessToken(member.getEmail());
         String refreshToken = jwtService.createRefreshToken();
 
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken,"moongeul.kro.kr");
+        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken,"localhost");
+
 
         // 리프레시 토큰 업데이트
         jwtService.updateRefreshToken(member.getEmail(), refreshToken);
