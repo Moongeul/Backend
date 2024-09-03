@@ -22,8 +22,14 @@ public enum ErrorStatus {
     NOT_ALLOW_NICKNAME_FILTER_UNDER_10(HttpStatus.BAD_REQUEST, "닉네임은 10자 이하로 설정해야 합니다."),
     NOT_ALLOW_USERTAG_FILTER_ROLE(HttpStatus.BAD_REQUEST, "닉네임은 영문, 숫자, 한글만 사용할 수 있습니다."),
     NOT_ALLOW_USERTAG_FILTER_LIST(HttpStatus.BAD_REQUEST, "부적절한 닉네임입니다."),
+    NOT_ALLOW_IMG_MIME(HttpStatus.BAD_REQUEST,"이미지 파일(jpg, jpeg, png, bmp, webp) 만 업로드할 수 있습니다."),
     DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST,"중복된 닉네임입니다."),
     MISSING_INFOOPEN(HttpStatus.BAD_REQUEST,"정보 공개 여부 값이 입력되지 않았습니다."),
+
+    /**
+     * 401 UNAUTHORIZED
+     */
+    USER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"인증되지 않은 사용자입니다."),
 
     /**
      * 404 NOT_FOUND
@@ -32,12 +38,13 @@ public enum ErrorStatus {
     USER_NOTFOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다."),
     BOOK_NOTFOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 도서를 찾을 수 없습니다."),
     BOOK_NO_MORE_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "더 이상 검색 결과가 없습니다."),
+    INFOOPEN_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "사용자 정보 공개 동의 여부가 등록되어 있지 않습니다."),
 
     /**
      * 500 SERVER_ERROR
      */
 
-    FAIL_UPLOAD_PROFILE_IMAGE(HttpStatus.INTERNAL_SERVER_ERROR, "프로팔 사진이 변경되지 않았습니다."),
+    FAIL_UPLOAD_PROFILE_IMAGE(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 사진이 변경되지 않았습니다."),
     ;
 
     private final HttpStatus httpStatus;
