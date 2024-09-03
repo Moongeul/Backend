@@ -3,6 +3,7 @@ package com.core.book.api.member.oauth2.handler;
 import com.core.book.api.member.entity.Role;
 import com.core.book.api.member.jwt.service.JwtService;
 import com.core.book.api.member.oauth2.CustomOAuth2User;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -40,35 +43,32 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private void handleGuestLogin(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
         String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
-        //jwtService.sendAccessToken(response, accessToken);
-        //response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
 
-        // moongeul.kro.kr 도메인에 쿠키 설정
-        jwtService.sendAccessToken(response, accessToken, "moongeul.kro.kr");
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("accessToken", accessToken);
+        responseBody.put("isNewUser", "true");
 
-        // localhost 도메인에 쿠키 설정
-        jwtService.sendAccessToken(response, accessToken, "localhost");
-
-        String redirectUrl = "http://localhost:8100/onboarding";
-        response.sendRedirect(redirectUrl);
+        sendJsonResponse(response, responseBody);
     }
 
     private void handleUserLogin(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
         String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
         String refreshToken = jwtService.createRefreshToken();
-        //jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
 
-        // moongeul.kro.kr 도메인에 쿠키 설정
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken, "moongeul.kro.kr");
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("accessToken", accessToken);
+        responseBody.put("refreshToken", refreshToken);
+        responseBody.put("isNewUser", "false");
 
-        // localhost 도메인에 쿠키 설정
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken, "localhost");
+        sendJsonResponse(response, responseBody);
 
         jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
-        //response.addHeader(jwtService.getAccessHeader(), "Bearer " + accessToken);
-        //response.addHeader(jwtService.getRefreshHeader(), "Bearer " + refreshToken);
+    }
 
-        String redirectUrl = "http://localhost:8100/home";
-        response.sendRedirect(redirectUrl);
+    private void sendJsonResponse(HttpServletResponse response, Map<String, Object> responseBody) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(new ObjectMapper().writeValueAsString(responseBody));
+        response.getWriter().flush();
     }
 }
