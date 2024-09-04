@@ -126,36 +126,6 @@ public class BookShelfService {
                 .build();
     }
 
-    // 단일 ReadBooks 객체를 ReadBooksDTO로 변환
-//    private ReadBooksDTO readBooksConvertToDTO(ReadBooks readBooks) {
-//        ReadBooksTag readBooksTag = readBooks.getReadBooksTag();
-//
-//        ReadBooksDTO.ReadBooksTagDTO tagDTO = ReadBooksDTO.ReadBooksTagDTO.builder()
-//                .tag1(readBooksTag.getTag1())
-//                .tag2(readBooksTag.getTag2())
-//                .tag3(readBooksTag.getTag3())
-//                .tag4(readBooksTag.getTag4())
-//                .tag5(readBooksTag.getTag5())
-//                .build();
-//
-//        return ReadBooksDTO.builder()
-//                .readDate(readBooks.getRead_date())
-//                .starRating(readBooks.getStar_rating())
-//                .oneLineReview(readBooks.getOne_line_review())
-//                .readBooksTagDTO(tagDTO)
-//                .memberId(readBooks.getMember().getId())
-//                .build();
-//    }
-
-//    // 단일 WishBooks 객체를 WishBooksDTO로 변환
-//    private WishBooksDTO wishBooksConvertToDTO(WishBooks wishBooks){
-//
-//        return WishBooksDTO.builder()
-//                .reason(wishBooks.getReason())
-//                .memberId(wishBooks.getId())
-//                .build();
-//    }
-
     /*
     *
     * 책장 '등록' 메서드
@@ -212,5 +182,69 @@ public class BookShelfService {
 
         // 책장 DB에 저장
         wishBooksRepository.save(wishBookshelfDTO.getWishBooksDTO().toEntity(book, member));
+    }
+
+
+    /*
+     *
+     * 책장 '상세 정보 수정' 메서드
+     *
+     */
+
+    @Transactional
+    public void updateReadBookshelf(ReadBooksDTO readBooksDTO, Long id){
+
+        // 기존 책장 데이터 가져오기
+        ReadBooks existingReadBooks = readBooksRepository.findById(id).
+                orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_INFO_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 기존에 태그가 있으면 -> 수정 / 없으면 -> 새로 생성
+        ReadBooksTag readBooksTag = existingReadBooks.getReadBooksTag();
+        ReadBooksDTO.ReadBooksTagDTO tagDTO = readBooksDTO.getReadBooksTagDTO();
+        if (readBooksTag != null && tagDTO != null) {
+            readBooksTag = ReadBooksTag.builder()
+                    .id(readBooksTag.getId()) // 기존 태그의 ID 유지
+                    .tag1(tagDTO.getTag1())
+                    .tag2(tagDTO.getTag2())
+                    .tag3(tagDTO.getTag3())
+                    .tag4(tagDTO.getTag4())
+                    .tag5(tagDTO.getTag5())
+                    .build();
+        } else if(readBooksTag == null && tagDTO != null){
+            readBooksTag = tagDTO.toEntity();
+            readBooksTagRepository.save(readBooksTag); // 새로운 태그 저장
+        }
+
+        // 수정된 ReadBooks 엔티티 생성
+        ReadBooks updatedReadBooks = ReadBooks.builder()
+                .id(existingReadBooks.getId()) // 기존 ID 유지
+                .readDate(readBooksDTO.getReadDate())
+                .star_rating(readBooksDTO.getStarRating())
+                .one_line_review(readBooksDTO.getOneLineReview())
+                .book(existingReadBooks.getBook()) // 기존 책 정보 유지
+                .member(existingReadBooks.getMember()) // 기존 회원 정보 유지
+                .readBooksTag(readBooksTag)
+                .build();
+
+        // 수정된 엔티티 저장
+        readBooksRepository.save(updatedReadBooks);
+    }
+
+    @Transactional
+    public void updateWishBookshelf(WishBooksDTO wishBooksDTO, Long id){
+
+        // 기존 책장 데이터 가져오기
+        WishBooks existingwishBooks = wishBooksRepository.findById(id).
+                orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_INFO_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 수정된 WishBooks 엔티티 생성
+        WishBooks updatedWishBooks = WishBooks.builder()
+                .id(existingwishBooks.getId())
+                .reason(wishBooksDTO.getReason())
+                .book(existingwishBooks.getBook())
+                .member(existingwishBooks.getMember())
+                .build();
+
+        wishBooksRepository.save(updatedWishBooks);
     }
 }

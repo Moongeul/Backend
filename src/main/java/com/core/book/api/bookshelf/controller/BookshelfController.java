@@ -5,6 +5,7 @@ import com.core.book.api.book.repository.BookRepository;
 import com.core.book.api.bookshelf.dto.*;
 import com.core.book.api.bookshelf.service.BookShelfService;
 import com.core.book.common.exception.BadRequestException;
+import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ApiResponse;
 import com.core.book.common.response.ErrorStatus;
 import com.core.book.common.response.SuccessStatus;
@@ -166,5 +167,48 @@ public class BookshelfController {
         bookShelfService.createWishBookshelf(wishBookshelfDTO);
 
         return ApiResponse.success_only(SuccessStatus.CREATE_BOOKSHELF_SUCCESS);
+    }
+
+    /*
+     *
+     * 책장 '상세 정보 수정' API
+     *
+     */
+
+    @Operation(
+            summary = "'읽은 책' 상세 정보 수정 API",
+            description = "'읽은 책' 책장에서 선택한 책의 상세 정보를 수정합니다. (읽은 책 상세 정보 : 날짜(required)/평점/태그/한줄평)"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 등록 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
+    })
+    @PatchMapping("/api/v1/bookshelf/read/{id}")
+    public ResponseEntity<ApiResponse<Void>> updateReadBookshelf(@RequestBody ReadBooksDTO readBooksDTO, @PathVariable Long id){
+
+        // 예외 처리 : 등록 날짜가 입력되지 않은 경우
+        if(readBooksDTO.getReadDate() == null){
+            throw new NotFoundException(ErrorStatus.MISSING_BOOKSHELF_DATE.getMessage());
+        }
+
+        bookShelfService.updateReadBookshelf(readBooksDTO, id);
+
+        return ApiResponse.success_only(SuccessStatus.UPDATE_BOOKSHELF_INFO_SUCCESS);
+    }
+
+    @Operation(
+            summary = "'읽고 싶은 책' 상세 정보 수정 API",
+            description = "'읽고 싶은 책' 책장에서 선택한 책의 상세 정보를 수정합니다. (읽고 싶은 책 상세 정보 : 읽고 싶은 이유)"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 등록 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
+    })
+    @PatchMapping("/api/v1/bookshelf/wish/{id}")
+    public ResponseEntity<ApiResponse<Void>> updateWishBookshelf(@RequestBody WishBooksDTO wishBooksDTO, @PathVariable Long id){
+
+        bookShelfService.updateWishBookshelf(wishBooksDTO, id);
+
+        return ApiResponse.success_only(SuccessStatus.UPDATE_BOOKSHELF_INFO_SUCCESS);
     }
 }
