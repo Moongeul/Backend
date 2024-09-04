@@ -73,6 +73,7 @@ public class BookShelfService {
 
     // WishBooks를 WishBookshelfResponseDTO 변환하는 메서드
     private WishBookshelfResponseDTO convertToWishBookshelfResponseDTO(WishBooks wishBooks) {
+
         // WishBookshelfResponseDTO 객체 생성 (빌더 패턴 사용)
         return WishBookshelfResponseDTO.builder()
                 .bookImage(wishBooks.getBook().getBook_image()) // 책 이미지
@@ -246,5 +247,27 @@ public class BookShelfService {
                 .build();
 
         wishBooksRepository.save(updatedWishBooks);
+    }
+
+    /*
+     *
+     * 책장 '삭제' 메서드
+     *
+     */
+
+    @Transactional
+    public void deleteReadBookshelf(Long id){
+        ReadBooks readBooks = readBooksRepository.findById(id).
+                orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_INFO_NOTFOUND_EXCEPTION.getMessage()));
+
+        readBooksRepository.delete(readBooks);
+    }
+
+    @Transactional
+    public void deleteWishBookshelf(Long id){
+        WishBooks wishBooks = wishBooksRepository.findById(id).
+                orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_INFO_NOTFOUND_EXCEPTION.getMessage()));
+
+        wishBooksRepository.delete(wishBooks);
     }
 }

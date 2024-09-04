@@ -211,4 +211,42 @@ public class BookshelfController {
 
         return ApiResponse.success_only(SuccessStatus.UPDATE_BOOKSHELF_INFO_SUCCESS);
     }
+
+    /*
+     *
+     * 책장 '삭제' API
+     *
+     */
+
+    @Operation(
+            summary = "'읽은 책' 삭제 API",
+            description = "'읽은 책' 책장에서 선택한 책을 삭제합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 삭제 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
+    })
+    @DeleteMapping("/api/v1/bookshelf/read/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteReadBookshelf(@PathVariable Long id){
+
+        bookShelfService.deleteReadBookshelf(id);
+
+        return ApiResponse.success_only(SuccessStatus.DELETE_BOOKSHELF_SUCCESS);
+    }
+
+    @Operation(
+            summary = "'읽고 싶은 책' 삭제 API",
+            description = "'읽고 싶은 책' 책장에서 선택한 책을 삭제합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 삭제 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
+    })
+    @DeleteMapping("/api/v1/bookshelf/wish/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteWishBookshelf(@PathVariable Long id){
+
+        bookShelfService.deleteWishBookshelf(id);
+
+        return ApiResponse.success_only(SuccessStatus.DELETE_BOOKSHELF_SUCCESS);
+    }
 }
