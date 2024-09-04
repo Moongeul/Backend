@@ -1,7 +1,7 @@
 package com.core.book.api.book.service;
 
-import com.core.book.api.book.dto.BookDto;
-import com.core.book.api.book.dto.ResultDto;
+import com.core.book.api.book.dto.BookDTO;
+import com.core.book.api.book.dto.ResultDTO;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
 import com.core.book.common.exception.NotFoundException;
@@ -25,9 +25,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class BookService {
-
-    @Autowired
-    private BookRepository bookRepository;
 
     @Value("${naver-client-id}")
     private String clientId;
@@ -63,43 +60,41 @@ public class BookService {
 
         //JSON 파싱 (JSON 문자열을 객체로 만듦, 문서화)
         ObjectMapper om = new ObjectMapper();
-        ResultDto resultDto = null;
+        ResultDTO resultDTO = null;
 
         try {
-            resultDto = om.readValue(resp.getBody(), ResultDto.class);
+            resultDTO = om.readValue(resp.getBody(), ResultDTO.class);
         } catch (JsonMappingException e) {
             log.error("JsonMappingException occurred while reading value", e);
         } catch (JsonProcessingException e) {
             log.error("JsonProcessingException occurred while reading value", e);
         }
 
-        log.info("resultDto: {}", resultDto.toString());
-
         //예외 처리 - 해당 도서를 찾을 수 없습니다."
-        if(resultDto.getTotal() == 0){
+        if(resultDTO.getTotal() == 0){
             throw new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage());
         }
 
         //예외 처리 - "더 이상 검색 결과가 없습니다."
-        if(resultDto.getTotal() < start){
+        if(resultDTO.getTotal() < start){
             throw new NotFoundException(ErrorStatus.BOOK_NO_MORE_FOUND_EXCEPTION.getMessage());
         }
 
-        //책 정보 데이터 담긴 List 변수 : bookDtos
-        List<BookDto> bookDtos = Optional.ofNullable(resultDto)
-                .map(ResultDto::getItems)
+        //책 정보 데이터 담긴 List 변수 : bookDTOs
+        List<BookDTO> bookDtos = Optional.ofNullable(resultDTO)
+                .map(ResultDTO::getItems)
                 .orElse(Collections.emptyList());
 
-        //Dto 에 담긴 데이터 Entity로 변경 : books
+        //DTO 에 담긴 데이터 Entity로 변경 : books
         List<Book> books = bookDtos.stream()
-                .map(BookDto::toEntity)
+                .map(BookDTO::toEntity)
                 .collect(Collectors.toList());
 
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("book", books);
         responseMap.put("page", page);
         responseMap.put("size", size);
-        responseMap.put("totalSize", resultDto.getTotal()); //총 검색 결과 개수
+        responseMap.put("totalSize", resultDTO.getTotal()); //총 검색 결과 개수
 
         return responseMap;
     }

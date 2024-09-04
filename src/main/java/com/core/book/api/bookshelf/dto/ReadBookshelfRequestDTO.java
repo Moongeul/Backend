@@ -1,6 +1,6 @@
 package com.core.book.api.bookshelf.dto;
 
-import com.core.book.api.book.dto.BookDto;
+import com.core.book.api.book.dto.BookDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -8,6 +8,6 @@ import lombok.Getter;
 @Getter
 public class ReadBookshelfRequestDTO {
 
-    private BookDto bookDto;
+    private BookDTO bookDto;
     private ReadBooksDTO readBooksDTO;
 }
