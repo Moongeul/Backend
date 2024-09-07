@@ -2,7 +2,6 @@ package com.core.book.api.bookshelf.entity;
 
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.member.entity.Member;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,7 +26,7 @@ public class ReadBooks {
     private double star_rating; //평점
     private String one_line_review; //한줄평
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
     private Book book; //책
 

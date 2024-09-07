@@ -9,4 +9,6 @@ public interface ReadBooksRepository extends JpaRepository<ReadBooks, Long> {
 
     // findByMemberIdOrderByReadDateDesc : memberId로 조회하면서 readDate를 기준으로 내림차순 정렬
     List<ReadBooks> findByMemberIdOrderByReadDateDesc(Long memberId);
+
+    boolean existsByBookIsbnAndMemberId(String bookIsbn, Long memberId);
 }

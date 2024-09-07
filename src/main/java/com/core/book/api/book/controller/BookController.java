@@ -8,8 +8,8 @@ import com.core.book.common.response.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @Slf4j
+@RequiredArgsConstructor
 @Tag(name = "Book", description = "Book 관련 API 입니다.")
 @RestController
 public class BookController {
 
-    @Autowired
-    private BookService bookService;
+    private final BookService bookService;
 
     @Operation(
             summary = "도서 데이터 요청 및 저장 API",

@@ -1,7 +1,5 @@
 package com.core.book.api.bookshelf.controller;
 
-import com.core.book.api.book.entity.Book;
-import com.core.book.api.book.repository.BookRepository;
 import com.core.book.api.bookshelf.dto.*;
 import com.core.book.api.bookshelf.service.BookShelfService;
 import com.core.book.common.exception.BadRequestException;
@@ -12,23 +10,20 @@ import com.core.book.common.response.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
+@RequiredArgsConstructor
 @Tag(name = "BOOKSHELF", description = "BOOKSHELF 관련 API 입니다.")
 @RestController
 public class BookshelfController {
 
-    @Autowired
-    private BookShelfService bookShelfService;
-    @Autowired
-    private BookRepository bookRepository;
+    private final BookShelfService bookShelfService;
 
     /*
      *
@@ -132,14 +127,6 @@ public class BookshelfController {
         if(readBookshelfDTO.getReadBooksDTO().getMemberId() == null){
             throw new BadRequestException(ErrorStatus.MISSING_BOOKSHELF_MEMBER.getMessage());
         }
-
-        //예외처리 : 이미 책장에 등록된 책에 대하여 등록 불가
-        Long bookId = readBookshelfDTO.getBookDto().getId();
-        Optional<Book> bookOptional = bookRepository.findById(bookId);
-
-        bookOptional.ifPresent(book -> {
-            throw new BadRequestException(ErrorStatus.NOT_ALLOW_DUPLICATE_BOOKSHELF.getMessage());
-        });
 
         // 책 저장 - 날짜/평점/태그/한줄평 입력 후 저장
         bookShelfService.createReadBookshelf(readBookshelfDTO);

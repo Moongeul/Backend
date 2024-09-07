@@ -1,5 +1,6 @@
 package com.core.book.api.bookshelf.service;
 
+import com.core.book.api.book.dto.BookDTO;
 import com.core.book.api.bookshelf.dto.*;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
@@ -11,6 +12,7 @@ import com.core.book.api.bookshelf.repository.ReadBooksTagRepository;
 import com.core.book.api.bookshelf.repository.WishBooksRepository;
 import com.core.book.api.member.entity.Member;
 import com.core.book.api.member.repository.MemberRepository;
+import com.core.book.common.exception.BadRequestException;
 import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
 import jakarta.transaction.Transactional;
@@ -22,8 +24,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
+@Service
 public class BookShelfService {
 
     private final ReadBooksRepository readBooksRepository;
@@ -137,20 +139,75 @@ public class BookShelfService {
     @Transactional
     public void createReadBookshelf(ReadBookshelfRequestDTO readBookshelfDTO){
 
-        // 선택된 책 DB에 저장
-        Book savedbook = bookRepository.save(readBookshelfDTO.getBookDto().toEntity());
+        String bookIsbn = readBookshelfDTO.getBookDTO().getIsbn();
+        Long memberId = readBookshelfDTO.getReadBooksDTO().getMemberId();
 
-        // 책, 회원 데이터 유무 확인
-        Book book = bookRepository.findById(savedbook.getId())
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
-        Member member = memberRepository.findById(readBookshelfDTO.getReadBooksDTO().getMemberId())
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+        // 예외처리 : 이미 나의 책장에 등록된 책에 대하여 등록 불가
+        checkDuplicateBookshelf(bookIsbn, memberId, true);
 
-        // (있으면) 선택된 태그 저장
+        // 책이 이미 BOOK DB에 존재한다면 -> DB 저장X / 없다면 -> DB 저장O
+        Book book = saveBookIfNotExists(bookIsbn, readBookshelfDTO.getBookDTO());
+
+        // 예외처리 : 회원 존재 여부 확인
+        Member member = getMemberById(memberId);
+
+        // 선택된 태그 저장 (null 가능)
         ReadBooksTag savedTags = saveReadBooksTag(readBookshelfDTO.getReadBooksDTO());
 
         // 책장 DB에 저장
         readBooksRepository.save(readBookshelfDTO.getReadBooksDTO().toEntity(book, member, savedTags));
+    }
+
+    // '읽고 싶은 책' 책장 등록 메서드
+    @Transactional
+    public void createWishBookshelf(WishBookshelfRequestDTO wishBookshelfDTO){
+
+        String bookIsbn = wishBookshelfDTO.getBookDTO().getIsbn();
+        Long memberId = wishBookshelfDTO.getWishBooksDTO().getMemberId();
+
+        // 예외처리 : 이미 나의 책장에 등록된 책에 대하여 등록 불가
+        checkDuplicateBookshelf(bookIsbn, memberId, false);
+
+        // 책이 이미 BOOK DB에 존재한다면 -> DB 저장X / 없다면 -> DB 저장O
+        Book book = saveBookIfNotExists(bookIsbn, wishBookshelfDTO.getBookDTO());
+
+        // 예외처리 : 회원 존재 여부 확인
+        Member member = getMemberById(memberId);
+
+        // 책장 DB에 저장
+        wishBooksRepository.save(wishBookshelfDTO.getWishBooksDTO().toEntity(book, member));
+    }
+
+    // 중복 책장 등록 체크 메서드
+    private void checkDuplicateBookshelf(String bookIsbn, Long memberId, boolean isReadBooks) {
+        boolean existsBookshelf;
+        if (isReadBooks) {
+            existsBookshelf = readBooksRepository.existsByBookIsbnAndMemberId(bookIsbn, memberId);
+        } else {
+            existsBookshelf = wishBooksRepository.existsByBookIsbnAndMemberId(bookIsbn, memberId);
+        }
+
+        if (existsBookshelf) {
+            throw new BadRequestException(ErrorStatus.NOT_ALLOW_DUPLICATE_BOOKSHELF.getMessage());
+        }
+    }
+
+    // 책 존재 확인 및 저장 메서드
+    private Book saveBookIfNotExists(String bookIsbn, BookDTO bookDTO){
+        boolean existsBook = bookRepository.existsByIsbn(bookIsbn);
+        if(!existsBook){
+            // 책이 DB에 존재하지 않는 경우
+            bookRepository.save(bookDTO.toEntity());
+        }
+
+        return bookRepository.findById(bookIsbn)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
+    }
+
+    // 회원 존재 확인 메서드
+    private Member getMemberById(Long memberId){
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
     }
 
     // '읽은 책' 태그 저장 메서드
@@ -166,23 +223,6 @@ public class BookShelfService {
         }
 
         return readBooksTagRepository.save(readBooksDTO.getReadBooksTagDTO().toEntity());
-    }
-
-    // '읽고 싶은 책' 책장 등록 메서드
-    @Transactional
-    public void createWishBookshelf(WishBookshelfRequestDTO wishBookshelfDTO){
-
-        // 선택된 책 DB에 저장
-        Book savedbook = bookRepository.save(wishBookshelfDTO.getBookDto().toEntity());
-
-        // 책, 회원 데이터 유무 확인
-        Book book = bookRepository.findById(savedbook.getId())
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
-        Member member = memberRepository.findById(wishBookshelfDTO.getWishBooksDTO().getMemberId())
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
-
-        // 책장 DB에 저장
-        wishBooksRepository.save(wishBookshelfDTO.getWishBooksDTO().toEntity(book, member));
     }
 
 

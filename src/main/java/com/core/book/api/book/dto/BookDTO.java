@@ -11,21 +11,19 @@ import lombok.*;
 @Getter
 public class BookDTO {
 
-    private Long id;
-
+    private String isbn;
     private String title;
     private String link;
     private String image;
     private String author;
     private String discount;
     private String publisher;
-    private String isbn;
     private String description;
     private String pubdate;
 
     private BookTag bookTag = new BookTag();
 
     public Book toEntity() {
-        return new Book(id, title, image, author, publisher, description, pubdate, bookTag);
+        return new Book(isbn, title, image, author, publisher, description, pubdate, bookTag);
     }
 }
