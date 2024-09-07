@@ -12,6 +12,9 @@ public enum SuccessStatus {
     /**
      * 200
      */
+    SEND_KAKAO_ACCESSTOKEN_SUCCESS(HttpStatus.OK,"카카오 엑세스토큰 발급 성공"),
+    SEND_LOGIN_SUCCESS(HttpStatus.OK, "로그인 성공"),
+    SEND_REISSUE_TOKEN_SUCCESS(HttpStatus.OK,"토큰 재발급 성공"),
     SEND_USERDETAIL_SUCCESS(HttpStatus.OK, "유저 정보 발송 성공"),
     SET_USER_MARKETING_SUCCESS(HttpStatus.OK, "유저 마케팅 동의 여부 설정 성공"),
 
