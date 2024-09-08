@@ -42,7 +42,7 @@ public class SecurityConfig {
                         CorsConfiguration config = new CorsConfiguration();
                         config.setAllowedOrigins(Arrays.asList(
                                 "https://moongeul.kro.kr",
-                                "http://localhost:3000"
+                                "http://localhost:8100"
                         ));
                         config.setAllowedMethods(Collections.singletonList("*"));
                         config.setAllowCredentials(true);
@@ -55,7 +55,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers( "/api-doc", "/health","/v3/api-docs/**", "/swagger-resources/**","/swagger-ui/**", "/h2-console/**", "/api/v1/book").permitAll()
-                        .requestMatchers("/oauth2/authorization/kakao").permitAll() // 카카오 로그인 접근 가능
+                        .requestMatchers("/oauth2/authorization/kakao", "/api/v1/member/accesstoken", "/api/v1/member/login", "/api/v1/member/token-reissue").permitAll() //로그인 관련 API 미인증 접근 가능
                         .anyRequest().authenticated() // 위의 경로 이외에는 모두 인증된 사용자만 접근 가능
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
@@ -63,12 +63,7 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/oauth2/authorization/kakao")
-                        .successHandler(oAuth2Config.getOAuth2LoginSuccessHandler()) // 동의하고 계속하기를 눌렀을 때 Handler 설정
-                        .failureHandler(oAuth2Config.getOAuth2LoginFailureHandler()) // 소셜 로그인 실패 시 핸들러 설정
-                        .clientRegistrationRepository(oAuth2Config.clientRegistrationRepository())
-                        .authorizedClientService(oAuth2Config.authorizedClientService())
-                        .tokenEndpoint(token -> token.accessTokenResponseClient(oAuth2Config.authorizationCodeTokenResponseClient()))
-                        .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2Config.getCustomOAuth2UserService())) // customUserService 설정
+                        .defaultSuccessUrl("/api/v1/member/accesstoken", true)
                 );
 
         // JwtAuthenticationProcessingFilter를 추가하여 JWT 인증을 처리

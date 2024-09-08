@@ -1,13 +1,8 @@
 package com.core.book.api.member.service;
 
 import com.core.book.api.member.dto.*;
-import com.core.book.api.member.entity.Follow;
-import com.core.book.api.member.entity.InfoOpen;
-import com.core.book.api.member.entity.Member;
-import com.core.book.api.member.entity.UserTag;
+import com.core.book.api.member.entity.*;
 import com.core.book.api.member.jwt.service.JwtService;
-import com.core.book.api.member.oauth2.CustomOAuth2User;
-import com.core.book.api.member.oauth2.OAuthAttributes;
 import com.core.book.api.member.repository.FollowRepository;
 import com.core.book.api.member.repository.InfoOpenRepository;
 import com.core.book.api.member.repository.MemberRepository;
@@ -20,12 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -33,15 +22,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+public class MemberService {
 
     private final MemberRepository memberRepository;
     private final UserTagRepository userTagRepository;
@@ -49,61 +39,61 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
     private final FollowRepository followRepository;
     private final JwtService jwtService;
     private final S3Service s3Service;
+    private final OAuthService oAuthService;
 
     // 금지된 닉네임 리스트
     @Value("${member.prohibited-nicknames}")
     private List<String> prohibitedNicknames;
 
-    @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        log.info("CustomOAuth2UserService.loadUser() 실행 - OAuth2 로그인 요청 진입");
+    @Transactional
+    public Map<String, Object> loginWithKakao(String kakaoAccessToken) {
+        // 카카오 Access Token을 이용해 사용자 정보 가져오기
+        KakaoUserInfoDTO kakaoUserInfo = oAuthService.getKakaoUserInfo(kakaoAccessToken);
 
-        OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
-        OAuth2User oAuth2User = delegate.loadUser(userRequest);
+        // 사용자 정보를 저장
+        Member member = registerOrLoginKakaoUser(kakaoUserInfo);
 
-        String userNameAttributeName = userRequest.getClientRegistration()
-                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
-        Map<String, Object> attributes = oAuth2User.getAttributes();
+        // 엑세스,리프레시 토큰 생성
+        Map<String, String> tokens = jwtService.createAccessAndRefreshToken(member.getEmail());
 
-        OAuthAttributes extractAttributes = OAuthAttributes.of(userNameAttributeName, attributes);
+        Map<String, Object> response = new HashMap<>();
+        response.put("tokens", tokens);
+        response.put("role", member.getRole());
 
-        Member createdUser = getUser(extractAttributes);
-
-        return new CustomOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(createdUser.getRole().getKey())),
-                attributes,
-                extractAttributes.getNameAttributeKey(),
-                createdUser.getEmail(),
-                createdUser.getRole()
-        );
+        return response;
     }
 
-    private Member getUser(OAuthAttributes attributes) {
-        Member findUser = memberRepository.findBySocialId(attributes.getOauth2UserInfo().getId()).orElse(null);
-
-        if (findUser == null) {
-            return saveUser(attributes);
-        }
-        return findUser;
+    // 카카오 사용자 정보를 사용해 회원가입 또는 로그인 처리
+    public Member registerOrLoginKakaoUser(KakaoUserInfoDTO kakaoUserInfo) {
+        // 카카오 사용자 ID로 사용자 조회
+        return memberRepository.findBySocialId(kakaoUserInfo.getId())
+                .orElseGet(() -> registerNewKakaoUser(kakaoUserInfo));  // 없으면 새 사용자 등록
     }
 
-    private Member saveUser(OAuthAttributes attributes) {
-        Member createdUser = attributes.toEntity(attributes.getOauth2UserInfo());
+    // 새로운 카카오 사용자 등록
+    private Member registerNewKakaoUser(KakaoUserInfoDTO kakaoUserInfo) {
+        Member member = Member.builder()
+                .socialId(kakaoUserInfo.getId())
+                .email(UUID.randomUUID() + "@socialUser.com")
+                .nickname(kakaoUserInfo.getNickname())
+                .imageUrl(kakaoUserInfo.getProfileImage())
+                .marketing_allow(Boolean.FALSE)
+                .role(Role.GUEST)
+                .build();
 
-        // 초기 사용자 모든 정보 공개 TRUE 설정
+        // 초기 정보 공개 설정
         InfoOpen infoOpen = InfoOpen.builder()
                 .follow_open(true)
                 .content_open(true)
                 .comment_open(true)
                 .like_open(true)
-                .member(createdUser)
+                .member(member)
                 .build();
 
-        Member savedMember = memberRepository.save(createdUser);
-
+        memberRepository.save(member);
         infoOpenRepository.save(infoOpen);
 
-        return savedMember;
+        return member;
     }
 
     @Transactional
@@ -134,16 +124,6 @@ public class MemberService implements OAuth2UserService<OAuth2UserRequest, OAuth
         Member updatedMember = member.authorizeUser();
         memberRepository.save(updatedMember);
 
-        // 엑세스 토큰 및 리프레시 토큰 발급 후 쿠키로 전송
-        String accessToken = jwtService.createAccessToken(member.getEmail());
-        String refreshToken = jwtService.createRefreshToken();
-
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken,"moongeul.kro.kr");
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken,"localhost");
-
-
-        // 리프레시 토큰 업데이트
-        jwtService.updateRefreshToken(member.getEmail(), refreshToken);
     }
 
     private void validateTagRequest(UserTagRequestDTO userTagRequest) {
