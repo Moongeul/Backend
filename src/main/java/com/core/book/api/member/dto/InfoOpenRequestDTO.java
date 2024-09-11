@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 @Builder
 public class InfoOpenRequestDTO {
-    private Boolean follow_open;
-    private Boolean content_open;
-    private Boolean comment_open;
-    private Boolean like_open;
+    private Boolean followOpen;
+    private Boolean contentOpen;
+    private Boolean commentOpen;
+    private Boolean likeOpen;
 }

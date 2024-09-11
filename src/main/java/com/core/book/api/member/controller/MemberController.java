@@ -50,7 +50,7 @@ public class MemberController {
 
     @Operation(
             summary = "로그인 API",
-            description = "카카오 엑세스토큰을 통해 사용자의 정보를 등록 및 토큰을 발급합니다."
+            description = "카카오 엑세스토큰을 통해 사용자의 정보를 등록 및 토큰을 발급합니다. (ROLE -> 처음사용자 : GUEST, 일반사용자 : USER, 관리자 : ADMIN)"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그인 성공"),
@@ -109,7 +109,7 @@ public class MemberController {
 
     @Operation(
             summary = "처음 사용자용 TAG 등록 API",
-            description = "처음 사용자 추가 정보 등록페이지 에서 TAG를 등록하고 기존사용자로 변경합니다."
+            description = "처음 사용자 추가 정보 등록페이지 에서 TAG를 등록하고 기존사용자로 변경합니다. - 해당 API는 처음사용자 등록할때만 유효합니다, TAG 변경은 다른 API로 수행해야합니다."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "USERTAG 등록 성공"),
