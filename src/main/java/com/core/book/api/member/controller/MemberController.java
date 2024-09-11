@@ -204,6 +204,25 @@ public class MemberController {
     }
 
     @Operation(
+            summary = "닉네임 사용 가능 체크 API",
+            description = "변경하려는 닉네임이 사용 가능한지 체크합니다. (닉네임 필터 조건 : 닉네임은 10자 이하로 설정, 닉네임은 영문, 숫자, 한글만 사용가능, 현재 다른 사용자가 사용중인 닉네임은 사용 불가)"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "닉네임 사용 가능"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "닉네임이 입력되지 않았습니다."),
+    })
+    @PostMapping("/check-nickname")
+    public ResponseEntity<ApiResponse<Void>> checkNickname(@RequestParam("nickname") String nickname) {
+        // 닉네임이 입력되지 않았을 경우 예외 처리
+        if (nickname == null || nickname.isEmpty()) {
+            throw new BadRequestException(ErrorStatus.MISSING_NICKNAME.getMessage());
+        }
+
+        memberService.checkNickname(nickname);
+        return ApiResponse.success_only(SuccessStatus.CHECK_NICKNAME_SUCCESS);
+    }
+
+    @Operation(
             summary = "정보 공개 여부 수정 API",
             description = "사용자의 정보 공개 여부를 수정합니다."
     )
