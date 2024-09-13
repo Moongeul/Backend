@@ -90,7 +90,7 @@ public class BookShelfService {
      *
      */
 
-    //'읽은 책' 책장 상세 정보 조회
+    // '읽은 책' 책장 상세 정보 조회
     public ReadBooksDTO showReadBooksDetails(Long id){
 
         //id 에 따른 책장 단건 조회
@@ -99,14 +99,13 @@ public class BookShelfService {
 
         ReadBooksTag readBooksTag = readBooks.getReadBooksTag();
 
-        ReadBooksDTO.ReadBooksTagDTO tagDTO = ReadBooksDTO.ReadBooksTagDTO.builder()
-                .tag1(readBooksTag.getTag1())
-                .tag2(readBooksTag.getTag2())
-                .tag3(readBooksTag.getTag3())
-                .tag4(readBooksTag.getTag4())
-                .tag5(readBooksTag.getTag5())
-                .build();
+        ReadBooksDTO.ReadBooksTagDTO tagDTO = convertToReadBooksTagDTO(readBooksTag);
 
+        return convertToReadBooksDTO(readBooks, tagDTO);
+    }
+
+    // ReadBooks를 ReadBooksDTO로 변환하는 메서드
+    private ReadBooksDTO convertToReadBooksDTO(ReadBooks readBooks, ReadBooksDTO.ReadBooksTagDTO tagDTO){
         return ReadBooksDTO.builder()
                 .readDate(readBooks.getReadDate())
                 .starRating(readBooks.getStar_rating())
@@ -116,13 +115,29 @@ public class BookShelfService {
                 .build();
     }
 
-    //'읽고 싶은 책' 책장 상세 정보 조회
+    // ReadBooksTag를 ReadBooksTagDTO로 변환하는 메서드
+    private ReadBooksDTO.ReadBooksTagDTO convertToReadBooksTagDTO(ReadBooksTag readBooksTag){
+        return ReadBooksDTO.ReadBooksTagDTO.builder()
+                .tag1(readBooksTag.getTag1())
+                .tag2(readBooksTag.getTag2())
+                .tag3(readBooksTag.getTag3())
+                .tag4(readBooksTag.getTag4())
+                .tag5(readBooksTag.getTag5())
+                .build();
+    }
+
+    // '읽고 싶은 책' 책장 상세 정보 조회
     public WishBooksDTO showWishBooksDetails(Long id){
 
         //id 에 따른 책장 단건 조회
         WishBooks wishBooks = wishBooksRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_INFO_NOTFOUND_EXCEPTION.getMessage()));
 
+        return convertToWishBooksDTO(wishBooks);
+    }
+
+    // wishBooks를 wishBooksDTO로 변환하는 메서드
+    private WishBooksDTO convertToWishBooksDTO(WishBooks wishBooks){
         return WishBooksDTO.builder()
                 .reason(wishBooks.getReason())
                 .memberId(wishBooks.getId())
@@ -310,4 +325,48 @@ public class BookShelfService {
 
         wishBooksRepository.delete(wishBooks);
     }
+
+    /*
+     *
+     * 책장 - 읽고 싶은 책 -> 읽은 책 '이동' 메서드
+     *
+     */
+    @Transactional
+    public void shiftBookshelf(ReadBooksDTO readBooksDTO, Long id){
+
+        WishBooks wishBooks = wishBooksRepository.findById(id).
+                orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_NOTFOUND_EXCEPTION.getMessage()));
+
+        /* (1) 읽은 책 책장에 등록 */
+
+        // 책 정보 가져오기
+        BookDTO bookDTO = convertToBookDTO(wishBooks.getBook());
+
+        // ReadBookshelfRequestDTO 만들기
+        ReadBookshelfRequestDTO readBookshelfRequestDTO = ReadBookshelfRequestDTO.builder()
+                .bookDTO(bookDTO)
+                .readBooksDTO(readBooksDTO)
+                .build();
+
+        // '읽은 책' 책장 등록
+        createReadBookshelf(readBookshelfRequestDTO);
+
+        /* (2) 읽고 싶은 책 책장에서 삭제 */
+        deleteWishBookshelf(id);
+    }
+
+    // book을 BookDTO로 변경하는 메서드
+    private BookDTO convertToBookDTO(Book book){
+        return BookDTO.builder()
+                .isbn(book.getIsbn())
+                .title(book.getTitle())
+                .image(book.getBook_image())
+                .author(book.getAuthor())
+                .publisher(book.getPublisher())
+                .description(book.getDescription())
+                .pubdate(book.getPubdate())
+                .bookTag(book.getBookTag())
+                .build();
+    }
+
 }
