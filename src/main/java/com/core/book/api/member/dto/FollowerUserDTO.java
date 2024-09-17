@@ -9,5 +9,6 @@ public class FollowerUserDTO {
     private Long id;
     private String nickname;
     private String imageUrl;
+    private boolean isFollowing;
 }
 
