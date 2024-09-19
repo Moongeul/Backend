@@ -344,12 +344,19 @@ public class MemberService {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
+        // N+1 문제 해결을 위한 해당 사용자의 모든 팔로워 리스트 불러오기
+        List<Long> followingIds = followRepository.findFollowingIdsByFollowerId(userId);
+
         return member.getFollowers().stream()
-                .map(follow -> FollowerUserDTO.builder()
-                        .id(follow.getFollower().getId())
-                        .nickname(follow.getFollower().getNickname())
-                        .imageUrl(follow.getFollower().getImageUrl())
-                        .build())
+                .map(follow -> {
+                    boolean isFollowing = followingIds.contains(follow.getFollower().getId());
+                    return FollowerUserDTO.builder()
+                            .id(follow.getFollower().getId())
+                            .nickname(follow.getFollower().getNickname())
+                            .imageUrl(follow.getFollower().getImageUrl())
+                            .isFollowing(isFollowing)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
