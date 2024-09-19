@@ -52,10 +52,10 @@ public class UserInfoResponseDTO {
         private final Boolean likeOpen;
 
         public InfoOpenDTO(InfoOpen infoOpen) {
-            this.followOpen = infoOpen.getFollow_open();
-            this.contentOpen = infoOpen.getContent_open();
-            this.commentOpen = infoOpen.getComment_open();
-            this.likeOpen = infoOpen.getLike_open();
+            this.followOpen = infoOpen.getFollowOpen();
+            this.contentOpen = infoOpen.getContentOpen();
+            this.commentOpen = infoOpen.getCommentOpen();
+            this.likeOpen = infoOpen.getLikeOpen();
         }
     }
 }

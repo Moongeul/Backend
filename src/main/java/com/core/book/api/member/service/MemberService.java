@@ -83,10 +83,10 @@ public class MemberService {
 
         // 초기 정보 공개 설정
         InfoOpen infoOpen = InfoOpen.builder()
-                .follow_open(true)
-                .content_open(true)
-                .comment_open(true)
-                .like_open(true)
+                .followOpen(true)
+                .contentOpen(true)
+                .commentOpen(true)
+                .likeOpen(true)
                 .member(member)
                 .build();
 
@@ -248,10 +248,10 @@ public class MemberService {
 
         // InfoOpen 정보 업데이트
         infoOpen = infoOpen.updateInfoOpen(
-                infoOpenRequestDTO.getFollow_open(),
-                infoOpenRequestDTO.getContent_open(),
-                infoOpenRequestDTO.getComment_open(),
-                infoOpenRequestDTO.getLike_open()
+                infoOpenRequestDTO.getFollowOpen(),
+                infoOpenRequestDTO.getContentOpen(),
+                infoOpenRequestDTO.getCommentOpen(),
+                infoOpenRequestDTO.getLikeOpen()
         );
 
         infoOpenRepository.save(infoOpen);

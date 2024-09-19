@@ -44,7 +44,7 @@ public class SwaggerConfig {
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("코어 프로젝트 API")
+                        .title("뭉글")
                         .description("독서 커뮤니티 REST API Document - Backend Developer : 태근, 주현")
                         .version("1.0.0"))
                 .components(new Components()

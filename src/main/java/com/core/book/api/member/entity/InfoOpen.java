@@ -17,10 +17,10 @@ public class InfoOpen extends BaseTimeEntity {
     @Column(name = "info_open_id")
     private Long id;
 
-    private Boolean follow_open; // 팔로우 공개 여부
-    private Boolean content_open; // 글 공개 여부
-    private Boolean comment_open; // 댓글 공개 여부
-    private Boolean like_open; // 좋아요 공개 여부
+    private Boolean followOpen; // 팔로우 공개 여부
+    private Boolean contentOpen; // 글 공개 여부
+    private Boolean commentOpen; // 댓글 공개 여부
+    private Boolean likeOpen; // 좋아요 공개 여부
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -28,10 +28,10 @@ public class InfoOpen extends BaseTimeEntity {
 
     public InfoOpen updateInfoOpen(Boolean followOpen, Boolean contentOpen, Boolean commentOpen, Boolean likeOpen) {
         return this.toBuilder()
-                .follow_open(followOpen)
-                .content_open(contentOpen)
-                .comment_open(commentOpen)
-                .like_open(likeOpen)
+                .followOpen(followOpen)
+                .contentOpen(contentOpen)
+                .commentOpen(commentOpen)
+                .likeOpen(likeOpen)
                 .build();
     }
 
