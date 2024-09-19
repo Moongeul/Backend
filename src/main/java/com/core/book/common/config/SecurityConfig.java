@@ -48,6 +48,8 @@ public class SecurityConfig {
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(Collections.singletonList("*"));
                         config.setMaxAge(3600L); //1시간
+                        config.addExposedHeader("Authorization");
+                        config.addExposedHeader("Authorization-Refresh");
                         return config;
                     }
                 }))
