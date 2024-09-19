@@ -14,13 +14,15 @@ public class UserInfoResponseDTO {
     private final UserTagDTO userTag;
     private final InfoOpenDTO infoOpen;
     private final int followedCount;
+    private final int followerCount;
 
-    public UserInfoResponseDTO(Member member, UserTag userTag, InfoOpen infoOpen, int followedCount) {
+    public UserInfoResponseDTO(Member member, UserTag userTag, InfoOpen infoOpen, int followedCount, int followerCount) {
         this.id = member.getId();
         this.nickname = member.getNickname();
         this.imageUrl = member.getImageUrl();
         this.marketingAllow = member.getMarketing_allow();
         this.followedCount = followedCount;
+        this.followerCount = followerCount;
         this.userTag = userTag != null ? new UserTagDTO(userTag) : null;
         this.infoOpen = infoOpen != null ? new InfoOpenDTO(infoOpen) : null;
     }
@@ -50,10 +52,10 @@ public class UserInfoResponseDTO {
         private final Boolean likeOpen;
 
         public InfoOpenDTO(InfoOpen infoOpen) {
-            this.followOpen = infoOpen.getFollow_open();
-            this.contentOpen = infoOpen.getContent_open();
-            this.commentOpen = infoOpen.getComment_open();
-            this.likeOpen = infoOpen.getLike_open();
+            this.followOpen = infoOpen.getFollowOpen();
+            this.contentOpen = infoOpen.getContentOpen();
+            this.commentOpen = infoOpen.getCommentOpen();
+            this.likeOpen = infoOpen.getLikeOpen();
         }
     }
 }

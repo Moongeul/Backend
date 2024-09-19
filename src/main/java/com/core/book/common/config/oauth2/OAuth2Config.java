@@ -1,7 +1,5 @@
 package com.core.book.common.config.oauth2;
 
-import com.core.book.api.member.oauth2.handler.OAuth2LoginFailureHandler;
-import com.core.book.api.member.oauth2.handler.OAuth2LoginSuccessHandler;
 import com.core.book.api.member.service.MemberService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +22,6 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 @Getter
 public class OAuth2Config {
 
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final MemberService customOAuth2UserService;
 
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")

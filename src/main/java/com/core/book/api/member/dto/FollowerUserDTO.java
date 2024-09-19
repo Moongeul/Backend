@@ -1,14 +1,14 @@
 package com.core.book.api.member.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
-public class FollowedUserDTO {
+@Builder
+public class FollowerUserDTO {
     private Long id;
     private String nickname;
     private String imageUrl;
+    private boolean isFollowing;
 }
+
