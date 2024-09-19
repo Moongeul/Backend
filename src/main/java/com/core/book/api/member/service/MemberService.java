@@ -213,6 +213,12 @@ public class MemberService {
         memberRepository.save(updatedMember); // Member 객체 반환
     }
 
+    @Transactional
+    public void checkNickname(String nickname) {
+
+        validateNickname(nickname);
+    }
+
     private void validateNickname(String nickname) {
         //10자 이하 인지 체크
         if (nickname.length() > 10) {

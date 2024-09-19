@@ -23,6 +23,7 @@ public enum SuccessStatus {
 
     UPDATE_PROFILE_IMAGE_SUCCESS(HttpStatus.OK, "프로필 사진 변경 성공"),
     UPDATE_NICKNAME_SUCCESS(HttpStatus.OK, "닉네임 변경 성공"),
+    CHECK_NICKNAME_SUCCESS(HttpStatus.OK, "닉네임 사용 가능"),
     UPDATE_INFO_OPEN_SUCCESS(HttpStatus.OK,"정보 공개 수정 성공"),
     DELETE_MEMBER_SUCCESS(HttpStatus.OK, "회원 탈퇴 성공"),
     GET_USERINFO_SUCCESS(HttpStatus.OK,"사용자 정보 조회 성공"),
