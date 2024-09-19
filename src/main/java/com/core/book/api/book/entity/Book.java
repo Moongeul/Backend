@@ -12,9 +12,8 @@ import lombok.*;
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "book_id")
-    private Long id;
+    private String isbn; //isbn - PK
 
     private String title; // 책 제목
     private String book_image; // 책 이미지

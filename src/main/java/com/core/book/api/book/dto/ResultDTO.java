@@ -7,10 +7,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class ResultDto {
+public class ResultDTO {
     private String lastBuildDate;
     private int total;
     private int start;
     private int display;
-    private List<BookDto> items;
+    private List<BookDTO> items;
 }

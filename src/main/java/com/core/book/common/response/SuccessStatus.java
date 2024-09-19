@@ -32,11 +32,17 @@ public enum SuccessStatus {
     GET_FOLLOWED_USERS_SUCCESS(HttpStatus.OK,"팔로우 중인 사용자 목록 조회 성공"),
     GET_FOLLOWER_USERS_SUCCESS(HttpStatus.OK, "팔로워 사용자 목록 조회 성공"),
 
+    GET_BOOKSHELF_SUCCESS(HttpStatus.OK,"책장 조회 성공"),
+    GET_BOOKSHELF_INFO_SUCCESS(HttpStatus.OK,"책장 상세 정보 조회 성공"),
+    UPDATE_BOOKSHELF_INFO_SUCCESS(HttpStatus.OK,"책장 상세 정보 수정 성공"),
+    DELETE_BOOKSHELF_SUCCESS(HttpStatus.OK,"책장 삭제 성공"),
+
     /**
      * 201
      */
     CREATE_ARTICLE_SUCCESS(HttpStatus.CREATED, "게시판 등록 성공"),
-    CREATE_USERTAG_SUCCESS(HttpStatus.CREATED, "USERTAG 등록 성공")
+    CREATE_USERTAG_SUCCESS(HttpStatus.CREATED, "USERTAG 등록 성공"),
+    CREATE_BOOKSHELF_SUCCESS(HttpStatus.CREATED, "책장 등록 성공"),
 
     ;
 
