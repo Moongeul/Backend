@@ -20,7 +20,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -46,31 +49,106 @@ public class BookShelfService {
         // 책장 주인(회원)이 가진 책장 리스트 반환
         List<ReadBooks> readBooksList = readBooksRepository.findByMemberIdOrderByReadDateDesc(memberId);
 
-        // ReadBooks 리스트를 ReadBookshelfResponseDTO 리스트로 변환
-        return readBooksList.stream()
-                .map(this::convertToReadBookshelfResponseDTO)
-                .collect(Collectors.toList());
+        // 읽은 책 책장 응답 body 구성을 위한 DTO 리스트들 (초기화)
+        List<ReadBookshelfResponseDTO> readBookshelfResponseList = new ArrayList<>();
+        List<ReadBookshelfResponseDTO.MonthlyReadBooksDTO> monthlyReadBooksList = new ArrayList<>();
+
+        // 책장 리스트가 비어있는지 검사
+        if(!(readBooksList.isEmpty())) { // 책장 리스트에 데이터가 있다면
+
+            // 날짜, 책 권수 변수 (초기화)
+            String monthlyDate = createMonthlyDate(readBooksList.get(0)); // 첫 읽은 책 데이터의 읽은 날짜
+            int monthlyReadBooksCnt = 0; // 날짜 별 읽은 책 권수
+
+            // 읽은 날짜 별(년도-월) 책 분리
+            for(int i = 0; i < readBooksList.size(); i++) {
+                ReadBooks readBooks = readBooksList.get(i);
+
+                /*
+                    1. List<ReadBookshelfResponseDTO.MonthlyReadBooksDTO> (책 정보) 리스트 만들기
+                */
+
+                // 현재 달 읽은 책 리스트(책 정보) 생성
+                ReadBookshelfResponseDTO.MonthlyReadBooksDTO monthlyReadBook = convertToMonthlyReadBooksDTO(readBooks);
+                monthlyReadBooksList.add(monthlyReadBook);
+
+                // 현재 달 읽은 책 권수 증가
+                monthlyReadBooksCnt++;
+
+                /*
+                    2. List<ReadBookshelfResponseDTO> (날짜 + 권수 + 책 정보) 리스트 만들기
+                */
+
+                // 다음 readBook의 읽은 날짜가 변경되었는지(달이 지났는지) 확인
+                if (i + 1 < readBooksList.size()) { // 다음 요소가 존재하는지 확인
+                    ReadBooks nextReadBook = readBooksList.get(i + 1);
+                    String nextMonthlyDate = createMonthlyDate(nextReadBook);
+
+                    // 현재 책의 달과 다음 책의 달을 비교하여 조건 걸기
+                    if (!monthlyDate.equals(nextMonthlyDate)) {
+                        // 다음 책의 달이 바뀌었을 경우 : ReadBookshelfResponseDTO(읽은 책 전체 조회 응답 DTO) 데이터 생성 및 DTO 리스트에 추가
+                        ReadBookshelfResponseDTO readBookshelfResponseDTO = createReadBookshelfResponseDTO(monthlyDate, monthlyReadBooksCnt, monthlyReadBooksList);
+                        readBookshelfResponseList.add(readBookshelfResponseDTO);
+
+                        // 다음 책의 달로 갱신 + 읽은 책 권수 초기화 + monthlyReadBooksList 초기화
+                        monthlyDate = nextMonthlyDate;
+                        monthlyReadBooksCnt = 0;
+                        monthlyReadBooksList = new ArrayList<>();
+                    }
+                } else {
+                    // 마지막 책에 도달했을 때 마지막 책 달의 데이터들도 응답 DTO 리스트에 추가
+                    ReadBookshelfResponseDTO readBookshelfResponseDTO = createReadBookshelfResponseDTO(monthlyDate, monthlyReadBooksCnt, monthlyReadBooksList);
+                    readBookshelfResponseList.add(readBookshelfResponseDTO);
+                }
+            }
+        }
+
+        return readBookshelfResponseList;
     }
 
-    // ReadBooks를 ReadBookshelfResponseDTO로 변환하는 메서드
-    private ReadBookshelfResponseDTO convertToReadBookshelfResponseDTO(ReadBooks readBooks) {
-        // ReadBookshelfResponseDTO 객체 생성 (빌더 패턴 사용)
+    // ReadBookshelfResponseDTO 생성 메서드
+    private ReadBookshelfResponseDTO createReadBookshelfResponseDTO(String monthlyDate, int monthlyReadBooksCnt, List<ReadBookshelfResponseDTO.MonthlyReadBooksDTO> monthlyReadBooksList){
         return ReadBookshelfResponseDTO.builder()
-                .bookImage(readBooks.getBook().getBook_image()) // 책 이미지
-                .readDate(readBooks.getReadDate()) // 읽은 날짜
-                .starRating(readBooks.getStar_rating()) // 평점
+                .date(monthlyDate)
+                .monthlyBookCnt(monthlyReadBooksCnt)
+                .monthlyReadBooks(monthlyReadBooksList)
                 .build();
     }
 
-    //'읽고 싶은 책' 책장 조회(list)
-    public List<WishBookshelfResponseDTO> showWishBooks(Long memberId){
+    // ReadBooks를 ReadBookshelfResponseDTO.MonthlyReadBooksDTO로 변환하는 메서드
+    private ReadBookshelfResponseDTO.MonthlyReadBooksDTO convertToMonthlyReadBooksDTO(ReadBooks readBooks) {
 
-        //책장 주인(회원)이 가진 책장 리스트 반환
+        return ReadBookshelfResponseDTO.MonthlyReadBooksDTO.builder()
+                .isbn(readBooks.getBook().getIsbn()) // isbn
+                .bookImage(readBooks.getBook().getBook_image()) // 책 이미지
+                .starRating(readBooks.getStar_rating()) // 평점
+                .title(readBooks.getBook().getTitle()) // 책 제목
+                .readDate(readBooks.getReadDate()) // 읽은 날짜
+                .build();
+    }
+
+    // 읽은 날짜의 년도-월(YYYY-M) 문자열 생성 메서드
+    private String createMonthlyDate(ReadBooks readBooks){
+        return readBooks.getReadDate().getYear() + "-" + readBooks.getReadDate().getMonthValue();
+    }
+
+    //'읽고 싶은 책' 책장 조회(list)
+    public Map<String, Object> showWishBooks(Long memberId){
+
+        // 책장 주인(회원)이 가진 책장 리스트 반환
         List<WishBooks> wishBooksList = wishBooksRepository.findByMemberId(memberId);
 
-        return wishBooksList.stream()
+        // WishBooks를 WishBookshelfResponseDTO 변환
+        List<WishBookshelfResponseDTO> wishBookshelfResponseDTOList = wishBooksList.stream()
                 .map(this::convertToWishBookshelfResponseDTO)
                 .collect(Collectors.toList());
+
+        // Response Body 로 보내주는 데이터
+        Map<String, Object> wishBookshelfResponseMap = new HashMap<>();
+        wishBookshelfResponseMap.put("BookTotalCnt", wishBooksList.size()); // 읽고 싶은 책 총 권수
+        wishBookshelfResponseMap.put("WishBooksList", wishBookshelfResponseDTOList); // 읽고 싶은 책 리스트
+
+        return wishBookshelfResponseMap;
     }
 
     // WishBooks를 WishBookshelfResponseDTO 변환하는 메서드
@@ -78,8 +156,10 @@ public class BookShelfService {
 
         // WishBookshelfResponseDTO 객체 생성 (빌더 패턴 사용)
         return WishBookshelfResponseDTO.builder()
+                .isbn(wishBooks.getBook().getIsbn()) // isbn
                 .bookImage(wishBooks.getBook().getBook_image()) // 책 이미지
                 .bookTitle(wishBooks.getBook().getTitle()) // 책 제목
+                .author(wishBooks.getBook().getAuthor()) // 저자
                 .reason(wishBooks.getReason()) // 읽고 싶은 이유
                 .build();
     }

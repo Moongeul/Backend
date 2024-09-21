@@ -11,4 +11,5 @@ public interface ReadBooksRepository extends JpaRepository<ReadBooks, Long> {
     List<ReadBooks> findByMemberIdOrderByReadDateDesc(Long memberId);
 
     boolean existsByBookIsbnAndMemberId(String bookIsbn, Long memberId);
+
 }

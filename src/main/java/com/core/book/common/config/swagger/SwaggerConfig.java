@@ -40,7 +40,7 @@ public class SwaggerConfig {
         SecurityRequirement refreshTokenRequirement = new SecurityRequirement().addList(refreshTokenHeader);
 
         Server server = new Server();
-        server.setUrl("https://moongeul.kro.kr");
+        server.setUrl("http://localhost:8080");
 
         return new OpenAPI()
                 .info(new Info()

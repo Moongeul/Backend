@@ -16,10 +16,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-@Tag(name = "BOOKSHELF", description = "BOOKSHELF 관련 API 입니다.")
+@Tag(name = "Bookshelf", description = "Bookshelf 관련 API 입니다.")
 @RestController
 public class BookshelfController {
 
@@ -42,10 +43,10 @@ public class BookshelfController {
     @GetMapping("/api/v1/bookshelf/read")
     public ResponseEntity<ApiResponse<List<ReadBookshelfResponseDTO>>> showReadBookshelf(@RequestParam("member-id") Long memberId){
 
-        List<ReadBookshelfResponseDTO> list = bookShelfService.showReadBooks(memberId);
-        log.info(list.toString());
+        List<ReadBookshelfResponseDTO> readBookshelfResponseList = bookShelfService.showReadBooks(memberId);
+        log.info("readBookshelfResponseList: {}", readBookshelfResponseList.toString());
 
-        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_INFO_SUCCESS, list);
+        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, readBookshelfResponseList);
     }
 
     @Operation(
@@ -57,12 +58,12 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값이 입력되지 않았습니다.")
     })
     @GetMapping("/api/v1/bookshelf/wish")
-    public ResponseEntity<ApiResponse<List<WishBookshelfResponseDTO>>> showWishBookshelf(@RequestParam("member-id") Long memberId){
+    public ResponseEntity<ApiResponse<Map<String, Object>>> showWishBookshelf(@RequestParam("member-id") Long memberId){
 
-        List<WishBookshelfResponseDTO> list = bookShelfService.showWishBooks(memberId);
-        log.info(list.toString());
+        Map<String, Object> wishBookshelfList = bookShelfService.showWishBooks(memberId);
+        log.info(wishBookshelfList.toString());
 
-        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_INFO_SUCCESS, list);
+        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, wishBookshelfList);
     }
 
     /*
