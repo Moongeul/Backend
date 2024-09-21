@@ -15,9 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = "Bookshelf", description = "Bookshelf 관련 API 입니다.")
@@ -41,12 +38,12 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값이 입력되지 않았습니다.")
     })
     @GetMapping("/api/v1/bookshelf/read")
-    public ResponseEntity<ApiResponse<List<ReadBookshelfResponseDTO>>> showReadBookshelf(@RequestParam("member-id") Long memberId){
+    public ResponseEntity<ApiResponse<ReadBookshelfResponseDTO>> showReadBookshelf(@RequestParam("member-id") Long memberId){
 
-        List<ReadBookshelfResponseDTO> readBookshelfResponseList = bookShelfService.showReadBooks(memberId);
-        log.info("readBookshelfResponseList: {}", readBookshelfResponseList.toString());
+        ReadBookshelfResponseDTO readBookshelfData = bookShelfService.showReadBooks(memberId);
+        log.info("readBookshelfData: {}", readBookshelfData.toString());
 
-        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, readBookshelfResponseList);
+        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, readBookshelfData);
     }
 
     @Operation(
@@ -58,12 +55,12 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값이 입력되지 않았습니다.")
     })
     @GetMapping("/api/v1/bookshelf/wish")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> showWishBookshelf(@RequestParam("member-id") Long memberId){
+    public ResponseEntity<ApiResponse<WishBookshelfResponseDTO>> showWishBookshelf(@RequestParam("member-id") Long memberId){
 
-        Map<String, Object> wishBookshelfList = bookShelfService.showWishBooks(memberId);
-        log.info(wishBookshelfList.toString());
+        WishBookshelfResponseDTO wishBookshelfData = bookShelfService.showWishBooks(memberId);
+        log.info(wishBookshelfData.toString());
 
-        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, wishBookshelfList);
+        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, wishBookshelfData);
     }
 
     /*
@@ -99,9 +96,9 @@ public class BookshelfController {
     @GetMapping("/api/v1/bookshelf/wish/{id}")
     public ResponseEntity<ApiResponse<WishBooksDTO>> showWishBookshelfDetails(@PathVariable Long id){
 
-            WishBooksDTO showed = bookShelfService.showWishBooksDetails(id);
-            log.info(showed.toString());
-            return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_INFO_SUCCESS, showed);
+        WishBooksDTO showed = bookShelfService.showWishBooksDetails(id);
+        log.info(showed.toString());
+        return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_INFO_SUCCESS, showed);
     }
 
     /*
