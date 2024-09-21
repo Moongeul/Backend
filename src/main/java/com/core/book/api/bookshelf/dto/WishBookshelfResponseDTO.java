@@ -7,7 +7,9 @@ import lombok.Getter;
 @Getter
 public class WishBookshelfResponseDTO {
 
+    private String isbn; //isbn
     private String bookImage; // 책 이미지
     private String bookTitle; //책 제목
+    private String author; // 저자
     private String reason; // 읽고 싶은 이유
 }
