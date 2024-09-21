@@ -26,8 +26,8 @@ public class BookController {
     private final BookService bookService;
 
     @Operation(
-            summary = "도서 데이터 요청 및 저장 API",
-            description = "도서 데이터를 외부 API에 요청해 가져오고 이를 DB에 저장합니다."
+            summary = "도서 데이터 요청 API",
+            description = "외부 API에 도서 데이터를 요청해 가져옵니다."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책 결과 반환 성공"),

@@ -68,18 +68,17 @@ public class BookService {
             log.error("JsonProcessingException occurred while reading value", e);
         }
 
-        //예외 처리 - 해당 도서를 찾을 수 없습니다."
-        if(resultDTO.getTotal() == 0){
-            throw new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage());
+        if(resultDTO == null){
+            throw new NotFoundException(ErrorStatus.FAIL_REQUEST_BOOK_INFO.getMessage());
         }
 
         //예외 처리 - "더 이상 검색 결과가 없습니다."
-        if(resultDTO.getTotal() < start){
+        if(resultDTO.getTotal() != 0 && resultDTO.getTotal() < start){
             throw new NotFoundException(ErrorStatus.BOOK_NO_MORE_FOUND_EXCEPTION.getMessage());
         }
 
         //책 정보 데이터 담긴 List 변수 : bookDTOs
-        List<BookDTO> bookDtos = Optional.ofNullable(resultDTO)
+        List<BookDTO> bookDtos = Optional.of(resultDTO)
                 .map(ResultDTO::getItems)
                 .orElse(Collections.emptyList());
 
