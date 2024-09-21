@@ -237,4 +237,27 @@ public class BookshelfController {
 
         return ApiResponse.success_only(SuccessStatus.DELETE_BOOKSHELF_SUCCESS);
     }
+
+    /*
+     *
+     * 책장 - 읽고 싶은 책 -> 읽은 책 '이동' API
+     *
+     */
+
+    @Operation(
+            summary = "책장 이동 API",
+            description = "'읽고 싶은 책' 책장에서 '책 읽음' 처리한 책을 '읽은 책' 책장으로 이동시킵니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 이동 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
+    })
+    @PostMapping("/api/v1/bookshelf/shift/{id}")
+    public ResponseEntity<ApiResponse<Void>> shiftBookshelf(@RequestBody ReadBooksDTO readBooksDTO, @PathVariable Long id){
+
+        bookShelfService.shiftBookshelf(readBooksDTO, id);
+
+        return ApiResponse.success_only(SuccessStatus.SHIFT_BOOKSHELF_SUCCESS);
+    }
+
 }
