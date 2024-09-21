@@ -8,6 +8,6 @@ import lombok.Getter;
 @Getter
 public class WishBookshelfRequestDTO {
 
-    private BookDTO bookDTO;
-    private WishBooksDTO wishBooksDTO;
+    private BookDTO book;
+    private WishBooksDTO wishBooks;
 }

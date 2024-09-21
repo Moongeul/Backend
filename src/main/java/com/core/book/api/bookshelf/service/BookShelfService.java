@@ -111,7 +111,7 @@ public class BookShelfService {
                 .readDate(readBooks.getReadDate())
                 .starRating(readBooks.getStar_rating())
                 .oneLineReview(readBooks.getOne_line_review())
-                .readBooksTagDTO(tagDTO)
+                .readBooksTag(tagDTO)
                 .memberId(readBooks.getMember().getId())
                 .build();
     }
@@ -139,43 +139,43 @@ public class BookShelfService {
     @Transactional
     public void createReadBookshelf(ReadBookshelfRequestDTO readBookshelfDTO){
 
-        String bookIsbn = readBookshelfDTO.getBookDTO().getIsbn();
-        Long memberId = readBookshelfDTO.getReadBooksDTO().getMemberId();
+        String bookIsbn = readBookshelfDTO.getBook().getIsbn();
+        Long memberId = readBookshelfDTO.getReadBooks().getMemberId();
 
         // 예외처리 : 이미 나의 책장에 등록된 책에 대하여 등록 불가
         checkDuplicateBookshelf(bookIsbn, memberId, true);
 
         // 책이 이미 BOOK DB에 존재한다면 -> DB 저장X / 없다면 -> DB 저장O
-        Book book = saveBookIfNotExists(bookIsbn, readBookshelfDTO.getBookDTO());
+        Book book = saveBookIfNotExists(bookIsbn, readBookshelfDTO.getBook());
 
         // 예외처리 : 회원 존재 여부 확인
         Member member = getMemberById(memberId);
 
         // 선택된 태그 저장 (null 가능)
-        ReadBooksTag savedTags = saveReadBooksTag(readBookshelfDTO.getReadBooksDTO());
+        ReadBooksTag savedTags = saveReadBooksTag(readBookshelfDTO.getReadBooks());
 
         // 책장 DB에 저장
-        readBooksRepository.save(readBookshelfDTO.getReadBooksDTO().toEntity(book, member, savedTags));
+        readBooksRepository.save(readBookshelfDTO.getReadBooks().toEntity(book, member, savedTags));
     }
 
     // '읽고 싶은 책' 책장 등록 메서드
     @Transactional
     public void createWishBookshelf(WishBookshelfRequestDTO wishBookshelfDTO){
 
-        String bookIsbn = wishBookshelfDTO.getBookDTO().getIsbn();
-        Long memberId = wishBookshelfDTO.getWishBooksDTO().getMemberId();
+        String bookIsbn = wishBookshelfDTO.getBook().getIsbn();
+        Long memberId = wishBookshelfDTO.getWishBooks().getMemberId();
 
         // 예외처리 : 이미 나의 책장에 등록된 책에 대하여 등록 불가
         checkDuplicateBookshelf(bookIsbn, memberId, false);
 
         // 책이 이미 BOOK DB에 존재한다면 -> DB 저장X / 없다면 -> DB 저장O
-        Book book = saveBookIfNotExists(bookIsbn, wishBookshelfDTO.getBookDTO());
+        Book book = saveBookIfNotExists(bookIsbn, wishBookshelfDTO.getBook());
 
         // 예외처리 : 회원 존재 여부 확인
         Member member = getMemberById(memberId);
 
         // 책장 DB에 저장
-        wishBooksRepository.save(wishBookshelfDTO.getWishBooksDTO().toEntity(book, member));
+        wishBooksRepository.save(wishBookshelfDTO.getWishBooks().toEntity(book, member));
     }
 
     // 중복 책장 등록 체크 메서드
@@ -214,15 +214,15 @@ public class BookShelfService {
     public ReadBooksTag saveReadBooksTag(ReadBooksDTO readBooksDTO){
 
         // 단, 태그가 하나도 입력되지 않았다면 저장 X
-        if(readBooksDTO.getReadBooksTagDTO().getTag1() == null
-                && readBooksDTO.getReadBooksTagDTO().getTag2() == null
-                && readBooksDTO.getReadBooksTagDTO().getTag3() == null
-                && readBooksDTO.getReadBooksTagDTO().getTag4() == null
-                && readBooksDTO.getReadBooksTagDTO().getTag5() == null){
+        if(readBooksDTO.getReadBooksTag().getTag1() == null
+                && readBooksDTO.getReadBooksTag().getTag2() == null
+                && readBooksDTO.getReadBooksTag().getTag3() == null
+                && readBooksDTO.getReadBooksTag().getTag4() == null
+                && readBooksDTO.getReadBooksTag().getTag5() == null){
             return null;
         }
 
-        return readBooksTagRepository.save(readBooksDTO.getReadBooksTagDTO().toEntity());
+        return readBooksTagRepository.save(readBooksDTO.getReadBooksTag().toEntity());
     }
 
 
@@ -241,7 +241,7 @@ public class BookShelfService {
 
         // 기존에 태그가 있으면 -> 수정 / 없으면 -> 새로 생성
         ReadBooksTag readBooksTag = existingReadBooks.getReadBooksTag();
-        ReadBooksDTO.ReadBooksTagDTO tagDTO = readBooksDTO.getReadBooksTagDTO();
+        ReadBooksDTO.ReadBooksTagDTO tagDTO = readBooksDTO.getReadBooksTag();
         if (readBooksTag != null && tagDTO != null) {
             readBooksTag = ReadBooksTag.builder()
                     .id(readBooksTag.getId()) // 기존 태그의 ID 유지

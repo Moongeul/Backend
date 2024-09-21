@@ -16,7 +16,7 @@ public class ReadBooksDTO {
     private LocalDate readDate; // 읽은 날짜
     private double starRating; // 평점
     private String oneLineReview; // 한줄평
-    private ReadBooksTagDTO readBooksTagDTO; //태그
+    private ReadBooksTagDTO readBooksTag; //태그
 
     private Long memberId; // 회원 ID
 
