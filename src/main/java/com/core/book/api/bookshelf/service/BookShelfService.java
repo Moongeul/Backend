@@ -424,8 +424,8 @@ public class BookShelfService {
 
         // ReadBookshelfRequestDTO 만들기
         ReadBookshelfRequestDTO readBookshelfRequestDTO = ReadBookshelfRequestDTO.builder()
-                .bookDTO(bookDTO)
-                .readBooksDTO(readBooksDTO)
+                .book(bookDTO)
+                .readBooks(readBooksDTO)
                 .build();
 
         // '읽은 책' 책장 등록
