@@ -122,10 +122,10 @@ public class BookshelfController {
     public ResponseEntity<ApiResponse<Void>> createReadBookshelf(@RequestBody ReadBookshelfRequestDTO readBookshelfDTO){
 
         // 예외처리 : 등록 날짜가 / 등록하는 유저가 정상적으로 입력되지 않은 경우 등록 불가
-        if(readBookshelfDTO.getReadBooksDTO().getReadDate() == null){
+        if(readBookshelfDTO.getReadBooks().getReadDate() == null){
             throw new BadRequestException(ErrorStatus.MISSING_BOOKSHELF_DATE.getMessage());
         }
-        if(readBookshelfDTO.getReadBooksDTO().getMemberId() == null){
+        if(readBookshelfDTO.getReadBooks().getMemberId() == null){
             throw new BadRequestException(ErrorStatus.MISSING_BOOKSHELF_MEMBER.getMessage());
         }
 
@@ -147,7 +147,7 @@ public class BookshelfController {
     public ResponseEntity<ApiResponse<Void>> createWishBookshelf(@RequestBody WishBookshelfRequestDTO wishBookshelfDTO){
 
         // 예외처리 : 등록하는 유저가 입력되지 정상적으로 않은 경우
-        if(wishBookshelfDTO.getWishBooksDTO().getMemberId() == null){
+        if(wishBookshelfDTO.getWishBooks().getMemberId() == null){
             throw new BadRequestException(ErrorStatus.MISSING_BOOKSHELF_MEMBER.getMessage());
         }
 
