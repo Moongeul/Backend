@@ -38,9 +38,11 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값이 입력되지 않았습니다.")
     })
     @GetMapping("/api/v1/bookshelf/read")
-    public ResponseEntity<ApiResponse<ReadBookshelfResponseDTO>> showReadBookshelf(@RequestParam("member-id") Long memberId){
+    public ResponseEntity<ApiResponse<ReadBookshelfResponseDTO>> showReadBookshelf(
+            @RequestParam("member-id") Long memberId,
+            @RequestParam(value = "page", defaultValue = "1") int page){
 
-        ReadBookshelfResponseDTO readBookshelfData = bookShelfService.showReadBooks(memberId);
+        ReadBookshelfResponseDTO readBookshelfData = bookShelfService.showReadBooks(memberId, page);
         log.info("readBookshelfData: {}", readBookshelfData.toString());
 
         return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, readBookshelfData);
@@ -55,9 +57,11 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값이 입력되지 않았습니다.")
     })
     @GetMapping("/api/v1/bookshelf/wish")
-    public ResponseEntity<ApiResponse<WishBookshelfResponseDTO>> showWishBookshelf(@RequestParam("member-id") Long memberId){
+    public ResponseEntity<ApiResponse<WishBookshelfResponseDTO>> showWishBookshelf(
+            @RequestParam("member-id") Long memberId,
+            @RequestParam(value = "page", defaultValue = "1") int page){
 
-        WishBookshelfResponseDTO wishBookshelfData = bookShelfService.showWishBooks(memberId);
+        WishBookshelfResponseDTO wishBookshelfData = bookShelfService.showWishBooks(memberId, page);
         log.info(wishBookshelfData.toString());
 
         return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, wishBookshelfData);
