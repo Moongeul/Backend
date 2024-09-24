@@ -13,12 +13,12 @@ public interface WishBooksRepository extends JpaRepository<WishBooks, Long> {
             "SELECT * " +
             "FROM WishBooks " +
             "WHERE user_id = :memberId " +
-            "ORDER BY wishbooks_id DESC " +   // read_date로 우선 정렬, 그다음 id로 정렬
-            "LIMIT :listLimit OFFSET :startPage",
+            "ORDER BY wishbooks_id DESC " +
+            "LIMIT :size OFFSET :startPage", // 페이징 처리
             nativeQuery = true)
     List<WishBooks> findByMemberId(@Param("memberId") Long memberId,
                                    @Param("startPage") int startPage,
-                                   @Param("listLimit") int listLimit);
+                                   @Param("size") int size);
 
     boolean existsByBookIsbnAndMemberId(String bookIsbn, Long memberId);
 }

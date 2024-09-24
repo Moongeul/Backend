@@ -44,14 +44,13 @@ public class BookShelfService {
     /*
         '읽은 책' 전체 책장 조회(list)
     */
-    public ReadBookshelfResponseDTO showReadBooks(Long memberId, int page) {
+    public ReadBookshelfResponseDTO showReadBooks(Long memberId, int page, int size) {
 
         // 페이징 처리를 위한 변수
-        int listLimit = 10; // 한 페이지에 표시될 컨텐츠의 개수
-        int startPage = (page - 1) * listLimit; // 조회를 시작할 게시물의 번호
+        int startPage = (page - 1) * size; // 조회를 시작할 게시물의 번호 (번호는 0부터 시작)
 
         // 책장 주인(회원)이 가진 책장 리스트 반환
-        List<ReadBooks> readBookList = readBooksRepository.findByMemberIdOrderByReadDateDesc(memberId, startPage, listLimit);
+        List<ReadBooks> readBookList = readBooksRepository.findByMemberIdOrderByReadDateDesc(memberId, startPage, size);
 
         // 읽은 책 책장 응답 body 구성을 위한 DTO 리스트들 (초기화)
         List<ReadBookshelfResponseDTO.MonthlyInfoDTO> monthlyInfoDTOList = new ArrayList<>();
@@ -142,14 +141,13 @@ public class BookShelfService {
     /*
         '읽고 싶은 책' 전체 책장 조회(list)
     */
-    public WishBookshelfResponseDTO showWishBooks(Long memberId, int page){
+    public WishBookshelfResponseDTO showWishBooks(Long memberId, int page, int size){
 
         // 페이징 처리를 위한 변수
-        int listLimit = 10; // 한 페이지에 표시될 컨텐츠의 개수
-        int startPage = (page - 1) * listLimit; // 조회를 시작할 게시물의 번호
+        int startPage = (page - 1) * size; // 조회를 시작할 게시물의 번호 (번호는 0부터 시작)
 
         // 책장 주인(회원)이 가진 '읽고 싶은 책' 책장 리스트 반환
-        List<WishBooks> wishBookList = wishBooksRepository.findByMemberId(memberId, startPage, listLimit);
+        List<WishBooks> wishBookList = wishBooksRepository.findByMemberId(memberId, startPage, size);
 
         // wishBookList 의 각 요소를 WishBookshelfResponseDTO.wishBookDTO 로 변환
         List<WishBookshelfResponseDTO.wishBookDTO> wishBookDTOList = wishBookList.stream()

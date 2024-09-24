@@ -40,9 +40,10 @@ public class BookshelfController {
     @GetMapping("/api/v1/bookshelf/read")
     public ResponseEntity<ApiResponse<ReadBookshelfResponseDTO>> showReadBookshelf(
             @RequestParam("member-id") Long memberId,
-            @RequestParam(value = "page", defaultValue = "1") int page){
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size){
 
-        ReadBookshelfResponseDTO readBookshelfData = bookShelfService.showReadBooks(memberId, page);
+        ReadBookshelfResponseDTO readBookshelfData = bookShelfService.showReadBooks(memberId, page, size);
         log.info("readBookshelfData: {}", readBookshelfData.toString());
 
         return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, readBookshelfData);
@@ -59,9 +60,10 @@ public class BookshelfController {
     @GetMapping("/api/v1/bookshelf/wish")
     public ResponseEntity<ApiResponse<WishBookshelfResponseDTO>> showWishBookshelf(
             @RequestParam("member-id") Long memberId,
-            @RequestParam(value = "page", defaultValue = "1") int page){
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size){
 
-        WishBookshelfResponseDTO wishBookshelfData = bookShelfService.showWishBooks(memberId, page);
+        WishBookshelfResponseDTO wishBookshelfData = bookShelfService.showWishBooks(memberId, page, size);
         log.info(wishBookshelfData.toString());
 
         return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, wishBookshelfData);
