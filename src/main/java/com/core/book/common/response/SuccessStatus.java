@@ -37,6 +37,8 @@ public enum SuccessStatus {
     UPDATE_BOOKSHELF_INFO_SUCCESS(HttpStatus.OK,"책장 상세 정보 수정 성공"),
     DELETE_BOOKSHELF_SUCCESS(HttpStatus.OK,"책장 삭제 성공"),
 
+    GET_ARTICLE_SUCCESS(HttpStatus.OK,"게시글 조회 성공"),
+
     /**
      * 201
      */

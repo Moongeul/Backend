@@ -50,6 +50,7 @@ public enum ErrorStatus {
     BOOKSHELF_NOTFOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 책장에서 도서를 찾을 수 없습니다."),
     INFOOPEN_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "사용자 정보 공개 동의 여부가 등록되어 있지 않습니다."),
     READBOOK_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 도서를 읽은 기록이 없습니다."),
+    ARTICLE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND,"게시글을 찾을 수 없습니다."),
 
     /**
      * 500 SERVER_ERROR
