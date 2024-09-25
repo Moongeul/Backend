@@ -12,6 +12,9 @@ public class ReviewArticleDetailDTO {
     private final String bookImage;
     private final String content;
     private final String oneLineReview;
+    private final long likeCnt;
+    private final long quoCnt;
+    private final long commentCnt;
     private final float starRating;
     private final ReviewArticleTagDTO reviewArticleTagDTO;
     private final String nickname;
@@ -20,7 +23,7 @@ public class ReviewArticleDetailDTO {
 
     @Builder
     public ReviewArticleDetailDTO(Long memberId, String isbn, String title, String author, String bookImage, String content,
-                                  String oneLineReview, float starRating, ReviewArticleTagDTO reviewArticleTagDTO,
+                                  String oneLineReview, long likeCnt, long quoCnt, long commentCnt, float starRating, ReviewArticleTagDTO reviewArticleTagDTO,
                                   String nickname, String profileImage, long followerCount) {
         this.memberId = memberId;
         this.isbn = isbn;
@@ -29,6 +32,9 @@ public class ReviewArticleDetailDTO {
         this.bookImage = bookImage;
         this.content = content;
         this.oneLineReview = oneLineReview;
+        this.likeCnt = likeCnt;
+        this.quoCnt = quoCnt;
+        this.commentCnt = commentCnt;
         this.starRating = starRating;
         this.reviewArticleTagDTO = reviewArticleTagDTO;
         this.nickname = nickname;
