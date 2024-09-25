@@ -13,6 +13,7 @@ public enum ErrorStatus {
      * 400 BAD_REQUEST
      */
     VALIDATION_REQUEST_MISSING_EXCEPTION(HttpStatus.BAD_REQUEST, "요청 값이 입력되지 않았습니다."),
+    VALIDATION_CONTENT_MISSING_EXCEPTION(HttpStatus.BAD_REQUEST, "필수 정보가 입력되지 않았습니다."),
     USERTAG_REQUEST_MISSING_EXCEPTION(HttpStatus.BAD_REQUEST, "최소 한개 이상의 USERTAG가 발송되지 않았습니다."),
     ALREADY_ADD_USERTAG_EXCEPTION(HttpStatus.BAD_REQUEST, "해당 유저는 이미 태그가 등록되었습니다."),
     MISSING_UPLOAD_IMAGE(HttpStatus.BAD_REQUEST, "수정할 프로필 이미지파일이 업로드 되지 않았습니다."),
@@ -48,6 +49,7 @@ public enum ErrorStatus {
     BOOKSHELF_INFO_NOTFOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 책장에서 선택된 도서를 찾을 수 없습니다."),
     BOOKSHELF_NOTFOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 책장에서 도서를 찾을 수 없습니다."),
     INFOOPEN_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "사용자 정보 공개 동의 여부가 등록되어 있지 않습니다."),
+    READBOOK_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 도서를 읽은 기록이 없습니다."),
 
     /**
      * 500 SERVER_ERROR

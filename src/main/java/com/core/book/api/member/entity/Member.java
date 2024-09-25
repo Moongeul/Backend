@@ -1,5 +1,6 @@
 package com.core.book.api.member.entity;
 
+import com.core.book.api.article.entity.ReviewArticle;
 import com.core.book.common.entity.BaseTimeEntity;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,6 +41,9 @@ public class Member extends BaseTimeEntity implements UserDetails {
 
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> followers;  // 나를 팔로우 하는 사람들
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewArticle> reviewArticles;  // 감상평 게시글 리스트
 
     // 유저 권한 설정 메소드
     public Member authorizeUser() {
