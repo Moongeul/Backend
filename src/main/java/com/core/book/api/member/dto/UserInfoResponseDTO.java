@@ -15,14 +15,18 @@ public class UserInfoResponseDTO {
     private final InfoOpenDTO infoOpen;
     private final int followedCount;
     private final int followerCount;
+    private final int readBooksCount;
+    private final int wishBooksCount;
 
-    public UserInfoResponseDTO(Member member, UserTag userTag, InfoOpen infoOpen, int followedCount, int followerCount) {
+    public UserInfoResponseDTO(Member member, UserTag userTag, InfoOpen infoOpen, int followedCount, int followerCount, int readBooksCount, int wishBooksCount) {
         this.id = member.getId();
         this.nickname = member.getNickname();
         this.imageUrl = member.getImageUrl();
         this.marketingAllow = member.getMarketing_allow();
         this.followedCount = followedCount;
         this.followerCount = followerCount;
+        this.readBooksCount = readBooksCount;
+        this.wishBooksCount = wishBooksCount;
         this.userTag = userTag != null ? new UserTagDTO(userTag) : null;
         this.infoOpen = infoOpen != null ? new InfoOpenDTO(infoOpen) : null;
     }
