@@ -5,6 +5,7 @@ import com.core.book.api.article.entity.ReviewArticle;
 import com.core.book.api.article.repository.ReviewArticleRepository;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
+import com.core.book.api.bookshelf.repository.ReadBooksRepository;
 import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class ArticleModifyService {
 
     private final ReviewArticleRepository reviewArticleRepository;
+    private final ReadBooksRepository readBooksRepository;
     private final BookRepository bookRepository;
 
 
@@ -30,11 +32,19 @@ public class ArticleModifyService {
             throw new NotFoundException(ErrorStatus.ARTICLE_MODIFY_NOT_SAME_USER_EXCEPTION.getMessage());
         }
 
+        // 사용자 읽은 책장에서 해당 ISBN이 있는지 확인
+        String isbn = reviewArticleCreateDTO.getIsbn();
+        boolean hasReadBook = readBooksRepository.existsByBookIsbnAndMemberId(isbn, userId);
+
+        if (!hasReadBook) {
+            throw new NotFoundException(ErrorStatus.READBOOK_NOT_FOUND_EXCEPTION.getMessage());
+        }
+
         // 새로운 ISBN 처리
         Book newBook = reviewArticle.getBook();
         if (reviewArticleCreateDTO.getIsbn() != null
                 && !reviewArticleCreateDTO.getIsbn().equals(reviewArticle.getBook().getIsbn())) {
-            newBook = bookRepository.findById(reviewArticleCreateDTO.getIsbn())
+            newBook = bookRepository.findById(isbn)
                     .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
         }
 
