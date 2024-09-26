@@ -1,5 +1,6 @@
 package com.core.book.api.article.entity;
 
+import com.core.book.api.article.dto.ReviewArticleCreateDTO;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.member.entity.Member;
 import com.core.book.common.entity.BaseTimeEntity;
@@ -7,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "REVIEW_ARTICLE")
@@ -43,5 +44,20 @@ public class ReviewArticle extends BaseTimeEntity {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "reviewarticle_tag_id")
     private ReviewArticleTag reviewArticleTag;
+
+    public ReviewArticle update(ReviewArticleCreateDTO dto, Book newBook) {
+        return this.toBuilder()
+                .content(dto.getContent())
+                .oneLineReview(dto.getOneLineReview())
+                .starRating(dto.getStarRating())
+                .book(newBook)
+                .reviewArticleTag(
+                        dto.getReviewArticleTagDTO() != null
+                                ? (this.reviewArticleTag != null
+                                ? this.reviewArticleTag.update(dto.getReviewArticleTagDTO())
+                                : dto.getReviewArticleTagDTO().toEntity())
+                                : this.reviewArticleTag)
+                .build();
+    }
 
 }

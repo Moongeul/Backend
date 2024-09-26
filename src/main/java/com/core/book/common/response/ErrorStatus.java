@@ -31,6 +31,7 @@ public enum ErrorStatus {
     MISSING_BOOKSHELF_DATE(HttpStatus.BAD_REQUEST, "책장 등록 날짜가 입력되지 않았습니다."),
     MISSING_BOOKSHELF_MEMBER(HttpStatus.BAD_REQUEST, "책장 등록을 요청하는 유저가 입력되지 않았습니다."),
     NOT_ALLOW_DUPLICATE_BOOKSHELF(HttpStatus.BAD_REQUEST, "이미 책장에 등록된 책입니다."),
+    ARTICLE_MODIFY_NOT_SAME_USER_EXCEPTION(HttpStatus.BAD_REQUEST, "게시글 작성자와 수정 요청자가 다릅니다."),
 
     /**
      * 401 UNAUTHORIZED

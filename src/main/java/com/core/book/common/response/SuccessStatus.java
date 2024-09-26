@@ -39,6 +39,7 @@ public enum SuccessStatus {
 
     GET_ARTICLE_SUCCESS(HttpStatus.OK,"게시글 조회 성공"),
     GET_ARTICLE_LIST_SUCCESS(HttpStatus.OK,"게시글 목록 조회 성공"),
+    MODIFY_ARTICLE_SUCCESS(HttpStatus.OK, "게시글 수정 성공"),
 
     /**
      * 201
