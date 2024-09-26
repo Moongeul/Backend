@@ -38,6 +38,7 @@ public enum SuccessStatus {
     DELETE_BOOKSHELF_SUCCESS(HttpStatus.OK,"책장 삭제 성공"),
 
     GET_ARTICLE_SUCCESS(HttpStatus.OK,"게시글 조회 성공"),
+    GET_ARTICLE_LIST_SUCCESS(HttpStatus.OK,"게시글 목록 조회 성공"),
 
     /**
      * 201

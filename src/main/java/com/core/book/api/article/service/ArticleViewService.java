@@ -1,6 +1,8 @@
 package com.core.book.api.article.service;
 
 import com.core.book.api.article.dto.ReviewArticleDetailDTO;
+import com.core.book.api.article.dto.ReviewArticleListDTO;
+import com.core.book.api.article.dto.ReviewArticleListResponseDTO;
 import com.core.book.api.article.dto.ReviewArticleTagDTO;
 import com.core.book.api.article.entity.ReviewArticle;
 import com.core.book.api.article.entity.ReviewArticleTag;
@@ -11,7 +13,14 @@ import com.core.book.api.member.repository.FollowRepository;
 import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +72,38 @@ public class ArticleViewService {
                 .nickname(member.getNickname())
                 .profileImage(member.getImageUrl())
                 .followerCount(followerCount)
+                .build();
+    }
+
+    public ReviewArticleListResponseDTO getAllReviewArticles(int page, int size) {
+        // 생성 날짜를 기준으로 최신 게시글 페이지네이션
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<ReviewArticle> reviewArticlePage = reviewArticleRepository.findAllWithFetchJoin(pageable);
+
+        List<ReviewArticleListDTO> articles = reviewArticlePage.getContent().stream()
+                .map(this::convertToListDTO)
+                .collect(Collectors.toList());
+        boolean hasNext = reviewArticlePage.hasNext();
+
+        return new ReviewArticleListResponseDTO(articles, hasNext);
+    }
+
+    public ReviewArticleListDTO convertToListDTO(ReviewArticle reviewArticle) {
+        Member member = reviewArticle.getMember();
+        Book book = reviewArticle.getBook();
+
+        return ReviewArticleListDTO.builder()
+                .articleId(reviewArticle.getId())
+                .memberId(member.getId())
+                .profileImage(member.getImageUrl())
+                .nickname(member.getNickname())
+                .content(reviewArticle.getContent())
+                .likeCnt(reviewArticle.getLikeCnt())
+                .commentCnt(reviewArticle.getCommentCnt())
+                .quoCnt(reviewArticle.getQuoCnt())
+                .bookImage(book.getBook_image())
+                .title(book.getTitle())
+                .author(book.getAuthor())
                 .build();
     }
 }
