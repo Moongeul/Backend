@@ -33,6 +33,7 @@ public enum ErrorStatus {
     NOT_ALLOW_DUPLICATE_BOOKSHELF(HttpStatus.BAD_REQUEST, "이미 책장에 등록된 책입니다."),
     ARTICLE_MODIFY_NOT_SAME_USER_EXCEPTION(HttpStatus.BAD_REQUEST, "게시글 작성자와 수정 요청자가 다릅니다."),
     ARTICLE_DELETE_NOT_SAME_USER_EXCEPTION(HttpStatus.BAD_REQUEST, "게시글 작성자와 삭제 요청자가 다릅니다."),
+    ARTICLE_TYPE_NOT_FOUND_EXCEPTION(HttpStatus.BAD_REQUEST, "게시글 타입이 존재하지 않습니다."),
 
     /**
      * 401 UNAUTHORIZED

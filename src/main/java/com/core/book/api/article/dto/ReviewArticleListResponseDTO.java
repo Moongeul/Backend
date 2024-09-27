@@ -7,10 +7,10 @@ import java.util.List;
 @Getter
 public class ReviewArticleListResponseDTO {
     private final List<ReviewArticleListDTO> articles;
-    private final boolean hasNext;
+    private final boolean isLast;
 
-    public ReviewArticleListResponseDTO(List<ReviewArticleListDTO> articles, boolean hasNext) {
+    public ReviewArticleListResponseDTO(List<ReviewArticleListDTO> articles, boolean isLast) {
         this.articles = articles;
-        this.hasNext = hasNext;
+        this.isLast = isLast;
     }
 }

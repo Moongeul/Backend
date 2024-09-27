@@ -21,6 +21,24 @@ public class ArticleViewController {
     private final ArticleViewService articleViewService;
 
     @Operation(
+            summary = "게시글 전체 조회 API",
+            description = "게시글의 목록을 조회합니다. / last : true 일 경우 마지막 데이터라는 의미입니다. / 페이지는 0부터 시작합니다. / 게시글전체 조회 타입 : all,  감상평 조회 타입 : review, 인상깊은구절 조회 타입 : phrase, QnA 조회 타입 : qna, 인용 조회 타입 : quotation, 추천해주세요 조회 타입 : recommend"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "게시글 타입이 존재하지 않습니다."),
+    })
+    @GetMapping("/{articleType}")
+    public ResponseEntity<ApiResponse<ReviewArticleListResponseDTO>> getAllArticles(
+            @PathVariable String articleType,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        ReviewArticleListResponseDTO reviewArticleListResponseDTO = articleViewService.getAllArticles(articleType, page, size);
+        return ApiResponse.success(SuccessStatus.GET_ARTICLE_LIST_SUCCESS, reviewArticleListResponseDTO);
+    }
+
+    @Operation(
             summary = "감상평 게시글 상세 조회 API",
             description = "감상평 게시글의 상세 정보를 조회합니다."
     )
@@ -34,19 +52,4 @@ public class ArticleViewController {
         return ApiResponse.success(SuccessStatus.GET_ARTICLE_SUCCESS, reviewArticleDetailDTO);
     }
 
-    @Operation(
-            summary = "감상평 게시글 전체 조회 API",
-            description = "감상평 게시글의 목록을 조회합니다. / hasNext : true 일 경우 다음 데이터가 있다는 의미입니다. / 페이지는 0부터 시작합니다."
-    )
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공")
-    })
-    @GetMapping("/review/all")
-    public ResponseEntity<ApiResponse<ReviewArticleListResponseDTO>> getAllReviewArticles(
-            @RequestParam int page,
-            @RequestParam int size
-    ) {
-        ReviewArticleListResponseDTO reviewArticleListResponseDTO = articleViewService.getAllReviewArticles(page, size);
-        return ApiResponse.success(SuccessStatus.GET_ARTICLE_LIST_SUCCESS, reviewArticleListResponseDTO);
-    }
 }
