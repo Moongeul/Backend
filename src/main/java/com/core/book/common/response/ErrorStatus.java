@@ -58,6 +58,8 @@ public enum ErrorStatus {
     FAIL_PARSE_KAKAO_USER_INFO(HttpStatus.INTERNAL_SERVER_ERROR, "카카오 사용자 정보를 가져오지 못했습니다."),
     SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류"),
 
+    FAIL_REQUEST_BOOK_INFO(HttpStatus.INTERNAL_SERVER_ERROR, "도서 API 호출 중 오류가 발생했습니다."),
+
     ;
 
     private final HttpStatus httpStatus;
