@@ -41,9 +41,10 @@ public class BookshelfController {
     public ResponseEntity<ApiResponse<ReadBookshelfResponseDTO>> showReadBookshelf(
             @RequestParam("member-id") Long memberId,
             @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size){
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "filter", defaultValue = "1") int filterNum){
 
-        ReadBookshelfResponseDTO readBookshelfData = bookShelfService.showReadBooks(memberId, page, size);
+        ReadBookshelfResponseDTO readBookshelfData = bookShelfService.showReadBooks(memberId, page, size, filterNum);
         log.info("readBookshelfData: {}", readBookshelfData.toString());
 
         return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, readBookshelfData);

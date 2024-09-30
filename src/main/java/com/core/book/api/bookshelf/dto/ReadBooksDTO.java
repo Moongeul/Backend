@@ -23,8 +23,8 @@ public class ReadBooksDTO {
     public ReadBooks toEntity(Book book, Member member, ReadBooksTag readBooksTag){
         return ReadBooks.builder()
                 .readDate(this.readDate)
-                .star_rating(this.starRating)
-                .one_line_review(this.oneLineReview)
+                .starRating(this.starRating)
+                .oneLineReview(this.oneLineReview)
                 .book(book)
                 .member(member)
                 .readBooksTag(readBooksTag)

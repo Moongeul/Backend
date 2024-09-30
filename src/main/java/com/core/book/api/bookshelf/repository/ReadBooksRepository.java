@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReadBooksRepository extends JpaRepository<ReadBooks, Long> {
 
-    Page<ReadBooks> findByMemberIdOrderByReadDateDesc(Long memberId, Pageable pageable);
+    Page<ReadBooks> findByMemberId(Long memberId, Pageable pageable);
 
     boolean existsByBookIsbnAndMemberId(String bookIsbn, Long memberId);
 
