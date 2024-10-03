@@ -23,8 +23,12 @@ public class ReadBooks {
 
     @Column(name = "read_date")
     private LocalDate readDate; //읽은 날짜
-    private double star_rating; //평점
-    private String one_line_review; //한줄평
+
+    @Column(name = "star_rating")
+    private double starRating; //평점
+
+    @Column(name = "one_line_review")
+    private String oneLineReview; //한줄평
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")

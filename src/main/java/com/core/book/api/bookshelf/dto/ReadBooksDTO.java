@@ -16,15 +16,15 @@ public class ReadBooksDTO {
     private LocalDate readDate; // 읽은 날짜
     private double starRating; // 평점
     private String oneLineReview; // 한줄평
-    private ReadBooksTagDTO readBooksTagDTO; //태그
+    private ReadBooksTagDTO readBooksTag; //태그
 
     private Long memberId; // 회원 ID
 
     public ReadBooks toEntity(Book book, Member member, ReadBooksTag readBooksTag){
         return ReadBooks.builder()
                 .readDate(this.readDate)
-                .star_rating(this.starRating)
-                .one_line_review(this.oneLineReview)
+                .starRating(this.starRating)
+                .oneLineReview(this.oneLineReview)
                 .book(book)
                 .member(member)
                 .readBooksTag(readBooksTag)

@@ -1,5 +1,7 @@
 package com.core.book.api.member.service;
 
+import com.core.book.api.bookshelf.repository.ReadBooksRepository;
+import com.core.book.api.bookshelf.repository.WishBooksRepository;
 import com.core.book.api.member.dto.*;
 import com.core.book.api.member.entity.*;
 import com.core.book.api.member.jwt.service.JwtService;
@@ -37,6 +39,8 @@ public class MemberService {
     private final UserTagRepository userTagRepository;
     private final InfoOpenRepository infoOpenRepository;
     private final FollowRepository followRepository;
+    private final ReadBooksRepository readBooksRepository;
+    private final WishBooksRepository wishBooksRepository;
     private final JwtService jwtService;
     private final S3Service s3Service;
     private final OAuthService oAuthService;
@@ -290,8 +294,10 @@ public class MemberService {
 
         int followedCount = member.getFollowing().size(); //팔로잉 수 계산
         int followerCount = member.getFollowers().size(); //팔로워 수 계산
+        int readBooksCount = readBooksRepository.findReadBooksByMemberId(userId).size(); // 읽은책 수 계산
+        int wishBooksCount = wishBooksRepository.findWishBooksByMemberId(userId).size(); // 읽고싶은책 수 계산
 
-        return new UserInfoResponseDTO(member, userTag, infoOpen, followedCount, followerCount);
+        return new UserInfoResponseDTO(member, userTag, infoOpen, followedCount, followerCount, readBooksCount, wishBooksCount);
     }
 
     @Transactional
@@ -368,6 +374,8 @@ public class MemberService {
 
         int followedCount = targetMember.getFollowing().size(); // 팔로잉 수 계산
         int followerCount = targetMember.getFollowers().size(); // 팔로워 수 계산
+        int readBooksCount = readBooksRepository.findReadBooksByMemberId(userId).size(); // 읽은책 수 계산
+        int wishBooksCount = wishBooksRepository.findWishBooksByMemberId(userId).size(); // 읽고싶은책 수 계산
 
         return OtherUserInfoResponseDTO.builder()
                 .id(targetMember.getId())
@@ -375,6 +383,8 @@ public class MemberService {
                 .imageUrl(targetMember.getImageUrl())
                 .followedCount(followedCount)
                 .followerCount(followerCount)
+                .readBooksCount(readBooksCount)
+                .wishBooksCount(wishBooksCount)
                 .build();
     }
 }
