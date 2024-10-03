@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface WishBooksRepository extends JpaRepository<WishBooks, Long> {
 
-    Page<WishBooks> findByMemberId(Long memberId, Pageable pageable)
+    Page<WishBooks> findByMemberId(Long memberId, Pageable pageable);
 
     boolean existsByBookIsbnAndMemberId(String bookIsbn, Long memberId);
 
