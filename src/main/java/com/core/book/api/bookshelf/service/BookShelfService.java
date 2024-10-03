@@ -18,6 +18,10 @@ import com.core.book.common.response.ErrorStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -44,10 +48,16 @@ public class BookShelfService {
     /*
         '읽은 책' 전체 책장 조회(list)
     */
-    public ReadBookshelfResponseDTO showReadBooks(Long memberId) {
+    public ReadBookshelfResponseDTO showReadBooks(Long memberId, int page, int size) {
+
+        // Pageable 객체 생성
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "readDate", "id"));
+
+        // 페이징된 결과물 반환
+        Page<ReadBooks> readBookPage = readBooksRepository.findByMemberIdOrderByReadDateDesc(memberId, pageable);
 
         // 책장 주인(회원)이 가진 책장 리스트 반환
-        List<ReadBooks> readBookList = readBooksRepository.findByMemberIdOrderByReadDateDesc(memberId);
+        List<ReadBooks> readBookList = readBookPage.getContent();
 
         // 읽은 책 책장 응답 body 구성을 위한 DTO 리스트들 (초기화)
         List<ReadBookshelfResponseDTO.MonthlyInfoDTO> monthlyInfoDTOList = new ArrayList<>();
@@ -104,8 +114,9 @@ public class BookShelfService {
         }
 
         return ReadBookshelfResponseDTO.builder()
-                .totalBookCnt(readBookList.size())
+                .totalBookCnt(readBookPage.getTotalElements())
                 .monthlyInfoList(monthlyInfoDTOList)
+                .isLast(readBookPage.isLast())
                 .build();
     }
 
@@ -138,10 +149,16 @@ public class BookShelfService {
     /*
         '읽고 싶은 책' 전체 책장 조회(list)
     */
-    public WishBookshelfResponseDTO showWishBooks(Long memberId){
+    public WishBookshelfResponseDTO showWishBooks(Long memberId, int page, int size){
 
-        // 책장 주인(회원)이 가진 '읽고 싶은 책' 책장 리스트 반환
-        List<WishBooks> wishBookList = wishBooksRepository.findByMemberId(memberId);
+        // Pageable 객체 생성
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id"));
+
+        // 페이징된 결과물 반환
+        Page<WishBooks> wishBookPage = wishBooksRepository.findByMemberId(memberId, pageable);
+
+        // 책장 주인(회원)이 가진 책장 리스트 반환
+        List<WishBooks> wishBookList = wishBookPage.getContent();
 
         // wishBookList 의 각 요소를 WishBookshelfResponseDTO.wishBookDTO 로 변환
         List<WishBookshelfResponseDTO.wishBookDTO> wishBookDTOList = wishBookList.stream()
@@ -150,8 +167,9 @@ public class BookShelfService {
 
         // 읽고 싶은 책 전체 데이터를 담는 WishBookshelfResponseDTO 생성 후 반환
         return WishBookshelfResponseDTO.builder()
-                .totalBookCnt(wishBookList.size())
+                .totalBookCnt(wishBookPage.getTotalElements())
                 .wishBookList(wishBookDTOList)
+                .isLast(wishBookPage.isLast())
                 .build();
     }
 
