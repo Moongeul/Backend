@@ -31,7 +31,8 @@ public class BookshelfController {
 
     @Operation(
             summary = "'읽은 책' 책장 전체 조회 API",
-            description = "'읽은 책' 책장에 불러올 전체 데이터를 조회합니다."
+            description = "'읽은 책' 책장에 불러올 전체 데이터를 조회합니다.\n" +
+                    "filter 는 필터 번호로 책장 필터링에 사용됩니다. (1: 전체보기(최신순), 2: 오래된 순, 3: 평점 높은 순, 4: 평점 낮은 순)"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 조회 성공"),
@@ -41,9 +42,10 @@ public class BookshelfController {
     public ResponseEntity<ApiResponse<ReadBookshelfResponseDTO>> showReadBookshelf(
             @RequestParam("member-id") Long memberId,
             @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size){
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "filter", defaultValue = "1") int filterNum){
 
-        ReadBookshelfResponseDTO readBookshelfData = bookShelfService.showReadBooks(memberId, page, size);
+        ReadBookshelfResponseDTO readBookshelfData = bookShelfService.showReadBooks(memberId, page, size, filterNum);
         log.info("readBookshelfData: {}", readBookshelfData.toString());
 
         return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, readBookshelfData);

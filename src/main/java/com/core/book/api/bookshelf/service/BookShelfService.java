@@ -48,14 +48,30 @@ public class BookShelfService {
     /*
         '읽은 책' 전체 책장 조회(list)
     */
-    public ReadBookshelfResponseDTO showReadBooks(Long memberId, int page, int size) {
+    public ReadBookshelfResponseDTO showReadBooks(Long memberId, int page, int size, int filterNum) {
+
+        /*
+        *  filter
+        *  1: 전체보기(최신순), 2: 오래된 순, 3: 평점 높은 순, 4: 평점 낮은 순
+        */
+
+        // filterNum = 1 or 2 -> "readDate"로 정렬 / filterNum = 3 or 4 -> "starRating"으로 정렬
+        String filter = (filterNum <= 2) ? "readDate" : "starRating";
+
+        // filterNum = 1 or 3 -> "ASC"으로 정렬 / filterNum = 2 or 4 -> "ASC"로 정렬
+        Sort.Direction direction = (filterNum % 2 == 0) ? Sort.Direction.ASC : Sort.Direction.DESC;
 
         // Pageable 객체 생성
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "readDate", "id"));
+        // Sort - filter 값 우선 정렬 후 id 값으로 정렬됨
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(direction, filter, "id"));
 
         // 페이징된 결과물 반환
-        Page<ReadBooks> readBookPage = readBooksRepository.findByMemberIdOrderByReadDateDesc(memberId, pageable);
+        Page<ReadBooks> readBookPage = readBooksRepository.findByMemberId(memberId, pageable);
 
+        /*
+        *  전체 조회 데이터 가져오기
+        */
+        
         // 책장 주인(회원)이 가진 책장 리스트 반환
         List<ReadBooks> readBookList = readBookPage.getContent();
 
@@ -135,7 +151,7 @@ public class BookShelfService {
         return ReadBookshelfResponseDTO.MonthlyInfoDTO.MonthlyReadBookDTO.builder()
                 .isbn(readBooks.getBook().getIsbn()) // isbn
                 .bookImage(readBooks.getBook().getBook_image()) // 책 이미지
-                .starRating(readBooks.getStar_rating()) // 평점
+                .starRating(readBooks.getStarRating()) // 평점
                 .title(readBooks.getBook().getTitle()) // 책 제목
                 .readDate(readBooks.getReadDate()) // 읽은 날짜
                 .build();
@@ -209,8 +225,8 @@ public class BookShelfService {
     private ReadBooksDTO convertToReadBooksDTO(ReadBooks readBooks, ReadBooksDTO.ReadBooksTagDTO tagDTO){
         return ReadBooksDTO.builder()
                 .readDate(readBooks.getReadDate())
-                .starRating(readBooks.getStar_rating())
-                .oneLineReview(readBooks.getOne_line_review())
+                .starRating(readBooks.getStarRating())
+                .oneLineReview(readBooks.getOneLineReview())
                 .readBooksTag(tagDTO)
                 .memberId(readBooks.getMember().getId())
                 .build();
@@ -376,8 +392,8 @@ public class BookShelfService {
         ReadBooks updatedReadBooks = ReadBooks.builder()
                 .id(existingReadBooks.getId()) // 기존 ID 유지
                 .readDate(readBooksDTO.getReadDate())
-                .star_rating(readBooksDTO.getStarRating())
-                .one_line_review(readBooksDTO.getOneLineReview())
+                .starRating(readBooksDTO.getStarRating())
+                .oneLineReview(readBooksDTO.getOneLineReview())
                 .book(existingReadBooks.getBook()) // 기존 책 정보 유지
                 .member(existingReadBooks.getMember()) // 기존 회원 정보 유지
                 .readBooksTag(readBooksTag)
