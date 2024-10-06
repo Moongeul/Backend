@@ -150,7 +150,7 @@ public class BookShelfService {
 
         return ReadBookshelfResponseDTO.MonthlyInfoDTO.MonthlyReadBookDTO.builder()
                 .isbn(readBooks.getBook().getIsbn()) // isbn
-                .bookImage(readBooks.getBook().getBook_image()) // 책 이미지
+                .bookImage(readBooks.getBook().getBookImage()) // 책 이미지
                 .starRating(readBooks.getStarRating()) // 평점
                 .title(readBooks.getBook().getTitle()) // 책 제목
                 .readDate(readBooks.getReadDate()) // 읽은 날짜
@@ -194,7 +194,7 @@ public class BookShelfService {
 
         return WishBookshelfResponseDTO.wishBookDTO.builder()
                 .isbn(wishBooks.getBook().getIsbn()) // isbn
-                .bookImage(wishBooks.getBook().getBook_image()) // 책 이미지
+                .bookImage(wishBooks.getBook().getBookImage()) // 책 이미지
                 .bookTitle(wishBooks.getBook().getTitle()) // 책 제목
                 .author(wishBooks.getBook().getAuthor()) // 저자
                 .reason(wishBooks.getReason()) // 읽고 싶은 이유
@@ -477,7 +477,7 @@ public class BookShelfService {
         return BookDTO.builder()
                 .isbn(book.getIsbn())
                 .title(book.getTitle())
-                .image(book.getBook_image())
+                .image(book.getBookImage())
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())
                 .description(book.getDescription())

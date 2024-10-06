@@ -16,7 +16,9 @@ public class Book {
     private String isbn; //isbn - PK
 
     private String title; // 책 제목
-    private String book_image; // 책 이미지
+
+    @Column(name = "book_image")
+    private String bookImage; // 책 이미지
     private String author; // 저자
     private String publisher; // 출판사
 

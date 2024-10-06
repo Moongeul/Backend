@@ -113,7 +113,7 @@ public class ArticleViewService {
                 .likeCnt(reviewArticle.getLikeCnt())
                 .commentCnt(reviewArticle.getCommentCnt())
                 .quoCnt(reviewArticle.getQuoCnt())
-                .bookImage(book.getBook_image())
+                .bookImage(book.getBookImage())
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .build();
@@ -151,7 +151,7 @@ public class ArticleViewService {
                 .isbn(book.getIsbn())
                 .title(book.getTitle())
                 .author(book.getAuthor())
-                .bookImage(book.getBook_image())
+                .bookImage(book.getBookImage())
                 .content(reviewArticle.getContent())
                 .oneLineReview(reviewArticle.getOneLineReview())
                 .likeCnt(reviewArticle.getLikeCnt())

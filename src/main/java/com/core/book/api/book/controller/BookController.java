@@ -1,5 +1,6 @@
 package com.core.book.api.book.controller;
 
+import com.core.book.api.book.dto.BookResponseDTO;
 import com.core.book.api.book.service.BookService;
 import com.core.book.common.exception.BadRequestException;
 import com.core.book.common.response.ApiResponse;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class BookController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값에 대한 반환 결과가 없습니다.")
     })
     @GetMapping("/api/v1/book")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> book(
+    public ResponseEntity<ApiResponse<BookResponseDTO>> book(
             @RequestParam("title") String text,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
@@ -46,8 +46,8 @@ public class BookController {
             throw new BadRequestException(ErrorStatus.VALIDATION_REQUEST_MISSING_EXCEPTION.getMessage());
         }
 
-        Map<String, Object> responseMap = bookService.book(text, page, size);
+        BookResponseDTO bookResponseDTO = bookService.book(text, page, size);
 
-        return ApiResponse.success(SuccessStatus.BOOK_SEARCH_SUCCESS, responseMap);
+        return ApiResponse.success(SuccessStatus.BOOK_SEARCH_SUCCESS, bookResponseDTO);
     }
 }
