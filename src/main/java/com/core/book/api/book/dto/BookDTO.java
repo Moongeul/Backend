@@ -21,6 +21,7 @@ public class BookDTO {
     private String description;
     private String pubdate;
 
+    @Builder.Default
     private BookTag bookTag = new BookTag();
 
     public Book toEntity() {
