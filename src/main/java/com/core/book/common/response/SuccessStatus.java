@@ -19,7 +19,6 @@ public enum SuccessStatus {
     SET_USER_MARKETING_SUCCESS(HttpStatus.OK, "유저 마케팅 동의 여부 설정 성공"),
 
     SEND_QUESTION_SUCCESS(HttpStatus.OK, "문제 발송 성공"),
-    BOOK_SEARCH_SUCCESS(HttpStatus.OK, "책 결과 반환 성공"),
 
     UPDATE_PROFILE_IMAGE_SUCCESS(HttpStatus.OK, "프로필 사진 변경 성공"),
     UPDATE_NICKNAME_SUCCESS(HttpStatus.OK, "닉네임 변경 성공"),
@@ -31,6 +30,8 @@ public enum SuccessStatus {
     USER_UNFOLLOW_SUCCESS(HttpStatus.OK,"언팔로우 성공"),
     GET_FOLLOWED_USERS_SUCCESS(HttpStatus.OK,"팔로우 중인 사용자 목록 조회 성공"),
     GET_FOLLOWER_USERS_SUCCESS(HttpStatus.OK, "팔로워 사용자 목록 조회 성공"),
+
+    BOOK_SEARCH_SUCCESS(HttpStatus.OK, "책 결과 반환 성공"),
 
     GET_BOOKSHELF_SUCCESS(HttpStatus.OK,"책장 조회 성공"),
     GET_BOOKSHELF_INFO_SUCCESS(HttpStatus.OK,"책장 상세 정보 조회 성공"),

@@ -48,6 +48,7 @@ public enum ErrorStatus {
 
     USER_NOTFOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다."),
     BOOK_NOTFOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 도서를 찾을 수 없습니다."),
+    BOOK_SEARCH_NOTFOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 도서의 검색 결과가 없습니다."),
     BOOK_NO_MORE_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "더 이상 검색 결과가 없습니다."),
     BOOKSHELF_INFO_NOTFOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 책장에서 선택된 도서를 찾을 수 없습니다."),
     BOOKSHELF_NOTFOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 책장에서 도서를 찾을 수 없습니다."),
