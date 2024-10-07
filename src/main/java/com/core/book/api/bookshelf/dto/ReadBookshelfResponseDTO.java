@@ -12,6 +12,7 @@ public class ReadBookshelfResponseDTO {
 
     private long totalBookCnt; // 전체 책 개수
     private List<MonthlyInfoDTO> monthlyInfoList; // 책장 내 월 별로 요구되는 데이터들의 리스트
+    private int page; // 현재 페이지 번호
     private boolean isLast; // 마지막 페이지 여부 (true: 마지막 페이지가 맞음 / false : 마지막 페이지가 아님)
 
     @Builder

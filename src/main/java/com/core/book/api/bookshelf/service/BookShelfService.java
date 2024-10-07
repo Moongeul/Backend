@@ -132,6 +132,7 @@ public class BookShelfService {
         return ReadBookshelfResponseDTO.builder()
                 .totalBookCnt(readBookPage.getTotalElements())
                 .monthlyInfoList(monthlyInfoDTOList)
+                .page(page)
                 .isLast(readBookPage.isLast())
                 .build();
     }
@@ -185,6 +186,7 @@ public class BookShelfService {
         return WishBookshelfResponseDTO.builder()
                 .totalBookCnt(wishBookPage.getTotalElements())
                 .wishBookList(wishBookDTOList)
+                .page(page)
                 .isLast(wishBookPage.isLast())
                 .build();
     }
