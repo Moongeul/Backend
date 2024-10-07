@@ -29,7 +29,7 @@ public class BookController {
 
     @Operation(
             summary = "책 검색 API",
-            description = "외부 API에 도서 데이터를 요청해 가져옵니다."
+            description = "외부 API에 도서 데이터를 요청해 가져옵니다. 반환 값 중 description(책 소개)은 검색 페이지에서 사용되지 않는 데이터 입니다. 다만 타 API에 책 데이터를 넘겨주는 경우에는 같이 사용됩니다."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책 결과 반환 성공"),

@@ -54,16 +54,9 @@ public class BookService {
                 .map(ResultDTO::getItems)
                 .orElse(Collections.emptyList());
 
-        // bookDTOs를 BookResponseDTO.BookDTO로 변환
-        List<BookResponseDTO.BookDTO> responseBookDTOs = bookList.stream()
-                .map(bookDTO -> BookResponseDTO.BookDTO.builder()
-                        .isbn(bookDTO.getIsbn())
-                        .title(bookDTO.getTitle())
-                        .image(bookDTO.getImage())
-                        .author(bookDTO.getAuthor())
-                        .publisher(bookDTO.getPublisher())
-                        .pubdate(bookDTO.getPubdate())
-                        .build())
+        // bookList를 BookInfoDTO로 변환
+        List<BookInfoDTO> BookInfoList = bookList.stream()
+                .map(this::convertToBookInfoDTO)
                 .collect(Collectors.toList());
 
         // 마지막 페이지 여부 검사
@@ -75,7 +68,7 @@ public class BookService {
         return BookResponseDTO.builder()
                 .totalSize(resultDTO.getTotal())
                 .page(page)
-                .bookList(responseBookDTOs)
+                .bookList(BookInfoList)
                 .isLast(isLast)
                 .build();
     }

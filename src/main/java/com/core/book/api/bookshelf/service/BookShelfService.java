@@ -1,6 +1,6 @@
 package com.core.book.api.bookshelf.service;
 
-import com.core.book.api.book.dto.BookDTO;
+import com.core.book.api.book.dto.BookInfoDTO;
 import com.core.book.api.bookshelf.dto.*;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
@@ -273,14 +273,14 @@ public class BookShelfService {
     @Transactional
     public void createReadBookshelf(ReadBookshelfRequestDTO readBookshelfDTO){
 
-        String bookIsbn = readBookshelfDTO.getBook().getIsbn();
+        String bookIsbn = readBookshelfDTO.getBookInfo().getIsbn();
         Long memberId = readBookshelfDTO.getReadBooks().getMemberId();
 
         // 예외처리 : 이미 나의 책장에 등록된 책에 대하여 등록 불가
         checkDuplicateBookshelf(bookIsbn, memberId, true);
 
         // 책이 이미 BOOK DB에 존재한다면 -> DB 저장X / 없다면 -> DB 저장O
-        Book book = saveBookIfNotExists(bookIsbn, readBookshelfDTO.getBook());
+        Book book = saveBookIfNotExists(bookIsbn, readBookshelfDTO.getBookInfo());
 
         // 예외처리 : 회원 존재 여부 확인
         Member member = getMemberById(memberId);
@@ -296,14 +296,14 @@ public class BookShelfService {
     @Transactional
     public void createWishBookshelf(WishBookshelfRequestDTO wishBookshelfDTO){
 
-        String bookIsbn = wishBookshelfDTO.getBook().getIsbn();
+        String bookIsbn = wishBookshelfDTO.getBookInfo().getIsbn();
         Long memberId = wishBookshelfDTO.getWishBooks().getMemberId();
 
         // 예외처리 : 이미 나의 책장에 등록된 책에 대하여 등록 불가
         checkDuplicateBookshelf(bookIsbn, memberId, false);
 
         // 책이 이미 BOOK DB에 존재한다면 -> DB 저장X / 없다면 -> DB 저장O
-        Book book = saveBookIfNotExists(bookIsbn, wishBookshelfDTO.getBook());
+        Book book = saveBookIfNotExists(bookIsbn, wishBookshelfDTO.getBookInfo());
 
         // 예외처리 : 회원 존재 여부 확인
         Member member = getMemberById(memberId);
@@ -327,11 +327,11 @@ public class BookShelfService {
     }
 
     // 책 존재 확인 및 저장 메서드
-    private Book saveBookIfNotExists(String bookIsbn, BookDTO bookDTO){
+    private Book saveBookIfNotExists(String bookIsbn, BookInfoDTO bookInfoDTO){
         boolean existsBook = bookRepository.existsByIsbn(bookIsbn);
         if(!existsBook){
             // 책이 DB에 존재하지 않는 경우
-            bookRepository.save(bookDTO.toEntity());
+            bookRepository.save(bookInfoDTO.toEntity());
         }
 
         return bookRepository.findById(bookIsbn)
@@ -459,11 +459,11 @@ public class BookShelfService {
         /* (1) 읽은 책 책장에 등록 */
 
         // 책 정보 가져오기
-        BookDTO bookDTO = convertToBookDTO(wishBooks.getBook());
+        BookInfoDTO bookInfoDTO = convertToBookInfoDTO(wishBooks.getBook());
 
         // ReadBookshelfRequestDTO 만들기
         ReadBookshelfRequestDTO readBookshelfRequestDTO = ReadBookshelfRequestDTO.builder()
-                .book(bookDTO)
+                .bookInfo(bookInfoDTO)
                 .readBooks(readBooksDTO)
                 .build();
 
@@ -475,16 +475,15 @@ public class BookShelfService {
     }
 
     // book을 BookDTO로 변경하는 메서드
-    private BookDTO convertToBookDTO(Book book){
-        return BookDTO.builder()
+    private BookInfoDTO convertToBookInfoDTO(Book book){
+        return BookInfoDTO.builder()
                 .isbn(book.getIsbn())
-                .title(book.getTitle())
                 .image(book.getBookImage())
+                .title(book.getTitle())
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())
-                .description(book.getDescription())
                 .pubdate(book.getPubdate())
-                .bookTag(book.getBookTag())
+                .description(book.getDescription())
                 .build();
     }
 
