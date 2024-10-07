@@ -14,16 +14,10 @@ import com.core.book.api.member.repository.FollowRepository;
 import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,74 +29,60 @@ public class ArticleViewService {
 
     public ReviewArticleListResponseDTO getAllArticles(String articleType, int page, int size) {
         if ("all".equalsIgnoreCase(articleType)) {
-            // 각 게시글 타입별로 가져올 게시글 수 계산
-            ArticleType[] articleTypes = ArticleType.values();
-            int typesCount = articleTypes.length;
-            int articlesPerType = (int) Math.ceil((double) size / typesCount);
+            // 게시글 타입 설정: REVIEW, PHRASE, QNA
+            List<ArticleType> targetTypes = Arrays.asList(ArticleType.REVIEW, ArticleType.PHRASE, ArticleType.QNA);
 
-            // 각 타입별로 게시글 가져오기
-            Map<ArticleType, List<ReviewArticle>> articlesByType = new HashMap<>();
-            for (ArticleType type : articleTypes) {
-                Pageable pageable = PageRequest.of(0, articlesPerType, Sort.by("createdAt").descending());
-                List<ReviewArticle> articles = reviewArticleRepository.findByType(type, pageable).getContent();
-                articlesByType.put(type, articles);
-            }
+            // 페이징 및 정렬 정보 설정 - 생성일 기준 내림차순
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-            // 가져온 게시글을 교대로 합치기
-            List<ReviewArticle> interleavedArticles = new ArrayList<>();
-            boolean hasMore = true;
-            int index = 0;
-            while (hasMore && interleavedArticles.size() < size) {
-                hasMore = false;
-                for (ArticleType type : articleTypes) {
-                    List<ReviewArticle> typeArticles = articlesByType.get(type);
-                    if (typeArticles.size() > index) {
-                        interleavedArticles.add(typeArticles.get(index));
-                        if (interleavedArticles.size() == size) {
-                            break;
-                        }
-                        hasMore = true;
-                    }
-                }
-                index++;
-            }
+            // 데이터베이스에서 지정된 타입의 게시글을 페이징하여 조회
+            Page<ReviewArticle> reviewArticlePage = reviewArticleRepository.findByTypeIn(
+                    targetTypes, pageable);
 
-            List<ReviewArticleListDTO> articles = interleavedArticles.stream()
+            // 조회된 게시글을 DTO로 변환하여 리스트에 추가
+            List<ReviewArticleListDTO> articles = reviewArticlePage.getContent().stream()
                     .map(this::convertToListDTO)
                     .collect(Collectors.toList());
 
-            // 마지막 페이지 여부 판단
-            boolean isLast = interleavedArticles.size() < size;
+            // 마지막 페이지 여부 확인
+            boolean isLast = reviewArticlePage.isLast();
 
-            return new ReviewArticleListResponseDTO(articles, isLast);
+            // 응답 DTO 생성 및 반환
+            return new ReviewArticleListResponseDTO(articles, isLast, page);
         } else {
-            // 특정 타입의 게시글 가져오기
+            // 특정 게시글 타입이 요청된 경우 해당 메서드로 처리
             return getArticlesByType(articleType, page, size);
         }
     }
 
     private ReviewArticleListResponseDTO getArticlesByType(String articleType, int page, int size) {
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         ArticleType type;
+
         try {
+            // 문자열로 받은 articleType을 ArticleType enum으로 변환
             type = ArticleType.valueOf(articleType.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new NotFoundException(ErrorStatus.ARTICLE_TYPE_NOT_FOUND_EXCEPTION.getMessage());
         }
+
+        // 지정된 타입의 게시글을 페이징하여 조회
         Page<ReviewArticle> reviewArticlePage = reviewArticleRepository.findByType(type, pageable);
 
         List<ReviewArticleListDTO> articles = reviewArticlePage.getContent().stream()
                 .map(this::convertToListDTO)
                 .collect(Collectors.toList());
 
+        // 마지막 페이지 여부 확인
         boolean isLast = reviewArticlePage.isLast();
 
-        return new ReviewArticleListResponseDTO(articles, isLast);
+        return new ReviewArticleListResponseDTO(articles, isLast, page);
     }
 
     private ReviewArticleListDTO convertToListDTO(ReviewArticle reviewArticle) {
-        Member member = reviewArticle.getMember();
-        Book book = reviewArticle.getBook();
+        Member member = reviewArticle.getMember(); // 작성자 정보
+        Book book = reviewArticle.getBook(); // 책 정보
 
         return ReviewArticleListDTO.builder()
                 .articleId(reviewArticle.getId())
@@ -116,6 +96,7 @@ public class ArticleViewService {
                 .bookImage(book.getBookImage())
                 .title(book.getTitle())
                 .author(book.getAuthor())
+                .articleType(reviewArticle.getType())
                 .build();
     }
 

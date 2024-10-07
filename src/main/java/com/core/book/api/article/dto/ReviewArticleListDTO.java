@@ -1,5 +1,6 @@
 package com.core.book.api.article.dto;
 
+import com.core.book.api.article.entity.ArticleType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,10 +17,11 @@ public class ReviewArticleListDTO {
     private final String bookImage;
     private final String title;
     private final String author;
+    private final ArticleType articleType;
 
     @Builder
     public ReviewArticleListDTO(Long articleId, Long memberId, String profileImage, String nickname, String content,
-                                long likeCnt, long commentCnt, long quoCnt, String bookImage, String title, String author) {
+                                long likeCnt, long commentCnt, long quoCnt, String bookImage, String title, String author, ArticleType articleType) {
         this.articleId = articleId;
         this.memberId = memberId;
         this.profileImage = profileImage;
@@ -31,5 +33,6 @@ public class ReviewArticleListDTO {
         this.bookImage = bookImage;
         this.title = title;
         this.author = author;
+        this.articleType = articleType;
     }
 }
