@@ -1,8 +1,10 @@
 package com.core.book.api.book.controller;
 
+import com.core.book.api.book.dto.BookInfoDTO;
 import com.core.book.api.book.dto.BookResponseDTO;
 import com.core.book.api.book.service.BookService;
 import com.core.book.common.exception.BadRequestException;
+import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ApiResponse;
 import com.core.book.common.response.ErrorStatus;
 import com.core.book.common.response.SuccessStatus;
@@ -26,7 +28,7 @@ public class BookController {
     private final BookService bookService;
 
     @Operation(
-            summary = "도서 데이터 요청 API",
+            summary = "책 검색 API",
             description = "외부 API에 도서 데이터를 요청해 가져옵니다."
     )
     @ApiResponses({
@@ -46,8 +48,29 @@ public class BookController {
             throw new BadRequestException(ErrorStatus.VALIDATION_REQUEST_MISSING_EXCEPTION.getMessage());
         }
 
-        BookResponseDTO bookResponseDTO = bookService.book(text, page, size);
+        BookResponseDTO bookList = bookService.bookSearch(text, page, size);
 
-        return ApiResponse.success(SuccessStatus.BOOK_SEARCH_SUCCESS, bookResponseDTO);
+        return ApiResponse.success(SuccessStatus.BOOK_SEARCH_SUCCESS, bookList);
+    }
+
+    @Operation(
+            summary = "책 정보 자세히보기 API",
+            description = "책 정보 자세히보기 페이지에 표시되는 데이터를 반환합니다. (데이터: 책 정보, 전체 평점, 전체 태그(Best 5), 리뷰 목록)"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책 결과 반환 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "해당 도서의 검색 결과가 없습니다.")
+    })
+    @GetMapping("/api/v1/book/info")
+    public ResponseEntity<ApiResponse<BookInfoDTO>> bookInfo(
+            @RequestParam("isbn") String isbn){
+
+        BookInfoDTO bookInfo = bookService.bookInfo(isbn);
+
+        if(bookInfo == null){
+            throw new NotFoundException(ErrorStatus.BOOK_SEARCH_NOTFOUND_EXCEPTION.getMessage());
+        }
+
+        return ApiResponse.success(SuccessStatus.BOOK_SEARCH_SUCCESS, bookInfo);
     }
 }
