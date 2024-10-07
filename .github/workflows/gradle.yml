@@ -56,24 +56,26 @@ jobs:
         mkdir -p src/main/resources
         echo "${{ secrets.APPLICATION_AWS_YML }}" > src/main/resources/application-aws.yml
 
-    # 3. Spring Boot 애플리케이션 빌드
-    - name: Build with Gradle
+    # 3. Gradle 설정
+    - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-      with:
-        arguments: clean bootJar
 
-    # 4. Docker 이미지 빌드
+    # 4. Spring Boot 애플리케이션 빌드
+    - name: Build with Gradle
+      run: ./gradlew clean bootJar
+
+    # 5. Docker 이미지 빌드
     - name: docker image build
       run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action .
 
-    # 5. DockerHub 로그인
+    # 6. DockerHub 로그인
     - name: docker login
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-    # 6. Docker Hub 이미지 푸시
+    # 7. Docker Hub 이미지 푸시
     - name: docker Hub push
       run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action
 
