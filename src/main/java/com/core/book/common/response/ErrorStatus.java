@@ -36,6 +36,7 @@ public enum ErrorStatus {
     ARTICLE_TYPE_NOT_FOUND_EXCEPTION(HttpStatus.BAD_REQUEST, "게시글 타입이 존재하지 않습니다."),
     MISSING_COMMENT(HttpStatus.BAD_REQUEST, "댓글이 입력되지 않았습니다."),
     MISSING_COMMENT_ARTICLEID(HttpStatus.BAD_REQUEST, "게시글 ID가 입력되지 않았습니다."),
+    MISSING_COMMENT_ID(HttpStatus.BAD_REQUEST,"댓글 ID가 입력되지 않았습니다."),
 
     /**
      * 401 UNAUTHORIZED
@@ -43,6 +44,7 @@ public enum ErrorStatus {
     USER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"인증되지 않은 사용자입니다."),
     INVALID_KAKAO_ACCESSTOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "유효하지 않은 카카오 엑세스토큰입니다."),
     INVALID_REFRESHTOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시토큰입니다."),
+    INVALID_MODIFY_AUTH(HttpStatus.UNAUTHORIZED,"수정 권한이 없습니다."),
 
     /**
      * 404 NOT_FOUND
@@ -58,6 +60,7 @@ public enum ErrorStatus {
     READBOOK_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 도서를 읽은 기록이 없습니다."),
     ARTICLE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND,"게시글을 찾을 수 없습니다."),
     PARENT_COMMENT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND,"부모 댓글을 찾을 수 없습니다."),
+    COMMENT_NOT_FOUND_EXCPETION(HttpStatus.NOT_FOUND,"댓글을 찾을 수 없습니다."),
 
     /**
      * 500 SERVER_ERROR

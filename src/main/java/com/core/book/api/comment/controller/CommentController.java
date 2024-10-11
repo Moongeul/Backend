@@ -2,6 +2,7 @@ package com.core.book.api.comment.controller;
 
 import com.core.book.api.comment.dto.CommentCreateDTO;
 import com.core.book.api.comment.dto.CommentResponseDTO;
+import com.core.book.api.comment.dto.CommentUpdateDTO;
 import com.core.book.api.comment.service.CommentService;
 import com.core.book.api.member.service.MemberService;
 import com.core.book.common.exception.NotFoundException;
@@ -83,5 +84,36 @@ public class CommentController {
         List<CommentResponseDTO> comments = commentService.getCommentsByArticleId(articleId);
 
         return ApiResponse.success(SuccessStatus.GET_COMMENT_SUCCESS, comments);
+    }
+
+    @Operation(
+            summary = "댓글 수정 API",
+            description = "특정 댓글을 수정하는 API입니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "댓글 수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "수정 권한이 없습니다.")
+    })
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> updateComment(
+            @PathVariable Long id,
+            @RequestBody CommentUpdateDTO commentUpdateDTO,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+
+        //댓글 ID 누락시 예외처리
+        if (id == null) {
+            throw new NotFoundException(ErrorStatus.MISSING_COMMENT_ID.getMessage());
+        }
+
+        // Comment 누락시 예외처리
+        if (commentUpdateDTO.getComment() == null || commentUpdateDTO.getComment().isEmpty()) {
+            throw new NotFoundException(ErrorStatus.MISSING_COMMENT.getMessage());
+        }
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        commentService.updateComment(id, commentUpdateDTO, userId);
+
+        return ApiResponse.success_only(SuccessStatus.MODIFY_COMMENT_SUCCESS);
     }
 }
