@@ -50,6 +50,7 @@ public enum SuccessStatus {
     CREATE_ARTICLE_SUCCESS(HttpStatus.CREATED, "게시판 등록 성공"),
     CREATE_USERTAG_SUCCESS(HttpStatus.CREATED, "USERTAG 등록 성공"),
     CREATE_BOOKSHELF_SUCCESS(HttpStatus.CREATED, "책장 등록 성공"),
+    CREATE_COMMENT_SUCCESS(HttpStatus.CREATED, "댓글 등록 성공"),
 
     ;
 

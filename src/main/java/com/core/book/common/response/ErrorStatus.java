@@ -34,6 +34,8 @@ public enum ErrorStatus {
     ARTICLE_MODIFY_NOT_SAME_USER_EXCEPTION(HttpStatus.BAD_REQUEST, "게시글 작성자와 수정 요청자가 다릅니다."),
     ARTICLE_DELETE_NOT_SAME_USER_EXCEPTION(HttpStatus.BAD_REQUEST, "게시글 작성자와 삭제 요청자가 다릅니다."),
     ARTICLE_TYPE_NOT_FOUND_EXCEPTION(HttpStatus.BAD_REQUEST, "게시글 타입이 존재하지 않습니다."),
+    MISSING_COMMENT(HttpStatus.BAD_REQUEST, "댓글이 입력되지 않았습니다."),
+    MISSING_COMMENT_ARTICLEID(HttpStatus.BAD_REQUEST, "게시글 ID가 입력되지 않았습니다."),
 
     /**
      * 401 UNAUTHORIZED
@@ -55,6 +57,7 @@ public enum ErrorStatus {
     INFOOPEN_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "사용자 정보 공개 동의 여부가 등록되어 있지 않습니다."),
     READBOOK_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 도서를 읽은 기록이 없습니다."),
     ARTICLE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND,"게시글을 찾을 수 없습니다."),
+    PARENT_COMMENT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND,"부모 댓글을 찾을 수 없습니다."),
 
     /**
      * 500 SERVER_ERROR
