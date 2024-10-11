@@ -3,6 +3,7 @@ package com.core.book.api.comment.service;
 import com.core.book.api.article.entity.Article;
 import com.core.book.api.article.repository.ArticleRepository;
 import com.core.book.api.comment.dto.CommentCreateDTO;
+import com.core.book.api.comment.dto.CommentResponseDTO;
 import com.core.book.api.comment.entity.Comment;
 import com.core.book.api.comment.repository.CommentRepository;
 import com.core.book.api.member.entity.Member;
@@ -11,6 +12,10 @@ import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +25,8 @@ public class CommentService {
     private final ArticleRepository articleRepository;
     private final MemberRepository memberRepository;
 
-    public Comment createComment(CommentCreateDTO commentCreateDTO, Long userId) {
+    @Transactional
+    public void createComment(CommentCreateDTO commentCreateDTO, Long userId) {
         // 해당 유저를 찾을 수 없을 경우 예외처리
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
@@ -41,6 +47,19 @@ public class CommentService {
                 .parentComment(parentComment)
                 .build();
 
-        return commentRepository.save(comment);
+        commentRepository.save(comment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentResponseDTO> getCommentsByArticleId(Long articleId) {
+        // 해당 게시글을 찾을 수 없을 경우 예외처리
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));
+
+        List<Comment> comments = commentRepository.findByArticle(article);
+
+        return comments.stream()
+                .map(CommentResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 }
