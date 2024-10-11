@@ -82,4 +82,18 @@ public class CommentService {
 
         commentRepository.save(comment);
     }
+
+    @Transactional
+    public void deleteComment(Long commentId, Long userId) {
+        // 댓글을 ID로 찾고, 존재하지 않으면 예외 처리
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.COMMENT_NOT_FOUND_EXCPETION.getMessage()));
+
+        // 해당 댓글의 작성자가 요청한 사용자와 동일한지 검증
+        if (!comment.getMember().getId().equals(userId)) {
+            throw new UnauthorizedException(ErrorStatus.INVALID_DELETE_AUTH.getMessage());
+        }
+
+        commentRepository.delete(comment);
+    }
 }

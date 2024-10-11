@@ -45,6 +45,7 @@ public enum ErrorStatus {
     INVALID_KAKAO_ACCESSTOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "유효하지 않은 카카오 엑세스토큰입니다."),
     INVALID_REFRESHTOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시토큰입니다."),
     INVALID_MODIFY_AUTH(HttpStatus.UNAUTHORIZED,"수정 권한이 없습니다."),
+    INVALID_DELETE_AUTH(HttpStatus.UNAUTHORIZED,"삭제 권한이 없습니다."),
 
     /**
      * 404 NOT_FOUND

@@ -88,9 +88,10 @@ public class CommentController {
 
     @Operation(
             summary = "댓글 수정 API",
-            description = "특정 댓글을 수정하는 API입니다.")
+            description = "게시글에 달린 댓글을 수정합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "댓글 수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "댓글 ID가 입력되지 않았습니다. / 댓글이 입력되지 않았습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "수정 권한이 없습니다.")
     })
@@ -100,7 +101,6 @@ public class CommentController {
             @RequestBody CommentUpdateDTO commentUpdateDTO,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-
         //댓글 ID 누락시 예외처리
         if (id == null) {
             throw new NotFoundException(ErrorStatus.MISSING_COMMENT_ID.getMessage());
@@ -115,5 +115,30 @@ public class CommentController {
         commentService.updateComment(id, commentUpdateDTO, userId);
 
         return ApiResponse.success_only(SuccessStatus.MODIFY_COMMENT_SUCCESS);
+    }
+
+    @Operation(
+            summary = "댓글 삭제 API",
+            description = "게시글에 달린 댓글을 삭제합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "댓글 삭제 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "댓글 ID가 입력되지 않았습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "40₩", description = "삭제 권한이 없습니다.")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteComment(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        //댓글 ID 누락시 예외처리
+        if (id == null) {
+            throw new NotFoundException(ErrorStatus.MISSING_COMMENT_ID.getMessage());
+        }
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        commentService.deleteComment(id, userId);
+
+        return ApiResponse.success_only(SuccessStatus.DELETE_COMMENT_SUCCESS);
     }
 }
