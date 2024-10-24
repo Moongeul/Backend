@@ -50,6 +50,10 @@ public class CommentService {
                 .build();
 
         commentRepository.save(comment);
+
+        // 댓글 수 증가
+        Article updatedArticle = article.increaseCommentCount();
+        articleRepository.save(updatedArticle);
     }
 
     @Transactional(readOnly = true)
@@ -95,5 +99,10 @@ public class CommentService {
         }
 
         commentRepository.delete(comment);
+
+        // 댓글 수 감소
+        Article article = comment.getArticle();
+        Article updatedArticle = article.decreaseCommentCount();
+        articleRepository.save(updatedArticle);
     }
 }
