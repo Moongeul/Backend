@@ -7,6 +7,7 @@ import lombok.*;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @ToString
 @Getter
 public class Book {

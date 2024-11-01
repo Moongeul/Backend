@@ -1,7 +1,5 @@
 package com.core.book.api.book.dto;
 
-import com.core.book.api.book.entity.Book;
-import com.core.book.api.book.entity.BookTag;
 import lombok.*;
 
 @ToString
@@ -20,11 +18,4 @@ public class BookDTO {
     private String publisher;
     private String description;
     private String pubdate;
-
-    @Builder.Default
-    private BookTag bookTag = new BookTag();
-
-    public Book toEntity() {
-        return new Book(isbn, title, image, author, publisher, description, pubdate, bookTag);
-    }
 }

@@ -10,16 +10,21 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "REVIEW_ARTICLE")
-@AllArgsConstructor
 public class ReviewArticle extends Article {
 
     @Column(columnDefinition = "TEXT")
     private String content; // 게시글 내용
 
+
     private String oneLineReview; //한줄평 리뷰
     private float starRating; // 평점
+
+    private long likeCnt; // 좋아요 수
+    private long quoCnt; // 인용 수
+    private long commentCnt; // 댓글 수
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
