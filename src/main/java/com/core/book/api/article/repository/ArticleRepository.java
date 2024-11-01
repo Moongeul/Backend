@@ -17,6 +17,4 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     Page<Article> findByTypeIn(Iterable<ArticleType> types, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"member", "book"})
-    Page<Article> findAll(Pageable pageable);
 }
