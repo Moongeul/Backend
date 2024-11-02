@@ -44,12 +44,17 @@ public enum SuccessStatus {
     MODIFY_ARTICLE_SUCCESS(HttpStatus.OK, "게시글 수정 성공"),
     DELETE_ARTICLE_SUCCESS(HttpStatus.OK, "게시글 삭제 성공"),
 
+    GET_COMMENT_SUCCESS(HttpStatus.OK, "댓글 조회 성공"),
+    MODIFY_COMMENT_SUCCESS(HttpStatus.OK,"댓글 수정 성공"),
+    DELETE_COMMENT_SUCCESS(HttpStatus.OK,"댓글 삭제 성공"),
+
     /**
      * 201
      */
     CREATE_ARTICLE_SUCCESS(HttpStatus.CREATED, "게시판 등록 성공"),
     CREATE_USERTAG_SUCCESS(HttpStatus.CREATED, "USERTAG 등록 성공"),
     CREATE_BOOKSHELF_SUCCESS(HttpStatus.CREATED, "책장 등록 성공"),
+    CREATE_COMMENT_SUCCESS(HttpStatus.CREATED, "댓글 등록 성공"),
 
     ;
 
