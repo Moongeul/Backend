@@ -18,20 +18,17 @@ public class ReviewArticle extends Article {
     @Column(columnDefinition = "TEXT")
     private String content; // 게시글 내용
 
-    private String oneLineReview; // 한줄평 리뷰
+
+    private String oneLineReview; //한줄평 리뷰
+    private float starRating; // 평점
 
     private long likeCnt; // 좋아요 수
     private long quoCnt; // 인용 수
     private long commentCnt; // 댓글 수
-    private float starRating; // 평점
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Member member;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    private Book book;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "reviewarticle_tag_id")
@@ -50,6 +47,16 @@ public class ReviewArticle extends Article {
                                 : dto.getReviewArticleTagDTO().toEntity())
                                 : this.reviewArticleTag)
                 .build();
+    }
+
+    @Override
+    public String getContent() {
+        return this.content;
+    }
+
+    @Override
+    public Member getMember() {
+        return this.member;
     }
 
 }
