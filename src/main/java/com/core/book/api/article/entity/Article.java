@@ -36,4 +36,7 @@ public abstract class Article extends BaseTimeEntity {
 
     public abstract String getContent();
     public abstract Member getMember();
+
+    public abstract Article increaseCommentCount();
+    public abstract Article decreaseCommentCount();
 }

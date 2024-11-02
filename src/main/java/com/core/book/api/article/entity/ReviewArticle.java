@@ -18,7 +18,6 @@ public class ReviewArticle extends Article {
     @Column(columnDefinition = "TEXT")
     private String content; // 게시글 내용
 
-
     private String oneLineReview; //한줄평 리뷰
     private float starRating; // 평점
 
@@ -46,6 +45,22 @@ public class ReviewArticle extends Article {
                                 ? this.reviewArticleTag.update(dto.getReviewArticleTagDTO())
                                 : dto.getReviewArticleTagDTO().toEntity())
                                 : this.reviewArticleTag)
+                .build();
+    }
+
+    // 댓글 수 증가
+    @Override
+    public ReviewArticle increaseCommentCount() {
+        return this.toBuilder()
+                .commentCnt(this.getCommentCnt() + 1)
+                .build();
+    }
+
+    // 댓글 수 감소
+    @Override
+    public ReviewArticle decreaseCommentCount() {
+        return this.toBuilder()
+                .commentCnt(this.getCommentCnt() - 1)
                 .build();
     }
 
