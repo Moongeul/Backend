@@ -1,7 +1,7 @@
 package com.core.book.api.article.controller;
 
+import com.core.book.api.article.dto.ArticleListResponseDTO;
 import com.core.book.api.article.dto.ReviewArticleDetailDTO;
-import com.core.book.api.article.dto.ReviewArticleListResponseDTO;
 import com.core.book.api.article.service.ArticleViewService;
 import com.core.book.common.response.ApiResponse;
 import com.core.book.common.response.SuccessStatus;
@@ -29,13 +29,13 @@ public class ArticleViewController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "게시글 타입이 존재하지 않습니다."),
     })
     @GetMapping("/{articleType}")
-    public ResponseEntity<ApiResponse<ReviewArticleListResponseDTO>> getAllArticles(
+    public ResponseEntity<ApiResponse<ArticleListResponseDTO>> getAllArticles(
             @PathVariable String articleType,
             @RequestParam int page,
             @RequestParam int size
     ) {
-        ReviewArticleListResponseDTO reviewArticleListResponseDTO = articleViewService.getAllArticles(articleType, page, size);
-        return ApiResponse.success(SuccessStatus.GET_ARTICLE_LIST_SUCCESS, reviewArticleListResponseDTO);
+        ArticleListResponseDTO articleListResponseDTO = articleViewService.getAllArticles(articleType, page, size);
+        return ApiResponse.success(SuccessStatus.GET_ARTICLE_LIST_SUCCESS, articleListResponseDTO);
     }
 
     @Operation(
