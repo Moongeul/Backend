@@ -2,6 +2,7 @@ package com.core.book.api.bookshelf.controller;
 
 import com.core.book.api.bookshelf.dto.*;
 import com.core.book.api.bookshelf.service.BookShelfService;
+import com.core.book.api.member.service.MemberService;
 import com.core.book.common.exception.BadRequestException;
 import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ApiResponse;
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class BookshelfController {
 
     private final BookShelfService bookShelfService;
+    private final MemberService memberService;
 
     /*
      *
@@ -40,12 +44,13 @@ public class BookshelfController {
     })
     @GetMapping("/api/v1/bookshelf/read")
     public ResponseEntity<ApiResponse<ReadBookshelfResponseDTO>> showReadBookshelf(
-            @RequestParam("member-id") Long memberId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "filter", defaultValue = "1") int filterNum){
 
-        ReadBookshelfResponseDTO readBookshelfData = bookShelfService.showReadBooks(memberId, page, size, filterNum);
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        ReadBookshelfResponseDTO readBookshelfData = bookShelfService.showReadBooks(userId, page, size, filterNum);
         log.info("readBookshelfData: {}", readBookshelfData.toString());
 
         return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, readBookshelfData);
@@ -61,11 +66,12 @@ public class BookshelfController {
     })
     @GetMapping("/api/v1/bookshelf/wish")
     public ResponseEntity<ApiResponse<WishBookshelfResponseDTO>> showWishBookshelf(
-            @RequestParam("member-id") Long memberId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size){
 
-        WishBookshelfResponseDTO wishBookshelfData = bookShelfService.showWishBooks(memberId, page, size);
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        WishBookshelfResponseDTO wishBookshelfData = bookShelfService.showWishBooks(userId, page, size);
         log.info(wishBookshelfData.toString());
 
         return ApiResponse.success(SuccessStatus.GET_BOOKSHELF_SUCCESS, wishBookshelfData);
@@ -124,18 +130,19 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다.")
     })
     @PostMapping("/api/v1/bookshelf/read")
-    public ResponseEntity<ApiResponse<Void>> createReadBookshelf(@RequestBody ReadBookshelfRequestDTO readBookshelfDTO){
+    public ResponseEntity<ApiResponse<Void>> createReadBookshelf(
+            @RequestBody ReadBookshelfRequestDTO readBookshelfDTO,
+            @AuthenticationPrincipal UserDetails userDetails){
 
-        // 예외처리 : 등록 날짜가 / 등록하는 유저가 정상적으로 입력되지 않은 경우 등록 불가
+        // 예외처리 : 등록 날짜가 정상적으로 입력되지 않은 경우 등록 불가
         if(readBookshelfDTO.getReadBooks().getReadDate() == null){
             throw new BadRequestException(ErrorStatus.MISSING_BOOKSHELF_DATE.getMessage());
         }
-        if(readBookshelfDTO.getReadBooks().getMemberId() == null){
-            throw new BadRequestException(ErrorStatus.MISSING_BOOKSHELF_MEMBER.getMessage());
-        }
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
 
         // 책 저장 - 날짜/평점/태그/한줄평 입력 후 저장
-        bookShelfService.createReadBookshelf(readBookshelfDTO);
+        bookShelfService.createReadBookshelf(readBookshelfDTO, userId);
 
         return ApiResponse.success_only(SuccessStatus.CREATE_BOOKSHELF_SUCCESS);
     }
@@ -149,15 +156,14 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다.")
     })
     @PostMapping("/api/v1/bookshelf/wish")
-    public ResponseEntity<ApiResponse<Void>> createWishBookshelf(@RequestBody WishBookshelfRequestDTO wishBookshelfDTO){
+    public ResponseEntity<ApiResponse<Void>> createWishBookshelf(
+            @RequestBody WishBookshelfRequestDTO wishBookshelfDTO,
+            @AuthenticationPrincipal UserDetails userDetails){
 
-        // 예외처리 : 등록하는 유저가 입력되지 정상적으로 않은 경우
-        if(wishBookshelfDTO.getWishBooks().getMemberId() == null){
-            throw new BadRequestException(ErrorStatus.MISSING_BOOKSHELF_MEMBER.getMessage());
-        }
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
 
         // 책 저장 - 날짜/평점/태그/한줄평 입력 후 저장
-        bookShelfService.createWishBookshelf(wishBookshelfDTO);
+        bookShelfService.createWishBookshelf(wishBookshelfDTO, userId);
 
         return ApiResponse.success_only(SuccessStatus.CREATE_BOOKSHELF_SUCCESS);
     }
@@ -177,7 +183,8 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
     })
     @PatchMapping("/api/v1/bookshelf/read/{id}")
-    public ResponseEntity<ApiResponse<Void>> updateReadBookshelf(@RequestBody ReadBooksDTO readBooksDTO, @PathVariable Long id){
+    public ResponseEntity<ApiResponse<Void>> updateReadBookshelf(
+            @RequestBody ReadBooksDTO readBooksDTO, @PathVariable Long id){
 
         // 예외 처리 : 등록 날짜가 입력되지 않은 경우
         if(readBooksDTO.getReadDate() == null){
@@ -258,9 +265,13 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
     })
     @PostMapping("/api/v1/bookshelf/shift/{id}")
-    public ResponseEntity<ApiResponse<Void>> shiftBookshelf(@RequestBody ReadBooksDTO readBooksDTO, @PathVariable Long id){
+    public ResponseEntity<ApiResponse<Void>> shiftBookshelf(
+            @RequestBody ReadBooksDTO readBooksDTO, @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails){
 
-        bookShelfService.shiftBookshelf(readBooksDTO, id);
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+
+        bookShelfService.shiftBookshelf(readBooksDTO, id, userId);
 
         return ApiResponse.success_only(SuccessStatus.SHIFT_BOOKSHELF_SUCCESS);
     }
