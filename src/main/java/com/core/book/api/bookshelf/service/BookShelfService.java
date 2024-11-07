@@ -10,6 +10,8 @@ import com.core.book.api.bookshelf.entity.WishBooks;
 import com.core.book.api.bookshelf.repository.ReadBooksRepository;
 import com.core.book.api.bookshelf.repository.ReadBooksTagRepository;
 import com.core.book.api.bookshelf.repository.WishBooksRepository;
+import com.core.book.api.member.entity.Member;
+import com.core.book.api.member.repository.MemberRepository;
 import com.core.book.common.exception.BadRequestException;
 import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
@@ -35,6 +37,7 @@ public class BookShelfService {
     private final WishBooksRepository wishBooksRepository;
     private final BookRepository bookRepository;
     private final ReadBooksTagRepository readBooksTagRepository;
+    private final MemberRepository memberRepository;
 
     /*
      *
@@ -277,11 +280,14 @@ public class BookShelfService {
         // 책이 이미 BOOK DB에 존재한다면 -> DB 저장X / 없다면 -> DB 저장O
         Book book = saveBookIfNotExists(bookIsbn, readBookshelfDTO.getBookInfo());
 
+        // 책장 저장을 위한 회원 객체 가져오기
+        Member member = getMemberById(userId);
+
         // 선택된 태그 저장 (null 가능)
         ReadBooksTag savedTags = saveReadBooksTag(readBookshelfDTO.getReadBooks());
 
         // 책장 DB에 저장
-        readBooksRepository.save(readBookshelfDTO.getReadBooks().toEntity(book, savedTags));
+        readBooksRepository.save(readBookshelfDTO.getReadBooks().toEntity(book, member, savedTags));
     }
 
     // '읽고 싶은 책' 책장 등록 메서드
@@ -296,8 +302,11 @@ public class BookShelfService {
         // 책이 이미 BOOK DB에 존재한다면 -> DB 저장X / 없다면 -> DB 저장O
         Book book = saveBookIfNotExists(bookIsbn, wishBookshelfDTO.getBookInfo());
 
+        // 책장 저장을 위한 회원 객체 가져오기
+        Member member = getMemberById(userId);
+
         // 책장 DB에 저장
-        wishBooksRepository.save(wishBookshelfDTO.getWishBooks().toEntity(book));
+        wishBooksRepository.save(wishBookshelfDTO.getWishBooks().toEntity(book, member));
     }
 
     // 중복 책장 등록 체크 메서드
@@ -312,6 +321,12 @@ public class BookShelfService {
         if (existsBookshelf) {
             throw new BadRequestException(ErrorStatus.NOT_ALLOW_DUPLICATE_BOOKSHELF.getMessage());
         }
+    }
+
+    // 회원 존재 확인 메서드
+    private Member getMemberById(Long memberId){
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
     }
 
     // 책 존재 확인 및 저장 메서드
@@ -349,11 +364,16 @@ public class BookShelfService {
      */
 
     @Transactional
-    public void updateReadBookshelf(ReadBooksDTO readBooksDTO, Long id){
+    public void updateReadBookshelf(ReadBooksDTO readBooksDTO, Long id, Long userId){
 
         // 기존 책장 데이터 가져오기
         ReadBooks existingReadBooks = readBooksRepository.findById(id).
                 orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_INFO_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 예외처리: 책장 소유자와 수정 요청자가 다른 경우
+        if(!existingReadBooks.getMember().getId().equals(userId)){
+            throw new BadRequestException(ErrorStatus.BOOKSHELF_MODIFY_NOT_SAME_USER_EXCEPTION.getMessage());
+        }
 
         // 기존에 태그가 있으면 -> 수정 / 없으면 -> 새로 생성
         ReadBooksTag readBooksTag = existingReadBooks.getReadBooksTag();
@@ -388,11 +408,16 @@ public class BookShelfService {
     }
 
     @Transactional
-    public void updateWishBookshelf(WishBooksDTO wishBooksDTO, Long id){
+    public void updateWishBookshelf(WishBooksDTO wishBooksDTO, Long id, Long userId){
 
         // 기존 책장 데이터 가져오기
         WishBooks existingwishBooks = wishBooksRepository.findById(id).
                 orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_INFO_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 예외처리: 책장 소유자와 수정 요청자가 다른 경우
+        if(!existingwishBooks.getMember().getId().equals(userId)){
+            throw new BadRequestException(ErrorStatus.BOOKSHELF_MODIFY_NOT_SAME_USER_EXCEPTION.getMessage());
+        }
 
         // 수정된 WishBooks 엔티티 생성
         WishBooks updatedWishBooks = WishBooks.builder()
@@ -412,17 +437,27 @@ public class BookShelfService {
      */
 
     @Transactional
-    public void deleteReadBookshelf(Long id){
+    public void deleteReadBookshelf(Long id, Long userId){
         ReadBooks readBooks = readBooksRepository.findById(id).
                 orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_INFO_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 예외처리: 책장 소유자와 삭제 요청자가 다른 경우
+        if(!readBooks.getMember().getId().equals(userId)){
+            throw new BadRequestException(ErrorStatus.BOOKSHELF_DELETE_NOT_SAME_USER_EXCEPTION.getMessage());
+        }
 
         readBooksRepository.delete(readBooks);
     }
 
     @Transactional
-    public void deleteWishBookshelf(Long id){
+    public void deleteWishBookshelf(Long id, Long userId){
         WishBooks wishBooks = wishBooksRepository.findById(id).
                 orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_INFO_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 예외처리: 책장 소유자와 삭제 요청자가 다른 경우
+        if(!wishBooks.getMember().getId().equals(userId)){
+            throw new BadRequestException(ErrorStatus.BOOKSHELF_DELETE_NOT_SAME_USER_EXCEPTION.getMessage());
+        }
 
         wishBooksRepository.delete(wishBooks);
     }
@@ -453,7 +488,7 @@ public class BookShelfService {
         createReadBookshelf(readBookshelfRequestDTO, userId);
 
         /* (2) 읽고 싶은 책 책장에서 삭제 */
-        deleteWishBookshelf(id);
+        deleteWishBookshelf(id, userId);
     }
 
     // book을 BookDTO로 변경하는 메서드
