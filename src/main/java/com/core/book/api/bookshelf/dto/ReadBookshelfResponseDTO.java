@@ -26,7 +26,8 @@ public class ReadBookshelfResponseDTO {
         @Getter
         public static class MonthlyReadBookDTO {
 
-            private String isbn; //isbn
+            private Long id;
+            private String isbn; // isbn
             private String bookImage; // 책 이미지
             private double starRating; // 평점
             private String title; // 책 제목

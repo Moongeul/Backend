@@ -3,7 +3,6 @@ package com.core.book.api.bookshelf.dto;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.bookshelf.entity.ReadBooks;
 import com.core.book.api.bookshelf.entity.ReadBooksTag;
-import com.core.book.api.member.entity.Member;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -18,15 +17,12 @@ public class ReadBooksDTO {
     private String oneLineReview; // 한줄평
     private ReadBooksTagDTO readBooksTag; //태그
 
-    private Long memberId; // 회원 ID
-
-    public ReadBooks toEntity(Book book, Member member, ReadBooksTag readBooksTag){
+    public ReadBooks toEntity(Book book, ReadBooksTag readBooksTag){
         return ReadBooks.builder()
                 .readDate(this.readDate)
                 .starRating(this.starRating)
                 .oneLineReview(this.oneLineReview)
                 .book(book)
-                .member(member)
                 .readBooksTag(readBooksTag)
                 .build();
     }
