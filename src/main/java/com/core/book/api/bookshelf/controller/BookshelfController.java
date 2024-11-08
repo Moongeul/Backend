@@ -184,14 +184,17 @@ public class BookshelfController {
     })
     @PatchMapping("/api/v1/bookshelf/read/{id}")
     public ResponseEntity<ApiResponse<Void>> updateReadBookshelf(
-            @RequestBody ReadBooksDTO readBooksDTO, @PathVariable Long id){
+            @RequestBody ReadBooksDTO readBooksDTO, @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails){
 
         // 예외 처리 : 등록 날짜가 입력되지 않은 경우
         if(readBooksDTO.getReadDate() == null){
             throw new NotFoundException(ErrorStatus.MISSING_BOOKSHELF_DATE.getMessage());
         }
 
-        bookShelfService.updateReadBookshelf(readBooksDTO, id);
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+
+        bookShelfService.updateReadBookshelf(readBooksDTO, id, userId);
 
         return ApiResponse.success_only(SuccessStatus.UPDATE_BOOKSHELF_INFO_SUCCESS);
     }
@@ -205,9 +208,13 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
     })
     @PatchMapping("/api/v1/bookshelf/wish/{id}")
-    public ResponseEntity<ApiResponse<Void>> updateWishBookshelf(@RequestBody WishBooksDTO wishBooksDTO, @PathVariable Long id){
+    public ResponseEntity<ApiResponse<Void>> updateWishBookshelf(
+            @RequestBody WishBooksDTO wishBooksDTO, @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails){
 
-        bookShelfService.updateWishBookshelf(wishBooksDTO, id);
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+
+        bookShelfService.updateWishBookshelf(wishBooksDTO, id, userId);
 
         return ApiResponse.success_only(SuccessStatus.UPDATE_BOOKSHELF_INFO_SUCCESS);
     }
@@ -227,9 +234,13 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
     })
     @DeleteMapping("/api/v1/bookshelf/read/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteReadBookshelf(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<Void>> deleteReadBookshelf(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails){
 
-        bookShelfService.deleteReadBookshelf(id);
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+
+        bookShelfService.deleteReadBookshelf(id, userId);
 
         return ApiResponse.success_only(SuccessStatus.DELETE_BOOKSHELF_SUCCESS);
     }
@@ -243,9 +254,13 @@ public class BookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 책장에서 선택된 도서를 찾을 수 없습니다.")
     })
     @DeleteMapping("/api/v1/bookshelf/wish/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteWishBookshelf(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<Void>> deleteWishBookshelf(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails){
 
-        bookShelfService.deleteWishBookshelf(id);
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+
+        bookShelfService.deleteWishBookshelf(id, userId);
 
         return ApiResponse.success_only(SuccessStatus.DELETE_BOOKSHELF_SUCCESS);
     }
