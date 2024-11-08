@@ -196,6 +196,7 @@ public class BookShelfService {
     private WishBookshelfResponseDTO.wishBookDTO convertToWishBookDTO(WishBooks wishBooks) {
 
         return WishBookshelfResponseDTO.wishBookDTO.builder()
+                .id(wishBooks.getId()) // '읽고 싶은 책' 책장 데이터의 id
                 .isbn(wishBooks.getBook().getIsbn()) // isbn
                 .bookImage(wishBooks.getBook().getBookImage()) // 책 이미지
                 .bookTitle(wishBooks.getBook().getTitle()) // 책 제목
