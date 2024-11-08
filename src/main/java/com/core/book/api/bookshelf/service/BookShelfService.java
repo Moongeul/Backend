@@ -219,6 +219,11 @@ public class BookShelfService {
 
         ReadBooksTag readBooksTag = readBooks.getReadBooksTag();
 
+        // 태그가 입력된 것이 없을 경우, null 반환
+        if(readBooksTag == null){
+            return convertToReadBooksDTO(readBooks, null);
+        }
+
         ReadBooksDTO.ReadBooksTagDTO tagDTO = convertToReadBooksTagDTO(readBooksTag);
 
         return convertToReadBooksDTO(readBooks, tagDTO);
@@ -389,6 +394,9 @@ public class BookShelfService {
                     .build();
         } else if(readBooksTag == null && tagDTO != null){
             readBooksTag = tagDTO.toEntity();
+        }
+
+        if(readBooksTag != null){
             readBooksTagRepository.save(readBooksTag); // 새로운 태그 저장
         }
 
