@@ -137,7 +137,7 @@ public class ArticleViewService {
                 .likeCnt(reviewArticle.getLikeCnt())
                 .quoCnt(reviewArticle.getQuoCnt())
                 .commentCnt(reviewArticle.getCommentCnt())
-                .starRating(reviewArticle.getStarRating())
+                .rating(reviewArticle.getRating())
                 .reviewArticleTagDTO(reviewArticleTagDTO)
                 .nickname(member.getNickname())
                 .profileImage(member.getImageUrl())
