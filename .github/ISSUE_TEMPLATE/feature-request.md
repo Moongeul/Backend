@@ -1,16 +1,27 @@
 ---
-name: Feature request
-about: 기능 개발 Template
-title: ''
-labels: ''
-assignees: ''
-
+name: Feature Request
+about: 새로운 기능 추가 요청을 작성해 주세요.
+title: "[FEAT] 기능 설명"
+labels: FEAT
+assignees: ""
 ---
 
-## 🚀 About Issue 🚀
-<!-- 이슈에 대한 내용을 설명해주세요. -->
+## ❓ 어떤 기능인가요?
 
+- 추가 요청하려는 기능에 대해 설명해 주세요.
 
-## ✅ Todo 
-<!-- 해야 할 일들을 적어주세요. -->
-- [ ] todo !
+## 📝 기능 설명
+
+- 추가하려는 기능의 세부 설명 및 목적을 작성해 주세요.
+
+## ✅ TODO
+
+구현해야 하는 기능에 대해 체크리스트를 작성해 주세요.
+
+- [ ] TODO 1
+- [ ] TODO 2
+
+## 📚 참고할만한 자료(선택)
+
+- 추가적으로 참고할 만한 사항이 있으면 적어주세요.
+- 없는 경우 해당 단락을 삭제해 주세요.
