@@ -1,11 +1,9 @@
 package com.core.book.api.article.service;
 
 import com.core.book.api.article.dto.*;
-import com.core.book.api.article.entity.Article;
-import com.core.book.api.article.entity.ArticleType;
-import com.core.book.api.article.entity.ReviewArticle;
-import com.core.book.api.article.entity.ReviewArticleTag;
+import com.core.book.api.article.entity.*;
 import com.core.book.api.article.repository.ArticleRepository;
+import com.core.book.api.article.repository.PhraseArticleRepository;
 import com.core.book.api.article.repository.ReviewArticleRepository;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.member.entity.Member;
@@ -24,6 +22,7 @@ import java.util.stream.Collectors;
 public class ArticleViewService {
 
     private final ReviewArticleRepository reviewArticleRepository;
+    private final PhraseArticleRepository phraseArticleRepository;
     private final ArticleRepository articleRepository;
     private final FollowRepository followRepository;
 
@@ -139,6 +138,39 @@ public class ArticleViewService {
                 .commentCnt(reviewArticle.getCommentCnt())
                 .starRating(reviewArticle.getStarRating())
                 .reviewArticleTagDTO(reviewArticleTagDTO)
+                .nickname(member.getNickname())
+                .profileImage(member.getImageUrl())
+                .followerCount(followerCount)
+                .build();
+    }
+
+    // 인상깊은구절 게시글 상세 조회 메서드
+    public PhraseArticleDetailDTO getPhraseArticleDetail(Long id) {
+        // 게시글 조회
+        PhraseArticle phraseArticle = phraseArticleRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));
+
+        // 책 정보 가져오기
+        Book book = phraseArticle.getBook();
+
+        // 작성자 정보 가져오기
+        Member member = phraseArticle.getMember();
+
+        // 작성자의 팔로워 수 조회
+        long followerCount = followRepository.countByFollowingId(member.getId());
+
+        return PhraseArticleDetailDTO.builder()
+                .memberId(member.getId())
+                .isbn(book.getIsbn())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .bookImage(book.getBookImage())
+                .content(phraseArticle.getContent())
+                .likeCnt(phraseArticle.getLikeCnt())
+                .quoCnt(phraseArticle.getQuoCnt())
+                .commentCnt(phraseArticle.getCommentCnt())
+                .pageNum(phraseArticle.getPageNum())
+                .phraseContent(phraseArticle.getPhraseContent())
                 .nickname(member.getNickname())
                 .profileImage(member.getImageUrl())
                 .followerCount(followerCount)

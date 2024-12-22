@@ -1,6 +1,7 @@
 package com.core.book.api.article.controller;
 
 import com.core.book.api.article.dto.ArticleListResponseDTO;
+import com.core.book.api.article.dto.PhraseArticleDetailDTO;
 import com.core.book.api.article.dto.ReviewArticleDetailDTO;
 import com.core.book.api.article.service.ArticleViewService;
 import com.core.book.common.response.ApiResponse;
@@ -50,6 +51,20 @@ public class ArticleViewController {
     public ResponseEntity<ApiResponse<ReviewArticleDetailDTO>> getReviewArticleDetail(@PathVariable Long id) {
         ReviewArticleDetailDTO reviewArticleDetailDTO = articleViewService.getReviewArticleDetail(id);
         return ApiResponse.success(SuccessStatus.GET_ARTICLE_SUCCESS, reviewArticleDetailDTO);
+    }
+
+    @Operation(
+            summary = "인상깊은구절 게시글 상세 조회 API",
+            description = "인상깊은구절 게시글의 상세 정보를 조회합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다.")
+    })
+    @GetMapping("/phrase/{id}")
+    public ResponseEntity<ApiResponse<PhraseArticleDetailDTO>> getPhraseArticleDetail(@PathVariable Long id) {
+        PhraseArticleDetailDTO phraseArticleDetailDTO = articleViewService.getPhraseArticleDetail(id);
+        return ApiResponse.success(SuccessStatus.GET_ARTICLE_SUCCESS, phraseArticleDetailDTO);
     }
 
 }
