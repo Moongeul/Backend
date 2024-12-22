@@ -1,5 +1,8 @@
 package com.core.book.api.article.entity;
 
+import com.core.book.api.article.dto.PhraseArticleCreateDTO;
+import com.core.book.api.article.dto.ReviewArticleCreateDTO;
+import com.core.book.api.book.entity.Book;
 import com.core.book.api.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -30,6 +33,16 @@ public class PhraseArticle extends Article {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Member member;
+
+    // 엔티티 수정
+    public PhraseArticle update(PhraseArticleCreateDTO dto, Book newBook) {
+        return this.toBuilder()
+                .content(dto.getContent())
+                .phraseContent(dto.getPhraseContent())
+                .pageNum(dto.getPageNum())
+                .book(newBook)
+                .build();
+    }
 
     // 댓글 수 증가
     @Override
