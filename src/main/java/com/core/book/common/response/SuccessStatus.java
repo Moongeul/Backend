@@ -48,7 +48,7 @@ public enum SuccessStatus {
     MODIFY_COMMENT_SUCCESS(HttpStatus.OK,"댓글 수정 성공"),
     DELETE_COMMENT_SUCCESS(HttpStatus.OK,"댓글 삭제 성공"),
 
-    TOGGLE_LIKE_SUCCESS(HttpStatus.OK,"좋아요 토클 성공"),
+    TOGGLE_LIKE_SUCCESS(HttpStatus.OK,"좋아요 토글 성공"),
 
     /**
      * 201

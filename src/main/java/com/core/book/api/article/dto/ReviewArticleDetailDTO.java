@@ -20,11 +20,13 @@ public class ReviewArticleDetailDTO {
     private final String nickname;
     private final String profileImage;
     private final long followerCount;
+    private final boolean myLike;
 
     @Builder
-    public ReviewArticleDetailDTO(Long memberId, String isbn, String title, String author, String bookImage, String content,
-                                  String oneLineReview, long likeCnt, long quoCnt, long commentCnt, float starRating, ReviewArticleTagDTO reviewArticleTagDTO,
-                                  String nickname, String profileImage, long followerCount) {
+    public ReviewArticleDetailDTO(Long memberId, String isbn, String title, String author, String bookImage,
+                                  String content, String oneLineReview, long likeCnt, long quoCnt, long commentCnt,
+                                  float starRating, ReviewArticleTagDTO reviewArticleTagDTO, String nickname,
+                                  String profileImage, long followerCount, boolean myLike) {
         this.memberId = memberId;
         this.isbn = isbn;
         this.title = title;
@@ -40,5 +42,6 @@ public class ReviewArticleDetailDTO {
         this.nickname = nickname;
         this.profileImage = profileImage;
         this.followerCount = followerCount;
+        this.myLike = myLike;
     }
 }

@@ -20,11 +20,13 @@ public class PhraseArticleDetailDTO {
     private final String nickname;
     private final String profileImage;
     private final long followerCount;
+    private final boolean myLike;
 
     @Builder
-    public PhraseArticleDetailDTO(Long memberId, String isbn, String title, String author, String bookImage, String content,
-                                  String phraseContent, long likeCnt, long quoCnt, long commentCnt, int pageNum,
-                                  String nickname, String profileImage, long followerCount) {
+    public PhraseArticleDetailDTO(Long memberId, String isbn, String title, String author, String bookImage,
+                                  String content, String phraseContent, long likeCnt, long quoCnt, long commentCnt,
+                                  int pageNum, String nickname, String profileImage, long followerCount,
+                                  boolean myLike) {
         this.memberId = memberId;
         this.isbn = isbn;
         this.title = title;
@@ -39,5 +41,6 @@ public class PhraseArticleDetailDTO {
         this.nickname = nickname;
         this.profileImage = profileImage;
         this.followerCount = followerCount;
+        this.myLike = myLike;
     }
 }

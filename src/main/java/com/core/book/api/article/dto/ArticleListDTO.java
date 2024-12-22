@@ -18,21 +18,24 @@ public class ArticleListDTO {
     private final String title;
     private final String author;
     private final ArticleType articleType; // 게시글 타입 구분을 위한 필드
+    private final boolean myLike;
 
     @Builder
     public ArticleListDTO(Long articleId, Long memberId, String profileImage, String nickname, String content,
-                          long likeCnt, long commentCnt, long quoCnt, String bookImage, String title, String author, ArticleType articleType) {
+                          long likeCnt, long commentCnt, long quoCnt, String bookImage, String title,
+                          String author, ArticleType articleType, boolean myLike) {
         this.articleId = articleId;
         this.memberId = memberId;
         this.profileImage = profileImage;
         this.nickname = nickname;
         this.content = content;
         this.likeCnt = likeCnt;
-        this.quoCnt = quoCnt;
         this.commentCnt = commentCnt;
+        this.quoCnt = quoCnt;
         this.bookImage = bookImage;
         this.title = title;
         this.author = author;
         this.articleType = articleType;
+        this.myLike = myLike;
     }
 }
