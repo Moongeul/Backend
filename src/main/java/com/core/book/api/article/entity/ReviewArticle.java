@@ -21,10 +21,6 @@ public class ReviewArticle extends Article {
     private String oneLineReview; //한줄평 리뷰
     private float starRating; // 평점
 
-    private long likeCnt; // 좋아요 수
-    private long quoCnt; // 인용 수
-    private long commentCnt; // 댓글 수
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Member member;
@@ -61,6 +57,20 @@ public class ReviewArticle extends Article {
     public ReviewArticle decreaseCommentCount() {
         return this.toBuilder()
                 .commentCnt(this.getCommentCnt() - 1)
+                .build();
+    }
+
+    // 좋아요 증가
+    public Article increaseLikeCount() {
+        return this.toBuilder()
+                .likeCnt(this.getLikeCnt() + 1)
+                .build();
+    }
+
+    // 좋아요 감소
+    public Article decreaseLikeCount() {
+        return this.toBuilder()
+                .likeCnt(this.getLikeCnt() - 1)
                 .build();
     }
 

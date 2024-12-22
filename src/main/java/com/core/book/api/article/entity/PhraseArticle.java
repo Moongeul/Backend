@@ -22,9 +22,6 @@ public class PhraseArticle extends Article {
     @Column(columnDefinition = "TEXT")
     private String content; // 구절에 대한 자세한 설명
 
-    private long likeCnt; // 좋아요 수
-    private long quoCnt; // 인용 수
-    private long commentCnt; // 댓글 수
     private int pageNum; // 페이지 번호
 
     @Column
@@ -57,6 +54,20 @@ public class PhraseArticle extends Article {
     public PhraseArticle decreaseCommentCount() {
         return this.toBuilder()
                 .commentCnt(this.getCommentCnt() - 1)
+                .build();
+    }
+
+    // 좋아요 증가
+    public Article increaseLikeCount() {
+        return this.toBuilder()
+                .likeCnt(this.getLikeCnt() + 1)
+                .build();
+    }
+
+    // 좋아요 감소
+    public Article decreaseLikeCount() {
+        return this.toBuilder()
+                .likeCnt(this.getLikeCnt() - 1)
                 .build();
     }
 

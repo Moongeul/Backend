@@ -26,9 +26,9 @@ public abstract class Article extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ArticleType type;
 
-    private long likeCnt;
-    private long commentCnt;
-    private long quoCnt;
+    private long likeCnt; // 좋아요 수
+    private long quoCnt; // 인용 수
+    private long commentCnt; // 댓글 수
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
@@ -39,4 +39,8 @@ public abstract class Article extends BaseTimeEntity {
 
     public abstract Article increaseCommentCount();
     public abstract Article decreaseCommentCount();
+
+    public abstract Article increaseLikeCount();
+    public abstract Article decreaseLikeCount();
+
 }
