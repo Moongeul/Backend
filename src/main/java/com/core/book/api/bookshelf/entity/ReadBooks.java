@@ -24,8 +24,7 @@ public class ReadBooks {
     @Column(name = "read_date")
     private LocalDate readDate; //읽은 날짜
 
-    @Column(name = "star_rating")
-    private double starRating; //평점
+    private double rating; //평점
 
     @Column(name = "one_line_review")
     private String oneLineReview; //한줄평

@@ -18,14 +18,14 @@ import java.time.LocalDate;
 public class ReadBooksDTO {
 
     private LocalDate readDate; // 읽은 날짜
-    private double starRating; // 평점
+    private double rating; // 평점
     private String oneLineReview; // 한줄평
     private ReadBooksTagDTO readBooksTag; //태그
 
     public ReadBooks toEntity(Book book, Member member, ReadBooksTag readBooksTag){
         return ReadBooks.builder()
                 .readDate(this.readDate)
-                .starRating(this.starRating)
+                .rating(this.rating)
                 .oneLineReview(this.oneLineReview)
                 .book(book)
                 .member(member)

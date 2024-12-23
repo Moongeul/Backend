@@ -27,6 +27,8 @@ public class ArticleModifyService {
         ReviewArticle reviewArticle = reviewArticleRepository.findById(articleId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));
 
+        double old_rating = reviewArticle.getRating();
+
         // 게시글 작성자와 수정 요청자가 다를 경우 예외 처리
         if (!reviewArticle.getMember().getId().equals(userId)) {
             throw new NotFoundException(ErrorStatus.ARTICLE_MODIFY_NOT_SAME_USER_EXCEPTION.getMessage());
@@ -53,5 +55,26 @@ public class ArticleModifyService {
 
         // 엔티티 저장
         reviewArticleRepository.save(updatedArticle);
+
+        // 평균 평점 수정 (단, rating_count 는 오르지 않음)
+        Book book = bookRepository.findById(reviewArticleCreateDTO.getIsbn()).
+                orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
+
+        modifyRatingAverage(book, reviewArticleCreateDTO.getRating(), old_rating);
+    }
+
+    // BOOK rating_average 갱신 메서드
+    public void modifyRatingAverage(Book book, double new_rating, double old_rating){
+
+        // 새 점수들의 합 = (기존 점수들의 합) - (바뀌기 이전 평점) + (바뀐 평점)
+        double new_rating_sum = (book.getRatingAverage() * book.getRatingCount()) - old_rating + new_rating;
+        double new_rating_average = new_rating_sum / book.getRatingCount();
+        new_rating_average = Math.round(new_rating_average * 100) / 100.0;
+
+        Book updatedBook = book.toBuilder()
+                .ratingAverage(new_rating_average)
+                .build();
+
+        bookRepository.save(updatedBook);
     }
 }

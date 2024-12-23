@@ -153,7 +153,7 @@ public class BookShelfService {
                 .id(readBooks.getId())
                 .isbn(readBooks.getBook().getIsbn()) // isbn
                 .bookImage(readBooks.getBook().getBookImage()) // 책 이미지
-                .starRating(readBooks.getStarRating()) // 평점
+                .rating(readBooks.getRating()) // 평점
                 .title(readBooks.getBook().getTitle()) // 책 제목
                 .readDate(readBooks.getReadDate()) // 읽은 날짜
                 .build();
@@ -234,7 +234,7 @@ public class BookShelfService {
     private ReadBooksDTO convertToReadBooksDTO(ReadBooks readBooks, ReadBooksDTO.ReadBooksTagDTO tagDTO){
         return ReadBooksDTO.builder()
                 .readDate(readBooks.getReadDate())
-                .starRating(readBooks.getStarRating())
+                .rating(readBooks.getRating())
                 .oneLineReview(readBooks.getOneLineReview())
                 .readBooksTag(tagDTO)
                 .build();
@@ -294,7 +294,28 @@ public class BookShelfService {
 
         // 책장 DB에 저장
         readBooksRepository.save(readBookshelfDTO.getReadBooks().toEntity(book, member, savedTags));
+
+        // BOOK rating_average 갱신
+        updateRatingAverage(book, readBookshelfDTO.getReadBooks().getRating());
+
     }
+
+    // BOOK rating_average 갱신 메서드
+    public void updateRatingAverage(Book book, double new_rating){
+
+        // 해당 책의 평균 평점(rating_average) 새로 계산 및 rating_count(평점 개수) + 1
+        // 계산 공식: new_rating_average = (rating_average * rating_count + rating) / rating_count + 1 )
+        double new_rating_average = (book.getRatingAverage() * book.getRatingCount() + new_rating) / (book.getRatingCount() + 1);
+        new_rating_average = Math.round(new_rating_average * 100) / 100.0;
+
+        Book updatedBook = book.toBuilder()
+                .ratingAverage(new_rating_average)
+                .ratingCount(book.getRatingCount() + 1)
+                .build();
+
+        bookRepository.save(updatedBook);
+    }
+
 
     // '읽고 싶은 책' 책장 등록 메서드
     @Transactional
@@ -376,6 +397,8 @@ public class BookShelfService {
         ReadBooks existingReadBooks = readBooksRepository.findById(id).
                 orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_INFO_NOTFOUND_EXCEPTION.getMessage()));
 
+        double old_rating = existingReadBooks.getRating();
+
         // 예외처리: 책장 소유자와 수정 요청자가 다른 경우
         if(!existingReadBooks.getMember().getId().equals(userId)){
             throw new BadRequestException(ErrorStatus.BOOKSHELF_MODIFY_NOT_SAME_USER_EXCEPTION.getMessage());
@@ -405,7 +428,7 @@ public class BookShelfService {
         ReadBooks updatedReadBooks = ReadBooks.builder()
                 .id(existingReadBooks.getId()) // 기존 ID 유지
                 .readDate(readBooksDTO.getReadDate())
-                .starRating(readBooksDTO.getStarRating())
+                .rating(readBooksDTO.getRating())
                 .oneLineReview(readBooksDTO.getOneLineReview())
                 .book(existingReadBooks.getBook()) // 기존 책 정보 유지
                 .member(existingReadBooks.getMember()) // 기존 회원 정보 유지
@@ -414,6 +437,28 @@ public class BookShelfService {
 
         // 수정된 엔티티 저장
         readBooksRepository.save(updatedReadBooks);
+
+        // 평균 평점 수정 (단, rating_count 는 오르지 않음)
+        Book book = bookRepository.findById(existingReadBooks.getBook().getIsbn()).
+                orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
+
+        modifyRatingAverage(book, readBooksDTO.getRating(), old_rating);
+
+    }
+
+    // BOOK rating_average 갱신 메서드
+    public void modifyRatingAverage(Book book, double new_rating, double old_rating){
+
+        // 새 점수들의 합 = (기존 점수들의 합) - (바뀌기 이전 평점) + (바뀐 평점)
+        double new_rating_sum = (book.getRatingAverage() * book.getRatingCount()) - old_rating + new_rating;
+        double new_rating_average = new_rating_sum / book.getRatingCount();
+        new_rating_average = Math.round(new_rating_average * 100) / 100.0;
+
+        Book updatedBook = book.toBuilder()
+                .ratingAverage(new_rating_average)
+                .build();
+
+        bookRepository.save(updatedBook);
     }
 
     @Transactional
