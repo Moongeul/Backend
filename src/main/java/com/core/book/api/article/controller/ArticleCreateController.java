@@ -53,7 +53,14 @@ public class ArticleCreateController {
         return ApiResponse.success_only(SuccessStatus.CREATE_ARTICLE_SUCCESS);
     }
 
-    @Operation(summary = "인상깊은구절 게시글 생성 API")
+    @Operation(
+            summary = "인상깊은구절 게시글 생성 API",
+            description = "인상깊은구절 게시글을 생성합니다. (TYPE : PHRASE) / 여러개의 구절을 등록할때 {\n" +
+                    "      \"isbn\": \"(데이터)\",\n" +
+                    "      \"content\": \"(데이터)\",\n" +
+                    "      \"pageNum\": (데이터),\n" +
+                    "      \"phraseContent\": \"(데이터)\"\n" +
+                    "    } 해당부분을 ,로 구분하여 추가하면 됩니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "게시글 생성 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "해당 도서를 읽은 기록이 없습니다.")
