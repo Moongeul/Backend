@@ -1,12 +1,10 @@
 package com.core.book.api.article.service;
 
+import com.core.book.api.article.dto.PhraseArticleContentDTO;
 import com.core.book.api.article.dto.PhraseArticleCreateDTO;
 import com.core.book.api.article.dto.ReviewArticleCreateDTO;
 import com.core.book.api.article.dto.ReviewArticleTagDTO;
-import com.core.book.api.article.entity.ArticleType;
-import com.core.book.api.article.entity.PhraseArticle;
-import com.core.book.api.article.entity.ReviewArticle;
-import com.core.book.api.article.entity.ReviewArticleTag;
+import com.core.book.api.article.entity.*;
 import com.core.book.api.article.repository.PhraseArticleRepository;
 import com.core.book.api.article.repository.ReviewArticleRepository;
 import com.core.book.api.book.entity.Book;
@@ -78,29 +76,39 @@ public class ArticleCreateService {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
-        // 사용자 읽은 책장에서 해당 ISBN이 있는지 확인
-        String isbn = phraseArticleCreateDTO.getIsbn();
-        boolean hasReadBook = readBooksRepository.existsByBookIsbnAndMemberId(isbn, userId);
-
-        if (!hasReadBook) {
-            throw new NotFoundException(ErrorStatus.READBOOK_NOT_FOUND_EXCEPTION.getMessage());
-        }
-
-        // 책 정보 가져오기
-        Book book = bookRepository.findById(isbn)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
-
         PhraseArticle phraseArticle = PhraseArticle.builder()
-                .content(phraseArticleCreateDTO.getContent())
-                .pageNum(phraseArticleCreateDTO.getPageNum())
-                .phraseContent(phraseArticleCreateDTO.getPhraseContent())
-                .likeCnt(0)  // 처음 생성 시 좋아요, 인용, 댓글 수는 0
+                .likeCnt(0)
                 .quoCnt(0)
                 .commentCnt(0)
                 .type(ArticleType.PHRASE)
                 .member(member)
-                .book(book)
                 .build();
+
+        // 자식 구절 리스트 추가
+        if (phraseArticleCreateDTO.getPhraseContents() != null) {
+            for (PhraseArticleContentDTO contentDTO : phraseArticleCreateDTO.getPhraseContents()) {
+
+                // 사용자가 읽은 책인지 확인
+                boolean hasReadBook = readBooksRepository.existsByBookIsbnAndMemberId(contentDTO.getIsbn(), userId);
+                if (!hasReadBook) {
+                    throw new NotFoundException(ErrorStatus.READBOOK_NOT_FOUND_EXCEPTION.getMessage());
+                }
+
+                // 책 엔티티 조회
+                Book book = bookRepository.findById(contentDTO.getIsbn())
+                        .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
+
+                PhraseArticleContent phraseArticleContent = PhraseArticleContent.builder()
+                        .content(contentDTO.getContent())
+                        .pageNum(contentDTO.getPageNum())
+                        .phraseContent(contentDTO.getPhraseContent())
+                        .book(book)
+                        .build();
+
+                // PhraseArticle 연결
+                phraseArticle.addPhraseArticleContent(phraseArticleContent);
+            }
+        }
 
         phraseArticleRepository.save(phraseArticle);
     }

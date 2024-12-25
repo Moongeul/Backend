@@ -78,8 +78,23 @@ public class ArticleViewService {
     }
 
     private ArticleListDTO convertToListDTO(Article article) {
-        Member member = article.getMember(); // 작성자 정보
-        Book book = article.getBook(); // 책 정보
+        Member member = article.getMember();
+
+        Book representativeBook = null;
+        if (article instanceof ReviewArticle) {
+            representativeBook = ((ReviewArticle) article).getBook();
+        } else if (article instanceof PhraseArticle) {
+            PhraseArticle phraseArticle = (PhraseArticle) article;
+            if (!phraseArticle.getPhraseArticleContents().isEmpty()) {
+                representativeBook = phraseArticle.getPhraseArticleContents()
+                        .get(0)
+                        .getBook();
+            }
+        }
+
+        String bookImage = (representativeBook != null) ? representativeBook.getBookImage() : null;
+        String title     = (representativeBook != null) ? representativeBook.getTitle()     : null;
+        String author    = (representativeBook != null) ? representativeBook.getAuthor()    : null;
 
         return ArticleListDTO.builder()
                 .articleId(article.getId())
@@ -90,12 +105,13 @@ public class ArticleViewService {
                 .likeCnt(article.getLikeCnt())
                 .commentCnt(article.getCommentCnt())
                 .quoCnt(article.getQuoCnt())
-                .bookImage(book.getBookImage())
-                .title(book.getTitle())
-                .author(book.getAuthor())
+                .bookImage(bookImage)
+                .title(title)
+                .author(author)
                 .articleType(article.getType())
                 .build();
     }
+
 
     // 감상평 게시글 상세 조회 메서드
     public ReviewArticleDetailDTO getReviewArticleDetail(Long id) {
@@ -150,29 +166,37 @@ public class ArticleViewService {
         PhraseArticle phraseArticle = phraseArticleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));
 
-        // 책 정보 가져오기
-        Book book = phraseArticle.getBook();
-
         // 작성자 정보 가져오기
         Member member = phraseArticle.getMember();
 
         // 작성자의 팔로워 수 조회
         long followerCount = followRepository.countByFollowingId(member.getId());
 
+        List<PhraseArticleContentDetailDTO> contentDetailList = phraseArticle.getPhraseArticleContents().stream()
+                .map(child -> {
+                    // 자식이 참조하는 Book
+                    Book book = child.getBook();
+                    return PhraseArticleContentDetailDTO.builder()
+                            .content(child.getContent())
+                            .pageNum(child.getPageNum())
+                            .phraseContent(child.getPhraseContent())
+                            .isbn(book != null ? book.getIsbn() : null)
+                            .title(book != null ? book.getTitle() : null)
+                            .author(book != null ? book.getAuthor() : null)
+                            .bookImage(book != null ? book.getBookImage() : null)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
         return PhraseArticleDetailDTO.builder()
+                .articleId(phraseArticle.getId())
                 .memberId(member.getId())
-                .isbn(book.getIsbn())
-                .title(book.getTitle())
-                .author(book.getAuthor())
-                .bookImage(book.getBookImage())
-                .content(phraseArticle.getContent())
+                .nickname(member.getNickname())
+                .profileImage(member.getImageUrl())
                 .likeCnt(phraseArticle.getLikeCnt())
                 .quoCnt(phraseArticle.getQuoCnt())
                 .commentCnt(phraseArticle.getCommentCnt())
-                .pageNum(phraseArticle.getPageNum())
-                .phraseContent(phraseArticle.getPhraseContent())
-                .nickname(member.getNickname())
-                .profileImage(member.getImageUrl())
+                .phraseContents(contentDetailList)
                 .followerCount(followerCount)
                 .build();
     }

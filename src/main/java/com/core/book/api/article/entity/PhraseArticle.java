@@ -1,15 +1,15 @@
 package com.core.book.api.article.entity;
 
-import com.core.book.api.article.dto.PhraseArticleCreateDTO;
-import com.core.book.api.article.dto.ReviewArticleCreateDTO;
-import com.core.book.api.book.entity.Book;
 import com.core.book.api.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Builder;
 import lombok.experimental.SuperBuilder;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @SuperBuilder(toBuilder = true)
@@ -19,32 +19,20 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "PHRASE_ARTICLE")
 public class PhraseArticle extends Article {
 
-    @Column(columnDefinition = "TEXT")
-    private String content; // 구절에 대한 자세한 설명
-
-    private long likeCnt; // 좋아요 수
-    private long quoCnt; // 인용 수
-    private long commentCnt; // 댓글 수
-    private int pageNum; // 페이지 번호
-
-    @Column
-    private String phraseContent; // 인용 할 구절
+    @Builder.Default
+    @OneToMany(mappedBy = "phraseArticle", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PhraseArticleContent> phraseArticleContents = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Member member;
 
-    // 엔티티 수정
-    public PhraseArticle update(PhraseArticleCreateDTO dto, Book newBook) {
-        return this.toBuilder()
-                .content(dto.getContent())
-                .phraseContent(dto.getPhraseContent())
-                .pageNum(dto.getPageNum())
-                .book(newBook)
-                .build();
+    public void addPhraseArticleContent(PhraseArticleContent phraseArticleContent) {
+        this.phraseArticleContents.add(phraseArticleContent);
+        phraseArticleContent.setPhraseArticle(this);
     }
 
-    // 댓글 수 증가
+    // 댓글 수 증가/감소
     @Override
     public PhraseArticle increaseCommentCount() {
         return this.toBuilder()
@@ -52,7 +40,6 @@ public class PhraseArticle extends Article {
                 .build();
     }
 
-    // 댓글 수 감소
     @Override
     public PhraseArticle decreaseCommentCount() {
         return this.toBuilder()
@@ -62,12 +49,35 @@ public class PhraseArticle extends Article {
 
     @Override
     public String getContent() {
-        return this.content;
+        // 자식(구절) 리스트가 없으면 빈 객체
+        if (phraseArticleContents.isEmpty()) {
+            return "{}";
+        }
+
+        // 첫 번째 구절만 추출
+        PhraseArticleContent first = phraseArticleContents.get(0);
+
+        Integer pageNum      = first.getPageNum();       // 페이지 번호
+        String phraseText    = first.getPhraseContent(); // 인상깊은 구절
+        String Content = first.getContent();       // 구절에 대한 전체 설명
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("\"pageNum\":").append(pageNum).append(",");
+        sb.append("\"phraseContent\":\"").append(escape(phraseText)).append("\",");
+        sb.append("\"content\":\"").append(escape(Content)).append("\"");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    // 문자열 중간의 " 를 간단히 변환하기 위한  메서드
+    private String escape(String input) {
+        if (input == null) return "";
+        return input.replace("\"", "\\\"");
     }
 
     @Override
     public Member getMember() {
         return this.member;
     }
-
 }

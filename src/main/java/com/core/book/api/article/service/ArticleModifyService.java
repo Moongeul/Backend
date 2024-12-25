@@ -1,8 +1,10 @@
 package com.core.book.api.article.service;
 
+import com.core.book.api.article.dto.PhraseArticleContentDTO;
 import com.core.book.api.article.dto.PhraseArticleCreateDTO;
 import com.core.book.api.article.dto.ReviewArticleCreateDTO;
 import com.core.book.api.article.entity.PhraseArticle;
+import com.core.book.api.article.entity.PhraseArticleContent;
 import com.core.book.api.article.entity.ReviewArticle;
 import com.core.book.api.article.repository.PhraseArticleRepository;
 import com.core.book.api.article.repository.ReviewArticleRepository;
@@ -13,6 +15,9 @@ import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -70,26 +75,35 @@ public class ArticleModifyService {
             throw new NotFoundException(ErrorStatus.ARTICLE_MODIFY_NOT_SAME_USER_EXCEPTION.getMessage());
         }
 
-        // 사용자 읽은 책장에서 해당 ISBN이 있는지 확인
-        String isbn = phraseArticleCreateDTO.getIsbn();
-        boolean hasReadBook = readBooksRepository.existsByBookIsbnAndMemberId(isbn, userId);
+        // 기존 구절들 전부 삭제
+        phraseArticle.getPhraseArticleContents().clear();
 
-        if (!hasReadBook) {
-            throw new NotFoundException(ErrorStatus.READBOOK_NOT_FOUND_EXCEPTION.getMessage());
-        }
+        // 새 구절 목록 생성
+        List<PhraseArticleContent> newContents = new ArrayList<>();
+        for (PhraseArticleContentDTO contentDTO : phraseArticleCreateDTO.getPhraseContents()) {
+            // 사용자가 읽은 책인지 확인
+            boolean hasReadBook = readBooksRepository.existsByBookIsbnAndMemberId(contentDTO.getIsbn(), userId);
+            if (!hasReadBook) {
+                throw new NotFoundException(ErrorStatus.READBOOK_NOT_FOUND_EXCEPTION.getMessage());
+            }
 
-        // 새로운 ISBN 처리
-        Book newBook = phraseArticle.getBook();
-        if (phraseArticleCreateDTO.getIsbn() != null
-                && !phraseArticleCreateDTO.getIsbn().equals(phraseArticle.getBook().getIsbn())) {
-            newBook = bookRepository.findById(isbn)
+            // 책 엔티티 조회
+            Book book = bookRepository.findById(contentDTO.getIsbn())
                     .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
+
+            PhraseArticleContent phraseArticleContent = PhraseArticleContent.builder()
+                    .content(contentDTO.getContent())
+                    .pageNum(contentDTO.getPageNum())
+                    .phraseContent(contentDTO.getPhraseContent())
+                    .book(book)
+                    .build();
+
+            // PhraseArticle 연결
+            phraseArticle.addPhraseArticleContent(phraseArticleContent);
+
+            newContents.add(phraseArticleContent);
         }
 
-        // 업데이트된 엔티티 생성
-        PhraseArticle updatedArticle = phraseArticle.update(phraseArticleCreateDTO, newBook);
-
-        // 엔티티 저장
-        phraseArticleRepository.save(updatedArticle);
+        phraseArticleRepository.save(phraseArticle);
     }
 }

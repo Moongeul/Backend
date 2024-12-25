@@ -29,7 +29,7 @@ public class ArticleDeleteService {
         reviewArticleRepository.delete(reviewArticle);
     }
 
-    //인상깊은구절 게시글 삭제
+    // 인상깊은구절 게시글 삭제
     public void deletePhraseArticle(Long articleId, Long userId) {
         PhraseArticle phraseArticle = phraseArticleRepository.findById(articleId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));

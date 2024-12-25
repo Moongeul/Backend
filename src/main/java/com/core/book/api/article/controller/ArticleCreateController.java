@@ -53,10 +53,7 @@ public class ArticleCreateController {
         return ApiResponse.success_only(SuccessStatus.CREATE_ARTICLE_SUCCESS);
     }
 
-    @Operation(
-            summary = "인상깊은구절 게시글 생성 API",
-            description = "인상깊은구절 게시글을 생성합니다. (TYPE : PHRASE)"
-    )
+    @Operation(summary = "인상깊은구절 게시글 생성 API")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "게시글 생성 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "해당 도서를 읽은 기록이 없습니다.")
@@ -66,8 +63,9 @@ public class ArticleCreateController {
             @RequestBody PhraseArticleCreateDTO phraseArticleCreateDTO,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        // content 누락시 예외처리
-        if (phraseArticleCreateDTO.getContent() == null || phraseArticleCreateDTO.getContent().isEmpty()) {
+
+        if (phraseArticleCreateDTO.getPhraseContents() == null
+                || phraseArticleCreateDTO.getPhraseContents().isEmpty()) {
             throw new NotFoundException(ErrorStatus.VALIDATION_CONTENT_MISSING_EXCEPTION.getMessage());
         }
 
