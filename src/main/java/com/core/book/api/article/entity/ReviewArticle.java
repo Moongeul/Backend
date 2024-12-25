@@ -19,7 +19,7 @@ public class ReviewArticle extends Article {
     private String content; // 게시글 내용
 
     private String oneLineReview; //한줄평 리뷰
-    private float starRating; // 평점
+    private float rating; // 평점
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -33,7 +33,7 @@ public class ReviewArticle extends Article {
         return this.toBuilder()
                 .content(dto.getContent())
                 .oneLineReview(dto.getOneLineReview())
-                .starRating(dto.getStarRating())
+                .rating(dto.getRating())
                 .book(newBook)
                 .reviewArticleTag(
                         dto.getReviewArticleTagDTO() != null
