@@ -17,7 +17,8 @@ public class WishBookshelfResponseDTO {
     @Builder
     @Getter
     public static class wishBookDTO {
-        
+
+        private Long id; // '읽고 싶은 책' 책장 데이터의 id
         private String isbn; //isbn
         private String bookImage; // 책 이미지
         private String bookTitle; //책 제목

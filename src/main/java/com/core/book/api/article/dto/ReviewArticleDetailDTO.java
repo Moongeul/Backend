@@ -15,7 +15,7 @@ public class ReviewArticleDetailDTO {
     private final long likeCnt;
     private final long quoCnt;
     private final long commentCnt;
-    private final float starRating;
+    private final float rating;
     private final ReviewArticleTagDTO reviewArticleTagDTO;
     private final String nickname;
     private final String profileImage;
@@ -37,7 +37,7 @@ public class ReviewArticleDetailDTO {
         this.likeCnt = likeCnt;
         this.quoCnt = quoCnt;
         this.commentCnt = commentCnt;
-        this.starRating = starRating;
+        this.rating = rating;
         this.reviewArticleTagDTO = reviewArticleTagDTO;
         this.nickname = nickname;
         this.profileImage = profileImage;
