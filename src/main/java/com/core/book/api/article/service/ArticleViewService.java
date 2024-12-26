@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -78,7 +79,12 @@ public class ArticleViewService {
     }
 
     private ArticleListDTO convertToListDTO(Article article) {
+
         Member member = article.getMember();
+
+        // 날짜 포맷팅
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = article.getCreatedAt().format(formatter);
 
         Book representativeBook = null;
         if (article instanceof ReviewArticle) {
@@ -109,6 +115,7 @@ public class ArticleViewService {
                 .title(title)
                 .author(author)
                 .articleType(article.getType())
+                .date(formattedDate)
                 .build();
     }
 
@@ -127,6 +134,10 @@ public class ArticleViewService {
 
         // 작성자의 팔로워 수 조회
         long followerCount = followRepository.countByFollowingId(member.getId());
+
+        // 날짜 포맷팅
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = reviewArticle.getCreatedAt().format(formatter);
 
         // 태그 정보 가져오기
         ReviewArticleTag reviewArticleTag = reviewArticle.getReviewArticleTag();
@@ -157,6 +168,7 @@ public class ArticleViewService {
                 .nickname(member.getNickname())
                 .profileImage(member.getImageUrl())
                 .followerCount(followerCount)
+                .date(formattedDate)
                 .build();
     }
 
@@ -171,6 +183,10 @@ public class ArticleViewService {
 
         // 작성자의 팔로워 수 조회
         long followerCount = followRepository.countByFollowingId(member.getId());
+
+        // 날짜 포맷팅
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = phraseArticle.getCreatedAt().format(formatter);
 
         List<PhraseArticleContentDetailDTO> contentDetailList = phraseArticle.getPhraseArticleContents().stream()
                 .map(child -> {
@@ -198,6 +214,7 @@ public class ArticleViewService {
                 .commentCnt(phraseArticle.getCommentCnt())
                 .phraseContents(contentDetailList)
                 .followerCount(followerCount)
+                .date(formattedDate)
                 .build();
     }
 }

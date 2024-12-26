@@ -13,6 +13,7 @@ public class PhraseArticleDetailDTO {
     private final String nickname;
     private final String profileImage;
     private final long followerCount;
+    private final String date;
 
     private final long likeCnt;
     private final long quoCnt;
@@ -25,6 +26,7 @@ public class PhraseArticleDetailDTO {
                                   Long memberId,
                                   String nickname,
                                   String profileImage,
+                                  String date,
                                   long likeCnt,
                                   long quoCnt,
                                   long commentCnt,
@@ -39,5 +41,6 @@ public class PhraseArticleDetailDTO {
         this.commentCnt = commentCnt;
         this.phraseContents = phraseContents;
         this.followerCount = followerCount;
+        this.date = date;
     }
 }
