@@ -19,7 +19,7 @@ public class ReviewArticle extends Article {
     private String content; // 게시글 내용
 
     private String oneLineReview; //한줄평 리뷰
-    private float starRating; // 평점
+    private float rating; // 평점
 
     private long likeCnt; // 좋아요 수
     private long quoCnt; // 인용 수
@@ -37,7 +37,7 @@ public class ReviewArticle extends Article {
         return this.toBuilder()
                 .content(dto.getContent())
                 .oneLineReview(dto.getOneLineReview())
-                .starRating(dto.getStarRating())
+                .rating(dto.getRating())
                 .book(newBook)
                 .reviewArticleTag(
                         dto.getReviewArticleTagDTO() != null

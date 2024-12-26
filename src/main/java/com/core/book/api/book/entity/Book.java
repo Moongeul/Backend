@@ -7,7 +7,7 @@ import lombok.*;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @ToString
 @Getter
 public class Book {
@@ -26,6 +26,12 @@ public class Book {
     @Column(length = 5000)
     private String description; //책 소개
     private String pubdate; // 출판연도
+
+    @Column(name = "rating_average")
+    private double ratingAverage; // 평점 (전체 평균)
+
+    @Column(name = "rating_count")
+    private int ratingCount; // 평점 개수
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "book_tag_id")

@@ -57,7 +57,7 @@ public class ArticleCreateService {
         ReviewArticle reviewArticle = ReviewArticle.builder()
                 .content(reviewArticleCreateDTO.getContent())
                 .oneLineReview(reviewArticleCreateDTO.getOneLineReview())
-                .starRating(reviewArticleCreateDTO.getStarRating())
+                .rating(reviewArticleCreateDTO.getRating())
                 .likeCnt(0)  // 처음 생성 시 좋아요, 인용, 댓글 수는 0
                 .quoCnt(0)
                 .commentCnt(0)
@@ -68,6 +68,25 @@ public class ArticleCreateService {
                 .build();
 
         reviewArticleRepository.save(reviewArticle);
+
+        // BOOK rating_average 갱신
+        updateRatingAverage(book, reviewArticleCreateDTO.getRating());
+    }
+
+    // BOOK rating_average 갱신 메서드
+    public void updateRatingAverage(Book book, double new_rating){
+
+        // 해당 책의 평균 평점(rating_average) 새로 계산 및 rating_count(평점 개수) + 1
+        // 계산 공식: new_rating_average = (rating_average * rating_count + rating) / rating_count + 1 )
+        double new_rating_average = (book.getRatingAverage() * book.getRatingCount() + new_rating) / (book.getRatingCount() + 1);
+        new_rating_average = Math.round(new_rating_average * 100) / 100.0;
+
+        Book updatedBook = book.toBuilder()
+                .ratingAverage(new_rating_average)
+                .ratingCount(book.getRatingCount() + 1)
+                .build();
+
+        bookRepository.save(updatedBook);
     }
 
     // 인상깊은구절 게시글 생성

@@ -4,26 +4,28 @@ import com.core.book.api.book.entity.Book;
 import com.core.book.api.bookshelf.entity.ReadBooks;
 import com.core.book.api.bookshelf.entity.ReadBooksTag;
 import com.core.book.api.member.entity.Member;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Builder
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReadBooksDTO {
 
     private LocalDate readDate; // 읽은 날짜
-    private double starRating; // 평점
+    private double rating; // 평점
     private String oneLineReview; // 한줄평
     private ReadBooksTagDTO readBooksTag; //태그
-
-    private Long memberId; // 회원 ID
 
     public ReadBooks toEntity(Book book, Member member, ReadBooksTag readBooksTag){
         return ReadBooks.builder()
                 .readDate(this.readDate)
-                .starRating(this.starRating)
+                .rating(this.rating)
                 .oneLineReview(this.oneLineReview)
                 .book(book)
                 .member(member)
