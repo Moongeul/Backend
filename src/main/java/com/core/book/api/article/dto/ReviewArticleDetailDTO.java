@@ -25,7 +25,7 @@ public class ReviewArticleDetailDTO {
 
     @Builder
     public ReviewArticleDetailDTO(Long memberId, String isbn, String title, String author, String bookImage, String content, String date,
-                                  String oneLineReview, long likeCnt, long quoCnt, long commentCnt, float starRating, ReviewArticleTagDTO reviewArticleTagDTO,
+                                  String oneLineReview, long likeCnt, long quoCnt, long commentCnt, float rating, ReviewArticleTagDTO reviewArticleTagDTO,
                                   String nickname, String profileImage, long followerCount, boolean myLike) {
         this.memberId = memberId;
         this.isbn = isbn;
