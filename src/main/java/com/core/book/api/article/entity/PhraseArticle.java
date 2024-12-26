@@ -32,7 +32,7 @@ public class PhraseArticle extends Article {
         phraseArticleContent.setPhraseArticle(this);
     }
 
-    // 댓글 수 증가/감소
+    // 댓글 수 증가
     @Override
     public PhraseArticle increaseCommentCount() {
         return this.toBuilder()
@@ -40,10 +40,25 @@ public class PhraseArticle extends Article {
                 .build();
     }
 
+    // 댓글 수 감소
     @Override
     public PhraseArticle decreaseCommentCount() {
         return this.toBuilder()
                 .commentCnt(this.getCommentCnt() - 1)
+                .build();
+    }
+
+    // 좋아요 증가
+    public Article increaseLikeCount() {
+        return this.toBuilder()
+                .likeCnt(this.getLikeCnt() + 1)
+                .build();
+    }
+
+    // 좋아요 감소
+    public Article decreaseLikeCount() {
+        return this.toBuilder()
+                .likeCnt(this.getLikeCnt() - 1)
                 .build();
     }
 

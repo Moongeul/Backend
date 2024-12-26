@@ -64,6 +64,20 @@ public class ReviewArticle extends Article {
                 .build();
     }
 
+    // 좋아요 증가
+    public Article increaseLikeCount() {
+        return this.toBuilder()
+                .likeCnt(this.getLikeCnt() + 1)
+                .build();
+    }
+
+    // 좋아요 감소
+    public Article decreaseLikeCount() {
+        return this.toBuilder()
+                .likeCnt(this.getLikeCnt() - 1)
+                .build();
+    }
+
     @Override
     public String getContent() {
         return this.content;

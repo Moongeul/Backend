@@ -14,6 +14,7 @@ public class PhraseArticleDetailDTO {
     private final String profileImage;
     private final long followerCount;
     private final String date;
+    private final boolean myLike;
 
     private final long likeCnt;
     private final long quoCnt;
@@ -31,7 +32,8 @@ public class PhraseArticleDetailDTO {
                                   long quoCnt,
                                   long commentCnt,
                                   long followerCount,
-                                  List<PhraseArticleContentDetailDTO> phraseContents) {
+                                  List<PhraseArticleContentDetailDTO> phraseContents,
+                                  boolean myLike) {
         this.articleId = articleId;
         this.memberId = memberId;
         this.nickname = nickname;
@@ -42,5 +44,6 @@ public class PhraseArticleDetailDTO {
         this.phraseContents = phraseContents;
         this.followerCount = followerCount;
         this.date = date;
+        this.myLike = myLike;
     }
 }
