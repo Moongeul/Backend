@@ -15,7 +15,7 @@ public class CommentResponseDTO {
     private String nickname;
     private String profileImageUrl;
     private Long parentId;
-    private String updatedAt;
+    private String createAt;
 
     public static CommentResponseDTO fromEntity(Comment comment) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
@@ -26,7 +26,7 @@ public class CommentResponseDTO {
                 .nickname(comment.getMember().getNickname())
                 .profileImageUrl(comment.getMember().getImageUrl())
                 .parentId(comment.getParentComment() != null ? comment.getParentComment().getId() : null)
-                .updatedAt(comment.getUpdatedAt().format(dateTimeFormatter))
+                .createAt(comment.getCreatedAt().format(dateTimeFormatter))
                 .build();
     }
 }
