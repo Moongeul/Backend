@@ -87,4 +87,5 @@ public class ArticleViewController {
         QnaArticleDetailDTO qnaArticleDetailDTO = articleViewService.getQnaArticleDetail(id,userDetails);
         return ApiResponse.success(SuccessStatus.GET_ARTICLE_SUCCESS, qnaArticleDetailDTO);
     }
+
 }

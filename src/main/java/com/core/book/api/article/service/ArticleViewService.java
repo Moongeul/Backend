@@ -82,7 +82,7 @@ public class ArticleViewService {
         // 날짜 포맷팅
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedDate = article.getCreatedAt().format(formatter);
-
+      
         // 좋아요 여부 체크
         boolean myLike = false;
         if (userDetails != null) {

@@ -1,5 +1,11 @@
 package com.core.book.api.article.service;
 
+import com.core.book.api.article.dto.PhraseArticleContentDTO;
+import com.core.book.api.article.dto.PhraseArticleCreateDTO;
+import com.core.book.api.article.dto.ReviewArticleCreateDTO;
+import com.core.book.api.article.dto.ReviewArticleTagDTO;
+import com.core.book.api.article.entity.*;
+import com.core.book.api.article.repository.PhraseArticleRepository;
 import com.core.book.api.article.dto.*;
 import com.core.book.api.article.entity.*;
 import com.core.book.api.article.repository.PhraseArticleRepository;

@@ -1,6 +1,8 @@
 package com.core.book.api.article.service;
 
 import com.core.book.api.article.entity.PhraseArticle;
+import com.core.book.api.article.entity.ReviewArticle;
+import com.core.book.api.article.repository.PhraseArticleRepository;
 import com.core.book.api.article.entity.QnaArticle;
 import com.core.book.api.article.entity.ReviewArticle;
 import com.core.book.api.article.repository.PhraseArticleRepository;
@@ -57,4 +59,5 @@ public class ArticleDeleteService {
 
         qnaArticleRepository.delete(qnaArticle);
     }
+
 }

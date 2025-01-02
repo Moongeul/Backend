@@ -32,8 +32,10 @@ public class PhraseArticleDetailDTO {
                                   long quoCnt,
                                   long commentCnt,
                                   long followerCount,
+                                  
                                   List<PhraseArticleContentDetailDTO> phraseContents,
                                   boolean myLike) {
+      
         this.articleId = articleId;
         this.memberId = memberId;
         this.nickname = nickname;
@@ -45,5 +47,6 @@ public class PhraseArticleDetailDTO {
         this.followerCount = followerCount;
         this.date = date;
         this.myLike = myLike;
+
     }
 }
