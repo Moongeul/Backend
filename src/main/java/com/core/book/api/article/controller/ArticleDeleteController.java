@@ -41,4 +41,44 @@ public class ArticleDeleteController {
 
         return ApiResponse.success_only(SuccessStatus.DELETE_ARTICLE_SUCCESS);
     }
+
+    @Operation(
+            summary = "인상깊은구절 게시글 삭제 API",
+            description = "인상깊은구절 게시글을 삭제합니다. (TYPE : PHRASE)"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 삭제 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "게시글 작성자와 삭제 요청자가 다릅니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다.")
+    })
+    @DeleteMapping("/phrase/{id}")
+    public ResponseEntity<ApiResponse<Void>> deletePhraseArticle(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        articleDeleteService.deletePhraseArticle(id, userId);
+
+        return ApiResponse.success_only(SuccessStatus.DELETE_ARTICLE_SUCCESS);
+    }
+
+    @Operation(
+            summary = "QnA 게시글 삭제 API",
+            description = "QnA 게시글을 삭제합니다. (TYPE : QNA)"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 삭제 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "게시글 작성자와 삭제 요청자가 다릅니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다.")
+    })
+    @DeleteMapping("/qna/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteQnaArticle(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        articleDeleteService.deleteQnaArticle(id, userId);
+
+        return ApiResponse.success_only(SuccessStatus.DELETE_ARTICLE_SUCCESS);
+    }
 }

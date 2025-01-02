@@ -1,5 +1,7 @@
 package com.core.book.api.article.controller;
 
+import com.core.book.api.article.dto.PhraseArticleCreateDTO;
+import com.core.book.api.article.dto.QnaArticleCreateDTO;
 import com.core.book.api.article.dto.ReviewArticleCreateDTO;
 import com.core.book.api.article.service.ArticleModifyService;
 import com.core.book.api.member.service.MemberService;
@@ -46,6 +48,50 @@ public class ArticleModifyController {
 
         Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
         articleModifyService.modifyReviewArticle(id, reviewArticleCreateDTO, userId);
+
+        return ApiResponse.success_only(SuccessStatus.MODIFY_ARTICLE_SUCCESS);
+    }
+
+    @Operation(summary = "인상깊은구절 게시글 수정 API", description = "인상깊은구절 게시글을 수정합니다. (TYPE : PHRASE)")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "게시글 작성자와 수정 요청자가 다릅니다.")
+    })
+    @PutMapping("/phrase/{id}")
+    public ResponseEntity<ApiResponse<Void>> modifyPhraseArticle(
+            @PathVariable Long id,
+            @RequestBody PhraseArticleCreateDTO phraseArticleCreateDTO,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+
+        if (phraseArticleCreateDTO.getPhraseContents() == null || phraseArticleCreateDTO.getPhraseContents().isEmpty()) {
+            throw new NotFoundException(ErrorStatus.VALIDATION_CONTENT_MISSING_EXCEPTION.getMessage());
+        }
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        articleModifyService.modifyPhraseArticle(id, phraseArticleCreateDTO, userId);
+
+        return ApiResponse.success_only(SuccessStatus.MODIFY_ARTICLE_SUCCESS);
+    }
+
+    @Operation(summary = "QnA 게시글 수정 API", description = "QnA 게시글을 수정합니다. (TYPE : QNA)")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "게시글 작성자와 수정 요청자가 다릅니다.")
+    })
+    @PutMapping("/qna/{id}")
+    public ResponseEntity<ApiResponse<Void>> modifyQnaArticle(
+            @PathVariable Long id,
+            @RequestBody QnaArticleCreateDTO qnaArticleCreateDTO,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+
+        if (qnaArticleCreateDTO.getQnaContents() == null || qnaArticleCreateDTO.getQnaContents().isEmpty()) {
+            throw new NotFoundException(ErrorStatus.VALIDATION_CONTENT_MISSING_EXCEPTION.getMessage());
+        }
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        articleModifyService.modifyQnaArticle(id, qnaArticleCreateDTO, userId);
 
         return ApiResponse.success_only(SuccessStatus.MODIFY_ARTICLE_SUCCESS);
     }
