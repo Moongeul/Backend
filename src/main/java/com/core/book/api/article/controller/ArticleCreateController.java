@@ -1,6 +1,7 @@
 package com.core.book.api.article.controller;
 
 import com.core.book.api.article.dto.PhraseArticleCreateDTO;
+import com.core.book.api.article.dto.QnaArticleCreateDTO;
 import com.core.book.api.article.dto.ReviewArticleCreateDTO;
 import com.core.book.api.article.service.ArticleCreateService;
 import com.core.book.api.member.service.MemberService;
@@ -78,6 +79,32 @@ public class ArticleCreateController {
 
         Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
         articleCreateService.createPhraseArticle(phraseArticleCreateDTO, userId);
+
+        return ApiResponse.success_only(SuccessStatus.CREATE_ARTICLE_SUCCESS);
+    }
+
+    @Operation(
+            summary = "QnA 게시글 생성 API",
+            description = "QnA 게시글을 생성합니다. (TYPE : QNA) / 여러개의 질문을 등록할때 {\n" +
+                    "      \"content\": \"(데이터)\"\n" +
+                    "    } 해당부분을 ,로 구분하여 추가하면 됩니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "게시글 생성 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "해당 도서를 읽은 기록이 없습니다.")
+    })
+    @PostMapping("/qna")
+    public ResponseEntity<ApiResponse<Void>> createQnaArticle(
+            @RequestBody QnaArticleCreateDTO qnaArticleCreateDTO,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+
+        if (qnaArticleCreateDTO.getQnaContents() == null
+                || qnaArticleCreateDTO.getQnaContents().isEmpty()) {
+            throw new NotFoundException(ErrorStatus.VALIDATION_CONTENT_MISSING_EXCEPTION.getMessage());
+        }
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        articleCreateService.createQnaArticle(qnaArticleCreateDTO, userId);
 
         return ApiResponse.success_only(SuccessStatus.CREATE_ARTICLE_SUCCESS);
     }

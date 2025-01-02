@@ -1,11 +1,9 @@
 package com.core.book.api.article.service;
 
-import com.core.book.api.article.dto.PhraseArticleContentDTO;
-import com.core.book.api.article.dto.PhraseArticleCreateDTO;
-import com.core.book.api.article.dto.ReviewArticleCreateDTO;
-import com.core.book.api.article.dto.ReviewArticleTagDTO;
+import com.core.book.api.article.dto.*;
 import com.core.book.api.article.entity.*;
 import com.core.book.api.article.repository.PhraseArticleRepository;
+import com.core.book.api.article.repository.QnaArticleRepository;
 import com.core.book.api.article.repository.ReviewArticleRepository;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
@@ -26,6 +24,7 @@ public class ArticleCreateService {
     private final MemberRepository memberRepository;
     private final ReadBooksRepository readBooksRepository;
     private final BookRepository bookRepository;
+    private final QnaArticleRepository qnaArticleRepository;
 
     // 감상평 게시글 생성
     public void createReviewArticle(ReviewArticleCreateDTO reviewArticleCreateDTO, Long userId) {
@@ -130,5 +129,48 @@ public class ArticleCreateService {
         }
 
         phraseArticleRepository.save(phraseArticle);
+    }
+
+    // QnA 게시글 생성
+    public void createQnaArticle(QnaArticleCreateDTO qnaArticleCreateDTO, Long userId) {
+        // 해당 유저를 찾을 수 없을 경우 예외처리
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 사용자 읽은 책장에서 해당 ISBN이 있는지 확인
+        String isbn = qnaArticleCreateDTO.getIsbn();
+        boolean hasReadBook = readBooksRepository.existsByBookIsbnAndMemberId(isbn, userId);
+
+        if (!hasReadBook) {
+            throw new NotFoundException(ErrorStatus.READBOOK_NOT_FOUND_EXCEPTION.getMessage());
+        }
+
+        // 책 정보 가져오기
+        Book book = bookRepository.findById(isbn)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
+
+        QnaArticle qnaArticle = QnaArticle.builder()
+                .likeCnt(0)
+                .quoCnt(0)
+                .commentCnt(0)
+                .type(ArticleType.QNA)
+                .book(book)
+                .member(member)
+                .build();
+
+        // 질문 리스트 추가
+        if (qnaArticleCreateDTO.getQnaContents() != null) {
+            for (QnaArticleContentDTO contentDTO : qnaArticleCreateDTO.getQnaContents()) {
+
+                QnaArticleContent qnaArticleContent = QnaArticleContent.builder()
+                        .content(contentDTO.getContent())
+                        .build();
+
+                // QnaArticle 연결
+                qnaArticle.addQnaArticleContent(qnaArticleContent);
+            }
+        }
+
+        qnaArticleRepository.save(qnaArticle);
     }
 }

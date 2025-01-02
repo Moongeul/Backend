@@ -2,10 +2,7 @@ package com.core.book.api.article.service;
 
 import com.core.book.api.article.dto.*;
 import com.core.book.api.article.entity.*;
-import com.core.book.api.article.repository.ArticleLikeRepository;
-import com.core.book.api.article.repository.ArticleRepository;
-import com.core.book.api.article.repository.PhraseArticleRepository;
-import com.core.book.api.article.repository.ReviewArticleRepository;
+import com.core.book.api.article.repository.*;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.member.service.MemberService;
 import com.core.book.api.member.entity.Member;
@@ -28,6 +25,7 @@ public class ArticleViewService {
     private final ReviewArticleRepository reviewArticleRepository;
     private final PhraseArticleRepository phraseArticleRepository;
     private final ArticleLikeRepository articleLikeRepository;
+    private final QnaArticleRepository qnaArticleRepository;
     private final ArticleRepository articleRepository;
     private final FollowRepository followRepository;
     private final MemberService memberService;
@@ -102,6 +100,8 @@ public class ArticleViewService {
                         .get(0)
                         .getBook();
             }
+        } else if(article instanceof QnaArticle){
+            representativeBook = ((QnaArticle) article).getBook();
         }
 
         String bookImage = (representativeBook != null) ? representativeBook.getBookImage() : null;
@@ -235,6 +235,60 @@ public class ArticleViewService {
                 .quoCnt(phraseArticle.getQuoCnt())
                 .commentCnt(phraseArticle.getCommentCnt())
                 .phraseContents(contentDetailList)
+                .followerCount(followerCount)
+                .date(formattedDate)
+                .myLike(myLike)
+                .build();
+    }
+
+    // QnA 게시글 상세 조회 메서드
+    public QnaArticleDetailDTO getQnaArticleDetail(Long id, UserDetails userDetails) {
+        // 게시글 조회
+        QnaArticle qnaArticle = qnaArticleRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));
+
+        // 작성자 정보 가져오기
+        Member member = qnaArticle.getMember();
+
+        // 작성자의 팔로워 수 조회
+        long followerCount = followRepository.countByFollowingId(member.getId());
+
+        // 날짜 포맷팅
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = qnaArticle.getCreatedAt().format(formatter);
+
+        // 좋아요 여부 체크
+        boolean myLike = false;
+        if (userDetails != null) {
+            Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+            myLike = articleLikeRepository.findByArticleIdAndMemberId(qnaArticle.getId(), userId).isPresent();
+        }
+
+        // 책 정보 가져오기
+        Book book = qnaArticle.getBook();
+
+        List<QnaArticleContentDetailDTO> contentDetailList = qnaArticle.getQnaArticleContents().stream()
+                .map(child -> {
+                    return QnaArticleContentDetailDTO.builder()
+                            .id(child.getId())
+                            .content(child.getContent())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return QnaArticleDetailDTO.builder()
+                .articleId(qnaArticle.getId())
+                .isbn(book.getIsbn())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .bookImage(book.getBookImage())
+                .memberId(member.getId())
+                .nickname(member.getNickname())
+                .profileImage(member.getImageUrl())
+                .likeCnt(qnaArticle.getLikeCnt())
+                .quoCnt(qnaArticle.getQuoCnt())
+                .commentCnt(qnaArticle.getCommentCnt())
+                .qnaContents(contentDetailList)
                 .followerCount(followerCount)
                 .date(formattedDate)
                 .myLike(myLike)
