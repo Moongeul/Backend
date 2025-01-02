@@ -7,6 +7,10 @@ import com.core.book.api.article.entity.PhraseArticle;
 import com.core.book.api.article.entity.PhraseArticleContent;
 import com.core.book.api.article.entity.ReviewArticle;
 import com.core.book.api.article.repository.PhraseArticleRepository;
+import com.core.book.api.article.dto.*;
+import com.core.book.api.article.entity.*;
+import com.core.book.api.article.repository.PhraseArticleRepository;
+import com.core.book.api.article.repository.QnaArticleRepository;
 import com.core.book.api.article.repository.ReviewArticleRepository;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
@@ -27,6 +31,7 @@ public class ArticleModifyService {
     private final PhraseArticleRepository phraseArticleRepository;
     private final ReadBooksRepository readBooksRepository;
     private final BookRepository bookRepository;
+    private final QnaArticleRepository qnaArticleRepository;
 
     // 감상평 게시글 수정
     public void modifyReviewArticle(Long articleId, ReviewArticleCreateDTO reviewArticleCreateDTO, Long userId) {
@@ -128,5 +133,36 @@ public class ArticleModifyService {
         }
 
         phraseArticleRepository.save(phraseArticle);
+    }
+
+    // QnA 게시글 수정
+    public void modifyQnaArticle(Long articleId, QnaArticleCreateDTO qnaArticleCreateDTO, Long userId) {
+
+        // 게시글 조회
+        QnaArticle qnaArticle = qnaArticleRepository.findById(articleId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));
+
+        // 게시글 작성자와 수정 요청자가 다를 경우 예외 처리
+        if (!qnaArticle.getMember().getId().equals(userId)) {
+            throw new NotFoundException(ErrorStatus.ARTICLE_MODIFY_NOT_SAME_USER_EXCEPTION.getMessage());
+        }
+
+        // 기존 질문들 전부 삭제
+        qnaArticle.getQnaArticleContents().clear();
+
+        // 새 질문 목록 생성
+        List<QnaArticleContent> newContents = new ArrayList<>();
+        for (QnaArticleContentDTO contentDTO : qnaArticleCreateDTO.getQnaContents()) {
+
+            QnaArticleContent qnaArticleContent = QnaArticleContent.builder()
+                    .content(contentDTO.getContent())
+                    .build();
+
+            // QnaArticle 연결
+            qnaArticle.addQnaArticleContent(qnaArticleContent);
+            newContents.add(qnaArticleContent);
+        }
+
+        qnaArticleRepository.save(qnaArticle);
     }
 }

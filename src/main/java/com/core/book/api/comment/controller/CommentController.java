@@ -1,8 +1,6 @@
 package com.core.book.api.comment.controller;
 
-import com.core.book.api.comment.dto.CommentCreateDTO;
-import com.core.book.api.comment.dto.CommentResponseDTO;
-import com.core.book.api.comment.dto.CommentUpdateDTO;
+import com.core.book.api.comment.dto.*;
 import com.core.book.api.comment.service.CommentService;
 import com.core.book.api.member.service.MemberService;
 import com.core.book.common.exception.NotFoundException;
@@ -138,6 +136,117 @@ public class CommentController {
 
         Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
         commentService.deleteComment(id, userId);
+
+        return ApiResponse.success_only(SuccessStatus.DELETE_COMMENT_SUCCESS);
+    }
+
+    @Operation(
+            summary = "QnA 게시글 답변(댓글) 작성 API",
+            description = "QnA 게시글에 답변(댓글)을 작성합니다 (대댓글은 parentId(부모 댓글 ID)를 넣어야합니다. 부모 댓글로 등록시 null로 해주세요! / qnaCommentId 는 contentId 입니다!)"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "댓글 등록 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "댓글이 입력되지 않았습니다. / 질문 ID가 입력되지 않았습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "질문을 찾을 수 없습니다. / 부모 댓글을 찾을 수 없습니다.")
+    })
+    @PostMapping("/qna")
+    public ResponseEntity<ApiResponse<Void>> createQnaComment(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody @Valid QnaCommentCreateDTO qnaCommentCreateDTO
+    ) {
+
+        // Comment 누락시 예외처리
+        if (qnaCommentCreateDTO.getComment() == null || qnaCommentCreateDTO.getComment().isEmpty()) {
+            throw new NotFoundException(ErrorStatus.MISSING_COMMENT.getMessage());
+        }
+
+        // 질문 ID 누락시 예외처리
+        if (qnaCommentCreateDTO.getQnaCommentId() == null) {
+            throw new NotFoundException(ErrorStatus.MISSING_COMMENT_ARTICLEID.getMessage());
+        }
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        commentService.createQnaComment(qnaCommentCreateDTO, userId);
+
+        return ApiResponse.success_only(SuccessStatus.CREATE_COMMENT_SUCCESS);
+    }
+
+    @Operation(
+            summary = "QnA 게시글 답변(댓글) 조회 API",
+            description = "QnA 게시글에 달린 답변(댓글)을 조회합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "댓글 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "질문 ID가 입력되지 않았습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "질문을 찾을 수 없습니다.")
+    })
+    @GetMapping("/qna")
+    public ResponseEntity<ApiResponse<List<QnaCommentResponseDTO>>> getQnACommentsByQnaCommentId(
+            @RequestParam Long QnaCommentId
+    ) {
+
+        // 게시글 ID 누락시 예외처리
+        if (QnaCommentId == null) {
+            throw new NotFoundException(ErrorStatus.MISSING_COMMENT_ARTICLEID.getMessage());
+        }
+
+        List<QnaCommentResponseDTO> comments = commentService.getQnACommentsByQnaCommentId(QnaCommentId);
+
+        return ApiResponse.success(SuccessStatus.GET_COMMENT_SUCCESS, comments);
+    }
+
+    @Operation(
+            summary = "QnA 게시글 답변(댓글) 수정 API",
+            description = "QnA 게시글에 달린 답변(댓글)을 수정합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "댓글 수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "댓글 ID가 입력되지 않았습니다. / 댓글이 입력되지 않았습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "수정 권한이 없습니다.")
+    })
+    @PatchMapping("/qna/{id}")
+    public ResponseEntity<ApiResponse<Void>> updateQnaComment(
+            @PathVariable Long id,
+            @RequestBody CommentUpdateDTO commentUpdateDTO,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        // 답변(댓글) ID 누락시 예외처리
+        if (id == null) {
+            throw new NotFoundException(ErrorStatus.MISSING_COMMENT_ID.getMessage());
+        }
+
+        // Comment 누락시 예외처리
+        if (commentUpdateDTO.getComment() == null || commentUpdateDTO.getComment().isEmpty()) {
+            throw new NotFoundException(ErrorStatus.MISSING_COMMENT.getMessage());
+        }
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        commentService.updateQnaComment(id, commentUpdateDTO, userId);
+
+        return ApiResponse.success_only(SuccessStatus.MODIFY_COMMENT_SUCCESS);
+    }
+
+    @Operation(
+            summary = "QnA 게시글 답변(댓글) 삭제 API",
+            description = "QnA 게시글에 달린 답변(댓글)을 삭제합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "댓글 삭제 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "댓글 ID가 입력되지 않았습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "40₩", description = "삭제 권한이 없습니다.")
+    })
+    @DeleteMapping("/qna/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteQnaComment(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        // 답변(댓글) ID 누락시 예외처리
+        if (id == null) {
+            throw new NotFoundException(ErrorStatus.MISSING_COMMENT_ID.getMessage());
+        }
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        commentService.deleteQnaComment(id, userId);
 
         return ApiResponse.success_only(SuccessStatus.DELETE_COMMENT_SUCCESS);
     }

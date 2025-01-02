@@ -16,25 +16,25 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "PHRASE_ARTICLE")
-public class PhraseArticle extends Article {
+@Table(name = "QNA_ARTICLE")
+public class QnaArticle extends Article{
 
     @Builder.Default
-    @OneToMany(mappedBy = "phraseArticle", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PhraseArticleContent> phraseArticleContents = new ArrayList<>();
+    @OneToMany(mappedBy = "qnaArticle", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QnaArticleContent> qnaArticleContents = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Member member;
 
-    public void addPhraseArticleContent(PhraseArticleContent phraseArticleContent) {
-        this.phraseArticleContents.add(phraseArticleContent);
-        phraseArticleContent.setPhraseArticle(this);
+    public void addQnaArticleContent(QnaArticleContent qnaArticleContent) {
+        this.qnaArticleContents.add(qnaArticleContent);
+        qnaArticleContent.setQnaArticle(this);
     }
 
     // 댓글 수 증가
     @Override
-    public PhraseArticle increaseCommentCount() {
+    public QnaArticle increaseCommentCount() {
         return this.toBuilder()
                 .commentCnt(this.getCommentCnt() + 1)
                 .build();
@@ -42,7 +42,7 @@ public class PhraseArticle extends Article {
 
     // 댓글 수 감소
     @Override
-    public PhraseArticle decreaseCommentCount() {
+    public QnaArticle decreaseCommentCount() {
         return this.toBuilder()
                 .commentCnt(this.getCommentCnt() - 1)
                 .build();
@@ -64,22 +64,18 @@ public class PhraseArticle extends Article {
 
     @Override
     public String getContent() {
-        // 자식(구절) 리스트가 없으면 빈 객체
-        if (phraseArticleContents.isEmpty()) {
+        // 질문 리스트가 없으면 빈 객체
+        if (qnaArticleContents.isEmpty()) {
             return "{}";
         }
 
         // 첫 번째 구절만 추출
-        PhraseArticleContent first = phraseArticleContents.get(0);
+        QnaArticleContent first = qnaArticleContents.get(0);
 
-        Integer pageNum      = first.getPageNum();       // 페이지 번호
-        String phraseText    = first.getPhraseContent(); // 인상깊은 구절
-        String Content = first.getContent();       // 구절에 대한 전체 설명
+        String Content = first.getContent();       // 질문 내용
 
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"pageNum\":").append(pageNum).append(",");
-        sb.append("\"phraseContent\":\"").append(escape(phraseText)).append("\",");
         sb.append("\"content\":\"").append(escape(Content)).append("\"");
         sb.append("}");
         return sb.toString();

@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class PhraseArticleDetailDTO {
+public class QnaArticleDetailDTO {
 
     private final Long articleId;
     private final Long memberId;
@@ -20,22 +20,30 @@ public class PhraseArticleDetailDTO {
     private final long quoCnt;
     private final long commentCnt;
 
-    private final List<PhraseArticleContentDetailDTO> phraseContents;
+    // 책 정보
+    private final String isbn;
+    private final String title;
+    private final String author;
+    private final String bookImage;
+
+    private final List<QnaArticleContentDetailDTO> qnaContents;
 
     @Builder
-    public PhraseArticleDetailDTO(Long articleId,
+    public QnaArticleDetailDTO(Long articleId,
                                   Long memberId,
                                   String nickname,
                                   String profileImage,
                                   String date,
+                                  String isbn,
+                                  String title,
+                                  String author,
+                                  String bookImage,
                                   long likeCnt,
                                   long quoCnt,
                                   long commentCnt,
                                   long followerCount,
-                                  
-                                  List<PhraseArticleContentDetailDTO> phraseContents,
+                                  List<QnaArticleContentDetailDTO> qnaContents,
                                   boolean myLike) {
-      
         this.articleId = articleId;
         this.memberId = memberId;
         this.nickname = nickname;
@@ -43,10 +51,13 @@ public class PhraseArticleDetailDTO {
         this.likeCnt = likeCnt;
         this.quoCnt = quoCnt;
         this.commentCnt = commentCnt;
-        this.phraseContents = phraseContents;
+        this.qnaContents = qnaContents;
         this.followerCount = followerCount;
         this.date = date;
         this.myLike = myLike;
-
+        this.isbn = isbn;
+        this.title = title;
+        this.author = author;
+        this.bookImage = bookImage;
     }
 }

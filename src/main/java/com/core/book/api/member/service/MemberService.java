@@ -124,10 +124,6 @@ public class MemberService {
 
         userTagRepository.save(userTag);
 
-        // 유저 권한 설정 GUEST -> USER
-        Member updatedMember = member.authorizeUser();
-        memberRepository.save(updatedMember);
-
     }
 
     private void validateTagRequest(UserTagRequestDTO userTagRequest) {
@@ -215,6 +211,12 @@ public class MemberService {
 
         Member updatedMember = member.updateNickname(nickname);
         memberRepository.save(updatedMember); // Member 객체 반환
+
+        // 초기 회원가입시 최종 닉네임 등록 후 USER로 승격
+        if (Role.GUEST.equals(member.getRole())) {
+            Member updatedRole = member.authorizeUser();
+            memberRepository.save(updatedRole);
+        }
     }
 
     @Transactional
