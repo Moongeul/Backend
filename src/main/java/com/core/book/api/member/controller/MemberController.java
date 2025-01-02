@@ -163,7 +163,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "수정할 프로필 이미지파일이 업로드 되지 않았습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "프로필 사진이 변경되지 않았습니다.")
     })
-    @PutMapping(value = "/change-profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/change-profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<Void>> changeProfileImage(@AuthenticationPrincipal UserDetails userDetails,
                                                                 @RequestParam("image") MultipartFile image) {
         Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
@@ -189,7 +189,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "닉네임 변경 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "닉네임이 입력되지 않았습니다."),
     })
-    @PutMapping("/change-nickname")
+    @PatchMapping("/change-nickname")
     public ResponseEntity<ApiResponse<Void>> changeNickname(@AuthenticationPrincipal UserDetails userDetails,
                                                             @RequestParam("nickname") String nickname) {
         Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
