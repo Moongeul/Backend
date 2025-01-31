@@ -123,7 +123,9 @@ public class BookshelfController {
 
     @Operation(
             summary = "'읽은 책' 책장 등록 API",
-            description = "'읽은 책' 책장에 선택한 책을 상세 정보와 함께 등록합니다. (읽은 책 상세 정보 : 날짜(required)/평점/태그/한줄평)"
+            description = "'읽은 책' 책장에 선택한 책을 상세 정보와 함께 등록합니다. (읽은 책 상세 정보 : 날짜(required)/평점/태그/한줄평)" +
+                    "\n- 만약 태그 전체가 입력되지 않았을 경우 : \"userBookTagList\": null" +
+                    "\n- 태그는 최대 5개까지로, id와 태그이름을 같이 보내주세요. 등록의 경우, 태그 id는 0으로 보내시면 됩니다(반드시 0)"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 등록 성공"),
@@ -176,7 +178,8 @@ public class BookshelfController {
 
     @Operation(
             summary = "'읽은 책' 상세 정보 수정 API",
-            description = "'읽은 책' 책장에서 선택한 책의 상세 정보를 수정합니다. (읽은 책 상세 정보 : 날짜(required)/평점/태그/한줄평)"
+            description = "'읽은 책' 책장에서 선택한 책의 상세 정보를 수정합니다. (읽은 책 상세 정보 : 날짜(required)/평점/태그/한줄평)" +
+                    "\n- 태그는 최대 5개까지로, id와 태그이름을 같이 보내주세요. 수정의 경우, 기존에 있던 id는 순서 그대로, 새로 추가된 태그는 id를 0으로 보내시면 됩니다"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 등록 성공"),

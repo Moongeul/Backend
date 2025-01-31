@@ -1,7 +1,6 @@
 package com.core.book.api.book.dto;
 
 import com.core.book.api.book.entity.Book;
-import com.core.book.api.book.entity.BookTag;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -19,8 +18,6 @@ public class BookInfoDTO {
 
     public Book toEntity() {
 
-        BookTag bookTag = new BookTag(); // ID는 자동 생성
-
         return Book.builder()
                 .isbn(isbn)
                 .title(title)
@@ -29,7 +26,6 @@ public class BookInfoDTO {
                 .publisher(publisher)
                 .description(description)
                 .pubdate(pubdate)
-                .bookTag(bookTag)
                 .build();
     }
 }

@@ -29,7 +29,8 @@ public class ArticleModifyController {
 
     @Operation(
             summary = "감상평 게시글 수정 API",
-            description = "감상평 게시글을 수정합니다. (TYPE : REVIEW)"
+            description = "감상평 게시글을 수정합니다. (TYPE : REVIEW)" +
+                    "\n- 태그는 최대 5개까지로, id와 태그이름을 같이 보내주세요. 수정의 경우, 기존에 있던 id는 순서 그대로, 새로 추가된 태그는 id를 0으로 보내시면 됩니다"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 수정 성공"),

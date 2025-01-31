@@ -3,6 +3,9 @@ package com.core.book.api.article.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
+@Builder
 @Getter
 public class ReviewArticleDetailDTO {
     private final Long memberId;
@@ -16,7 +19,7 @@ public class ReviewArticleDetailDTO {
     private final long quoCnt;
     private final long commentCnt;
     private final float rating;
-    private final ReviewArticleTagDTO reviewArticleTagDTO;
+    private final List<ReviewArticleTagDTO> reviewArticleTagList;
     private final String nickname;
     private final String profileImage;
     private final long followerCount;
@@ -24,25 +27,10 @@ public class ReviewArticleDetailDTO {
     private final boolean myLike;
 
     @Builder
-    public ReviewArticleDetailDTO(Long memberId, String isbn, String title, String author, String bookImage, String content, String date,
-                                  String oneLineReview, long likeCnt, long quoCnt, long commentCnt, float rating, ReviewArticleTagDTO reviewArticleTagDTO,
-                                  String nickname, String profileImage, long followerCount, boolean myLike) {
-        this.memberId = memberId;
-        this.isbn = isbn;
-        this.title = title;
-        this.author = author;
-        this.bookImage = bookImage;
-        this.content = content;
-        this.oneLineReview = oneLineReview;
-        this.likeCnt = likeCnt;
-        this.quoCnt = quoCnt;
-        this.commentCnt = commentCnt;
-        this.rating = rating;
-        this.reviewArticleTagDTO = reviewArticleTagDTO;
-        this.nickname = nickname;
-        this.profileImage = profileImage;
-        this.followerCount = followerCount;
-        this.date = date;
-        this.myLike = myLike;
+    @Getter
+    public static class ReviewArticleTagDTO {
+
+        private int tagId;
+        private String tag;
     }
 }

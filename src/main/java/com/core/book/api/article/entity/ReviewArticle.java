@@ -25,22 +25,12 @@ public class ReviewArticle extends Article {
     @JoinColumn(name = "user_id")
     private Member member;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "reviewarticle_tag_id")
-    private ReviewArticleTag reviewArticleTag;
-
     public ReviewArticle update(ReviewArticleCreateDTO dto, Book newBook) {
         return this.toBuilder()
                 .content(dto.getContent())
                 .oneLineReview(dto.getOneLineReview())
                 .rating(dto.getRating())
                 .book(newBook)
-                .reviewArticleTag(
-                        dto.getReviewArticleTagDTO() != null
-                                ? (this.reviewArticleTag != null
-                                ? this.reviewArticleTag.update(dto.getReviewArticleTagDTO())
-                                : dto.getReviewArticleTagDTO().toEntity())
-                                : this.reviewArticleTag)
                 .build();
     }
 

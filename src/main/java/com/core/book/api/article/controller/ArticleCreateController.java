@@ -32,7 +32,9 @@ public class ArticleCreateController {
 
     @Operation(
             summary = "감상평 게시글 생성 API",
-            description = "감상평 게시글을 생성합니다. (TYPE : REVIEW) / 만약 태그 전체가 입력되지 않았을 경우 : \"reviewArticleTagDTO\": null , 태그 일부만 등록되었을경우 : tag1~5 순서대로 기입 후 비어있는 부분은 null로 넣으면 됩니다!"
+            description = "감상평 게시글을 생성합니다. (TYPE : REVIEW)" +
+                    "\n- 만약 태그 전체가 입력되지 않았을 경우 : \"userBookTagList\": null" +
+                    "\n- 태그는 최대 5개까지로, id와 태그이름을 같이 보내주세요. 등록의 경우, 태그 id는 0으로 보내시면 됩니다(반드시 0)"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "게시글 생성 성공"),

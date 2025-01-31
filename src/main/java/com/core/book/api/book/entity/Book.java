@@ -33,7 +33,4 @@ public class Book {
     @Column(name = "rating_count")
     private int ratingCount; // 평점 개수
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "book_tag_id")
-    private BookTag bookTag; //책 태그 - entity
 }
