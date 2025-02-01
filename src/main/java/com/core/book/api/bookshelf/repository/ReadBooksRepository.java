@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,9 @@ public interface ReadBooksRepository extends JpaRepository<ReadBooks, Long> {
     Page<ReadBooks> findByMemberId(Long memberId, Pageable pageable);
 
     boolean existsByBookIsbnAndMemberId(String bookIsbn, Long memberId);
+
+    @Query("SELECT rb.id FROM ReadBooks rb WHERE rb.book.isbn = :bookIsbn AND rb.member.id = :memberId")
+    Optional<Long> findReadBookIdByBookIsbnAndMemberId(String bookIsbn, Long memberId);
 
     @Query("SELECT rb FROM ReadBooks rb JOIN FETCH rb.book WHERE rb.member.id = :memberId ORDER BY rb.readDate DESC")
     List<ReadBooks> findReadBooksByMemberId(@Param("memberId") Long memberId);
