@@ -21,6 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -90,6 +93,29 @@ public class ArticleCreateService {
 
         bookRepository.save(updatedBook);
     }
+
+    // ReadBooks(읽은 책) 책장 책 내 존재 유무 확인
+    public Map<String, Object> checkBookshelf(String isbn, Long userId){
+
+        // 1. 책장에 userId-isbn 조합의 데이터가 있는가?
+        boolean hasReadBook = readBooksRepository.existsByBookIsbnAndMemberId(isbn, userId);
+
+        Map<String, Object> response = new HashMap<>();
+
+        // 2-1. 있다면 true 와 책장 id 반환
+        if(hasReadBook){
+            Optional<Long> readBookId = readBooksRepository.findReadBookIdByBookIsbnAndMemberId(isbn, userId);
+
+            response.put("hasReadBook", hasReadBook);
+            response.put("readBookId", readBookId);
+
+        } else{ // 2-2. 없다면 false 반환
+            response.put("hasReadBook", hasReadBook);
+        }
+
+        return response;
+    }
+
 
     // 인상깊은구절 게시글 생성
     public void createPhraseArticle(PhraseArticleCreateDTO phraseArticleCreateDTO, Long userId) {

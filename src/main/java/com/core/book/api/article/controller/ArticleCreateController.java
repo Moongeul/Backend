@@ -16,10 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Tag(name = "Article", description = "게시글 관련 API 입니다.")
 @RestController
@@ -58,6 +57,28 @@ public class ArticleCreateController {
     }
 
     @Operation(
+            summary = "ReadBooks(읽은 책) 책장 내 책 존재 유무 확인 API",
+            description = "감상평 게시글 작성 시, isbn 으로 선택한 책이 책장에 존재하는지 확인합니다." +
+                    "\n 책장에 있다면 \"hasReadBook\" : true / 책장에 없다면 \"hasReadBook\" : false"+
+                    "\n- 책장에 있는 경우 \"readBookId\" : {id} 로 책장 id 값이 반환됩니다. 해당 id 값으로 평가정보를 불러와 주세요!"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "책장 책 유무 확인 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "")
+    })
+    @GetMapping("/review/check-bookshelf/{isbn}")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> checkBookshelf(
+            @PathVariable String isbn,
+            @AuthenticationPrincipal UserDetails userDetails){
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        Map<String, Object> showed = articleCreateService.checkBookshelf(isbn, userId);
+
+        return ApiResponse.success(SuccessStatus.GET_ARTICLE_CHECK_BOOKSHELF_SUCCESS, showed);
+    }
+
+
+    @Operation(
             summary = "인상깊은구절 게시글 생성 API",
             description = "인상깊은구절 게시글을 생성합니다. (TYPE : PHRASE) / 여러개의 구절을 등록할때 {\n" +
                     "      \"isbn\": \"(데이터)\",\n" +
@@ -66,7 +87,7 @@ public class ArticleCreateController {
                     "      \"phraseContent\": \"(데이터)\"\n" +
                     "    } 해당부분을 ,로 구분하여 추가하면 됩니다.")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "게시글 생성 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "책장 책 유무 확인 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "해당 도서를 읽은 기록이 없습니다.")
     })
     @PostMapping("/phrase")
