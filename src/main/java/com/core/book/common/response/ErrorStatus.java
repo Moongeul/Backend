@@ -64,6 +64,7 @@ public enum ErrorStatus {
     ARTICLE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND,"게시글을 찾을 수 없습니다."),
     PARENT_COMMENT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND,"부모 댓글을 찾을 수 없습니다."),
     COMMENT_NOT_FOUND_EXCPETION(HttpStatus.NOT_FOUND,"댓글을 찾을 수 없습니다."),
+    TAG_NOT_FOUND_EXCPETION(HttpStatus.NOT_FOUND,"해당 태그를 찾을 수 없습니다."),
 
     /**
      * 500 SERVER_ERROR

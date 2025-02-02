@@ -9,11 +9,12 @@ import com.core.book.api.article.entity.ReviewArticle;
 import com.core.book.api.article.repository.PhraseArticleRepository;
 import com.core.book.api.article.dto.*;
 import com.core.book.api.article.entity.*;
-import com.core.book.api.article.repository.PhraseArticleRepository;
 import com.core.book.api.article.repository.QnaArticleRepository;
 import com.core.book.api.article.repository.ReviewArticleRepository;
+import com.core.book.api.book.dto.UserBookTagDTO;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
+import com.core.book.api.book.service.UserBookTagService;
 import com.core.book.api.bookshelf.repository.ReadBooksRepository;
 import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
@@ -32,6 +33,7 @@ public class ArticleModifyService {
     private final ReadBooksRepository readBooksRepository;
     private final BookRepository bookRepository;
     private final QnaArticleRepository qnaArticleRepository;
+    private final UserBookTagService userBookTagService;
 
     // 감상평 게시글 수정
     public void modifyReviewArticle(Long articleId, ReviewArticleCreateDTO reviewArticleCreateDTO, Long userId) {
@@ -62,6 +64,10 @@ public class ArticleModifyService {
             newBook = bookRepository.findById(isbn)
                     .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
         }
+        
+        // 태그 수정
+        List<UserBookTagDTO> tagList = reviewArticleCreateDTO.getUserBookTagList();
+        userBookTagService.updateUserBookTag(tagList, newBook, null, reviewArticle);
 
         // 업데이트된 엔티티 생성
         ReviewArticle updatedArticle = reviewArticle.update(reviewArticleCreateDTO, newBook);

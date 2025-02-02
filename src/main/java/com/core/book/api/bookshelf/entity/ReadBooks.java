@@ -31,13 +31,14 @@ public class ReadBooks {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
-    private Book book; //책
+    private Book book; //책 - isbn
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Member member; //회원
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "readbooks_tag_id")
-    private ReadBooksTag readBooksTag; //태그
+//    @OneToMany(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "user_book_tag")
+//    private List<UserBookTag> userBookTagList; //태그
+
 }

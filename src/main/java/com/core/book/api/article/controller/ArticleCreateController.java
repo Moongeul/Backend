@@ -31,7 +31,10 @@ public class ArticleCreateController {
 
     @Operation(
             summary = "감상평 게시글 생성 API",
-            description = "감상평 게시글을 생성합니다. (TYPE : REVIEW) / 만약 태그 전체가 입력되지 않았을 경우 : \"reviewArticleTagDTO\": null , 태그 일부만 등록되었을경우 : tag1~5 순서대로 기입 후 비어있는 부분은 null로 넣으면 됩니다!"
+            description = "감상평 게시글을 생성합니다. (TYPE : REVIEW)" +
+                    "\n- 만약 태그 전체가 입력되지 않았을 경우 : \"userBookTagList\": null" +
+                    "\n- 수정의 경우, 기존에 있던 id는 순서 그대로, 새로 추가된 태그는 id를 0으로 보내시면 됩니다. 만약 기존에 있던 태그가 일부 삭제된 경우, id는 그대로, \"tag\": null 로 보내주시면 됩니다." +
+                    "\n- 변경된 태그 요청 방식에 대한 상세 설명 : https://www.notion.so/api-v1-bookshelf-read-id-1a95d7dcdd5f42ad82aa5bc18e5588a9?pvs=4 해당 노션 설명 참고해주세요"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "게시글 생성 성공"),

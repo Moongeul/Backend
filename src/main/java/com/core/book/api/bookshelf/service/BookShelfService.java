@@ -1,14 +1,17 @@
 package com.core.book.api.bookshelf.service;
 
+import com.core.book.api.book.constant.BookTag;
 import com.core.book.api.book.dto.BookInfoDTO;
+import com.core.book.api.book.dto.UserBookTagDTO;
+import com.core.book.api.book.entity.UserBookTag;
+import com.core.book.api.book.repository.UserBookTagRepository;
+import com.core.book.api.book.service.UserBookTagService;
 import com.core.book.api.bookshelf.dto.*;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
 import com.core.book.api.bookshelf.entity.ReadBooks;
-import com.core.book.api.bookshelf.entity.ReadBooksTag;
 import com.core.book.api.bookshelf.entity.WishBooks;
 import com.core.book.api.bookshelf.repository.ReadBooksRepository;
-import com.core.book.api.bookshelf.repository.ReadBooksTagRepository;
 import com.core.book.api.bookshelf.repository.WishBooksRepository;
 import com.core.book.api.member.entity.Member;
 import com.core.book.api.member.repository.MemberRepository;
@@ -36,8 +39,15 @@ public class BookShelfService {
     private final ReadBooksRepository readBooksRepository;
     private final WishBooksRepository wishBooksRepository;
     private final BookRepository bookRepository;
-    private final ReadBooksTagRepository readBooksTagRepository;
     private final MemberRepository memberRepository;
+    private final UserBookTagRepository userBookTagRepository;
+    private final UserBookTagService userBookTagService;
+
+    // 회원 객체 가져오기 메서드
+    private Member getMemberById(Long memberId){
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+    }
 
     /*
      *
@@ -218,37 +228,36 @@ public class BookShelfService {
         ReadBooks readBooks = readBooksRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOKSHELF_INFO_NOTFOUND_EXCEPTION.getMessage()));
 
-        ReadBooksTag readBooksTag = readBooks.getReadBooksTag();
+        List<UserBookTag> userBookTags = userBookTagRepository.findByReadBooks(readBooks);
 
         // 태그가 입력된 것이 없을 경우, null 반환
-        if(readBooksTag == null){
+        if(userBookTags.isEmpty()){
             return convertToReadBooksDTO(readBooks, null);
         }
 
-        ReadBooksDTO.ReadBooksTagDTO tagDTO = convertToReadBooksTagDTO(readBooksTag);
+        List<UserBookTagDTO> tagDTO = convertToReadBooksTagDTO(userBookTags);
 
         return convertToReadBooksDTO(readBooks, tagDTO);
     }
 
     // ReadBooks를 ReadBooksDTO로 변환하는 메서드
-    private ReadBooksDTO convertToReadBooksDTO(ReadBooks readBooks, ReadBooksDTO.ReadBooksTagDTO tagDTO){
+    private ReadBooksDTO convertToReadBooksDTO(ReadBooks readBooks, List<UserBookTagDTO> tagDTO){
         return ReadBooksDTO.builder()
                 .readDate(readBooks.getReadDate())
                 .rating(readBooks.getRating())
                 .oneLineReview(readBooks.getOneLineReview())
-                .readBooksTag(tagDTO)
+                .userBookTagList(tagDTO)
                 .build();
     }
 
     // ReadBooksTag를 ReadBooksTagDTO로 변환하는 메서드
-    private ReadBooksDTO.ReadBooksTagDTO convertToReadBooksTagDTO(ReadBooksTag readBooksTag){
-        return ReadBooksDTO.ReadBooksTagDTO.builder()
-                .tag1(readBooksTag.getTag1())
-                .tag2(readBooksTag.getTag2())
-                .tag3(readBooksTag.getTag3())
-                .tag4(readBooksTag.getTag4())
-                .tag5(readBooksTag.getTag5())
-                .build();
+    private List<UserBookTagDTO> convertToReadBooksTagDTO(List<UserBookTag> userBookTags) {
+        return userBookTags.stream()
+                .map(userBookTag -> UserBookTagDTO.builder()
+                        .tagId(userBookTag.getId())
+                        .tag(BookTag.fromId(userBookTag.getTag()).getDescription())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     // '읽고 싶은 책' 책장 상세 정보 조회
@@ -289,11 +298,12 @@ public class BookShelfService {
         // 책장 저장을 위한 회원 객체 가져오기
         Member member = getMemberById(userId);
 
-        // 선택된 태그 저장 (null 가능)
-        ReadBooksTag savedTags = saveReadBooksTag(readBookshelfDTO.getReadBooks());
-
         // 책장 DB에 저장
-        readBooksRepository.save(readBookshelfDTO.getReadBooks().toEntity(book, member, savedTags));
+        ReadBooks readBooks = readBooksRepository.save(readBookshelfDTO.getReadBooks().toEntity(book, member));
+
+        // 선택된 태그 저장 (null 가능)
+        List<UserBookTagDTO> tagList = readBookshelfDTO.getReadBooks().getUserBookTagList();
+        userBookTagService.updateUserBookTag(tagList, book, readBooks, null);
 
         // BOOK rating_average 갱신
         updateRatingAverage(book, readBookshelfDTO.getReadBooks().getRating());
@@ -350,12 +360,6 @@ public class BookShelfService {
         }
     }
 
-    // 회원 존재 확인 메서드
-    private Member getMemberById(Long memberId){
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
-    }
-
     // 책 존재 확인 및 저장 메서드
     private Book saveBookIfNotExists(String bookIsbn, BookInfoDTO bookInfoDTO){
         boolean existsBook = bookRepository.existsByIsbn(bookIsbn);
@@ -366,21 +370,6 @@ public class BookShelfService {
 
         return bookRepository.findById(bookIsbn)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
-    }
-
-    // '읽은 책' 태그 저장 메서드
-    public ReadBooksTag saveReadBooksTag(ReadBooksDTO readBooksDTO){
-
-        // 단, 태그가 하나도 입력되지 않았다면 저장 X
-        if(readBooksDTO.getReadBooksTag().getTag1() == null
-                && readBooksDTO.getReadBooksTag().getTag2() == null
-                && readBooksDTO.getReadBooksTag().getTag3() == null
-                && readBooksDTO.getReadBooksTag().getTag4() == null
-                && readBooksDTO.getReadBooksTag().getTag5() == null){
-            return null;
-        }
-
-        return readBooksTagRepository.save(readBooksDTO.getReadBooksTag().toEntity());
     }
 
 
@@ -404,25 +393,9 @@ public class BookShelfService {
             throw new BadRequestException(ErrorStatus.BOOKSHELF_MODIFY_NOT_SAME_USER_EXCEPTION.getMessage());
         }
 
-        // 기존에 태그가 있으면 -> 수정 / 없으면 -> 새로 생성
-        ReadBooksTag readBooksTag = existingReadBooks.getReadBooksTag();
-        ReadBooksDTO.ReadBooksTagDTO tagDTO = readBooksDTO.getReadBooksTag();
-        if (readBooksTag != null && tagDTO != null) {
-            readBooksTag = ReadBooksTag.builder()
-                    .id(readBooksTag.getId()) // 기존 태그의 ID 유지
-                    .tag1(tagDTO.getTag1())
-                    .tag2(tagDTO.getTag2())
-                    .tag3(tagDTO.getTag3())
-                    .tag4(tagDTO.getTag4())
-                    .tag5(tagDTO.getTag5())
-                    .build();
-        } else if(readBooksTag == null && tagDTO != null){
-            readBooksTag = tagDTO.toEntity();
-        }
-
-        if(readBooksTag != null){
-            readBooksTagRepository.save(readBooksTag); // 새로운 태그 저장
-        }
+        // 태그 수정
+        List<UserBookTagDTO> tagList = readBooksDTO.getUserBookTagList();
+        userBookTagService.updateUserBookTag(tagList, existingReadBooks.getBook(), existingReadBooks, null);
 
         // 수정된 ReadBooks 엔티티 생성
         ReadBooks updatedReadBooks = ReadBooks.builder()
@@ -432,7 +405,6 @@ public class BookShelfService {
                 .oneLineReview(readBooksDTO.getOneLineReview())
                 .book(existingReadBooks.getBook()) // 기존 책 정보 유지
                 .member(existingReadBooks.getMember()) // 기존 회원 정보 유지
-                .readBooksTag(readBooksTag)
                 .build();
 
         // 수정된 엔티티 저장
@@ -461,6 +433,7 @@ public class BookShelfService {
         bookRepository.save(updatedBook);
     }
 
+    // '읽고 싶은 책' 책장 수정
     @Transactional
     public void updateWishBookshelf(WishBooksDTO wishBooksDTO, Long id, Long userId){
 
@@ -498,6 +471,16 @@ public class BookShelfService {
         // 예외처리: 책장 소유자와 삭제 요청자가 다른 경우
         if(!readBooks.getMember().getId().equals(userId)){
             throw new BadRequestException(ErrorStatus.BOOKSHELF_DELETE_NOT_SAME_USER_EXCEPTION.getMessage());
+        }
+
+        /* UserBookTag 삭제 */
+        // 해당 회원과 책에 해당하는 UserBookTag 조회
+        List<UserBookTag> userBookTags = userBookTagRepository.findByReadBooks(readBooks);
+
+        // 조회된 UserBookTag가 있으면 삭제
+        if(!userBookTags.isEmpty()){
+            // 튜플 삭제
+            userBookTagRepository.deleteAll(userBookTags);
         }
 
         readBooksRepository.delete(readBooks);

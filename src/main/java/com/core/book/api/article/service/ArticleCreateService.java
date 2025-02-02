@@ -3,14 +3,15 @@ package com.core.book.api.article.service;
 import com.core.book.api.article.dto.PhraseArticleContentDTO;
 import com.core.book.api.article.dto.PhraseArticleCreateDTO;
 import com.core.book.api.article.dto.ReviewArticleCreateDTO;
-import com.core.book.api.article.dto.ReviewArticleTagDTO;
 import com.core.book.api.article.entity.*;
 import com.core.book.api.article.repository.PhraseArticleRepository;
 import com.core.book.api.article.dto.*;
 import com.core.book.api.article.repository.QnaArticleRepository;
 import com.core.book.api.article.repository.ReviewArticleRepository;
+import com.core.book.api.book.dto.UserBookTagDTO;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
+import com.core.book.api.book.service.UserBookTagService;
 import com.core.book.api.bookshelf.repository.ReadBooksRepository;
 import com.core.book.api.member.entity.Member;
 import com.core.book.api.member.repository.MemberRepository;
@@ -19,6 +20,7 @@ import com.core.book.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +35,7 @@ public class ArticleCreateService {
     private final ReadBooksRepository readBooksRepository;
     private final BookRepository bookRepository;
     private final QnaArticleRepository qnaArticleRepository;
+    private final UserBookTagService userBookTagService;
 
     // 감상평 게시글 생성
     public void createReviewArticle(ReviewArticleCreateDTO reviewArticleCreateDTO, Long userId) {
@@ -52,15 +55,7 @@ public class ArticleCreateService {
         Book book = bookRepository.findById(isbn)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
 
-        // ReviewArticleTag 생성
-        ReviewArticleTag reviewArticleTag = null;
-        ReviewArticleTagDTO tagDTO = reviewArticleCreateDTO.getReviewArticleTagDTO();
-
-        if (tagDTO != null) {
-            reviewArticleTag = tagDTO.toEntity();
-            // CascadeType.ALL 설정으로 인해 별도의 저장 없이도 ReviewArticle 저장 시 함께 저장
-        }
-
+        // 감상평 게시글 저장
         ReviewArticle reviewArticle = ReviewArticle.builder()
                 .content(reviewArticleCreateDTO.getContent())
                 .oneLineReview(reviewArticleCreateDTO.getOneLineReview())
@@ -71,10 +66,13 @@ public class ArticleCreateService {
                 .type(ArticleType.REVIEW)
                 .member(member)
                 .book(book)
-                .reviewArticleTag(reviewArticleTag)
                 .build();
 
         reviewArticleRepository.save(reviewArticle);
+
+        // 태그 수정
+        List<UserBookTagDTO> tagList = reviewArticleCreateDTO.getUserBookTagList();
+        userBookTagService.updateUserBookTag(tagList, book, null, reviewArticle);
 
         // BOOK rating_average 갱신
         updateRatingAverage(book, reviewArticleCreateDTO.getRating());

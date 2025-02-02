@@ -3,7 +3,10 @@ package com.core.book.api.article.service;
 import com.core.book.api.article.dto.*;
 import com.core.book.api.article.entity.*;
 import com.core.book.api.article.repository.*;
+import com.core.book.api.book.constant.BookTag;
 import com.core.book.api.book.entity.Book;
+import com.core.book.api.book.entity.UserBookTag;
+import com.core.book.api.book.repository.UserBookTagRepository;
 import com.core.book.api.member.service.MemberService;
 import com.core.book.api.member.entity.Member;
 import com.core.book.api.member.repository.FollowRepository;
@@ -29,6 +32,7 @@ public class ArticleViewService {
     private final ArticleRepository articleRepository;
     private final FollowRepository followRepository;
     private final MemberService memberService;
+    private final UserBookTagRepository userBookTagRepository;
 
     // 전체 게시글을 가져오는 메서드
     public ArticleListResponseDTO getAllArticles(String articleType, int page, int size, UserDetails userDetails) {
@@ -147,17 +151,14 @@ public class ArticleViewService {
         String formattedDate = reviewArticle.getCreatedAt().format(formatter);
 
         // 태그 정보 가져오기
-        ReviewArticleTag reviewArticleTag = reviewArticle.getReviewArticleTag();
-        ReviewArticleTagDTO reviewArticleTagDTO = null;
-        if (reviewArticleTag != null) {
-            reviewArticleTagDTO = ReviewArticleTagDTO.builder()
-                    .tag1(reviewArticleTag.getTag1())
-                    .tag2(reviewArticleTag.getTag2())
-                    .tag3(reviewArticleTag.getTag3())
-                    .tag4(reviewArticleTag.getTag4())
-                    .tag5(reviewArticleTag.getTag5())
-                    .build();
-        }
+        List<UserBookTag> userBookTagList = userBookTagRepository.findByReviewArticle(reviewArticle);
+
+        List<ReviewArticleDetailDTO.ReviewArticleTagDTO> reviewArticleTagList = userBookTagList.stream()
+                .map(userBookTag -> ReviewArticleDetailDTO.ReviewArticleTagDTO.builder()
+                        .tagId(userBookTag.getId())
+                        .tag(BookTag.fromId(userBookTag.getTag()).getDescription())
+                        .build())
+                .toList();
 
         // 좋아요 여부 체크
         boolean myLike = false;
@@ -178,7 +179,7 @@ public class ArticleViewService {
                 .quoCnt(reviewArticle.getQuoCnt())
                 .commentCnt(reviewArticle.getCommentCnt())
                 .rating(reviewArticle.getRating())
-                .reviewArticleTagDTO(reviewArticleTagDTO)
+                .reviewArticleTagList(reviewArticleTagList)
                 .nickname(member.getNickname())
                 .profileImage(member.getImageUrl())
                 .followerCount(followerCount)
