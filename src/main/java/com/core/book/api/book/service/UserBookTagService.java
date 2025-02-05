@@ -17,6 +17,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserBookTagService {
+
     private final UserBookTagRepository userBookTagRepository;
 
     // id로 태그 entity 가져오기

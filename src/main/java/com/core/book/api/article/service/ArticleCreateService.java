@@ -83,8 +83,8 @@ public class ArticleCreateService {
 
         // 해당 책의 평균 평점(rating_average) 새로 계산 및 rating_count(평점 개수) + 1
         // 계산 공식: new_rating_average = (rating_average * rating_count + rating) / rating_count + 1 )
-        double new_rating_average = (book.getRatingAverage() * book.getRatingCount() + new_rating) / (book.getRatingCount() + 1);
-        new_rating_average = Math.round(new_rating_average * 100) / 100.0;
+        float new_rating_average = (float) ((book.getRatingAverage() * book.getRatingCount() + new_rating) / (book.getRatingCount() + 1));
+        new_rating_average = (float) (Math.round(new_rating_average * 100) / 100.0);
 
         Book updatedBook = book.toBuilder()
                 .ratingAverage(new_rating_average)

@@ -1,8 +1,12 @@
 package com.core.book.api.book.service;
 
+import com.core.book.api.article.entity.Article;
+import com.core.book.api.article.repository.ArticleRepository;
+import com.core.book.api.book.constant.BookTag;
 import com.core.book.api.book.dto.*;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
+import com.core.book.api.book.repository.UserBookTagRepository;
 import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,6 +33,8 @@ import java.util.stream.Collectors;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final UserBookTagRepository userBookTagRepository;
+    private final ArticleRepository articleRepository;
 
     @Value("${naver-client-id}")
     private String clientId;
@@ -56,7 +63,7 @@ public class BookService {
 
         // bookList를 BookInfoDTO로 변환
         List<BookInfoDTO> BookInfoList = bookList.stream()
-                .map(this::convertToBookInfoDTO)
+                .map(this::convertFromBookDTOToBookInfoDTO)
                 .collect(Collectors.toList());
 
         // 마지막 페이지 여부 검사
@@ -73,23 +80,45 @@ public class BookService {
                 .build();
     }
 
-    public BookInfoDTO bookInfo(String isbn){
+    public BookInfoDetailDTO bookInfo(String isbn){
 
         BookDTO bookDTO;
 
+        float ratingAverage = 0.0F;
+        List<String> tagList = new ArrayList<>();
+        List<ReviewPreviewDTO> reviewPreviewList = new ArrayList<>();
+
         // BOOK DB에서 책 데이터 찾기
         if(bookRepository.existsByIsbn(isbn)){
-
-            log.info("도서 정보 DB 요청");
             
             Book book = bookRepository.findById(isbn)
                     .orElseThrow(() -> new NotFoundException(ErrorStatus.BOOK_NOTFOUND_EXCEPTION.getMessage()));
-            bookDTO = convertToBookDTO(book);
+
+            bookDTO = convertFromBookToBookInfoDTO(book);
+
+            // 평균 평점
+            ratingAverage = book.getRatingAverage();
+
+            // Best 5 태그
+            List<Integer> tagIds = userBookTagRepository.findTop5TagsByIsbn(isbn, PageRequest.of(0, 5));
+            for (Integer id : tagIds) {
+                tagList.add(BookTag.fromId(id).getDescription());
+            }
+
+            // 리뷰 (표시정보 : profile_image, nickname, article_type, content)
+            List<Article> articleList = articleRepository.findByBookIsbnOrderByCreatedAtDesc(isbn, PageRequest.of(0, 5));
+            for(Article article : articleList){
+                ReviewPreviewDTO reviewPreview = ReviewPreviewDTO.builder()
+                        .profileImage(article.getMember().getImageUrl())
+                        .nickname(article.getMember().getNickname())
+                        .articleType(article.getType())
+                        .content(article.getContent())
+                        .build();
+                reviewPreviewList.add(reviewPreview);
+            }
 
         }
         else{ // (DB에 없다면) 외부 도서 API에 데이터 요청
-
-            log.info("도서 정보 외부 API 요청");
 
             // 외부 도서 API 요청
             URI uri = uriComponentBuild(null, isbn, 1, 10);
@@ -103,7 +132,7 @@ public class BookService {
         }
 
         if(bookDTO != null){
-            return convertToBookInfoDTO(bookDTO);
+            return convertFromBookDTOToBookInfoDetailDTO(bookDTO, ratingAverage, tagList, reviewPreviewList);
         } else {
             return null;
         }
@@ -165,7 +194,7 @@ public class BookService {
     }
 
     // Book을 BookInfoDTO로 변환
-    private BookDTO convertToBookDTO(Book book){
+    private BookDTO convertFromBookToBookInfoDTO(Book book){
         return BookDTO.builder()
                 .isbn(book.getIsbn())
                 .image(book.getBookImage())
@@ -178,7 +207,7 @@ public class BookService {
     }
 
     // BookDTO를 BookInfoDTO로 변환
-    private BookInfoDTO convertToBookInfoDTO(BookDTO bookDTO){
+    private BookInfoDTO convertFromBookDTOToBookInfoDTO(BookDTO bookDTO){
         return BookInfoDTO.builder()
                 .isbn(bookDTO.getIsbn())
                 .image(bookDTO.getImage())
@@ -187,6 +216,22 @@ public class BookService {
                 .publisher(bookDTO.getPublisher())
                 .pubdate(bookDTO.getPubdate())
                 .description(bookDTO.getDescription())
+                .build();
+    }
+
+    // BookDTO를 BookInfoDetailDTO로 변환
+    private BookInfoDetailDTO convertFromBookDTOToBookInfoDetailDTO(BookDTO bookDTO, float ratingAverage, List<String> tagList, List<ReviewPreviewDTO> reviewPreviewList){
+        return BookInfoDetailDTO.builder()
+                .isbn(bookDTO.getIsbn())
+                .image(bookDTO.getImage())
+                .title(bookDTO.getTitle())
+                .author(bookDTO.getAuthor())
+                .publisher(bookDTO.getPublisher())
+                .pubdate(bookDTO.getPubdate())
+                .description(bookDTO.getDescription())
+                .ratingAverage(ratingAverage)
+                .tagList(tagList)
+                .reviewPreviewList(reviewPreviewList)
                 .build();
     }
 }

@@ -315,8 +315,8 @@ public class BookShelfService {
 
         // 해당 책의 평균 평점(rating_average) 새로 계산 및 rating_count(평점 개수) + 1
         // 계산 공식: new_rating_average = (rating_average * rating_count + rating) / rating_count + 1 )
-        double new_rating_average = (book.getRatingAverage() * book.getRatingCount() + new_rating) / (book.getRatingCount() + 1);
-        new_rating_average = Math.round(new_rating_average * 100) / 100.0;
+        float new_rating_average = (float) ((book.getRatingAverage() * book.getRatingCount() + new_rating) / (book.getRatingCount() + 1));
+        new_rating_average = (float) (Math.round(new_rating_average * 100) / 100.0);
 
         Book updatedBook = book.toBuilder()
                 .ratingAverage(new_rating_average)
@@ -422,9 +422,9 @@ public class BookShelfService {
     public void modifyRatingAverage(Book book, double new_rating, double old_rating){
 
         // 새 점수들의 합 = (기존 점수들의 합) - (바뀌기 이전 평점) + (바뀐 평점)
-        double new_rating_sum = (book.getRatingAverage() * book.getRatingCount()) - old_rating + new_rating;
-        double new_rating_average = new_rating_sum / book.getRatingCount();
-        new_rating_average = Math.round(new_rating_average * 100) / 100.0;
+        float new_rating_sum = (float) ((book.getRatingAverage() * book.getRatingCount()) - old_rating + new_rating);
+        float new_rating_average = new_rating_sum / book.getRatingCount();
+        new_rating_average = (float) (Math.round(new_rating_average * 100) / 100.0);
 
         Book updatedBook = book.toBuilder()
                 .ratingAverage(new_rating_average)

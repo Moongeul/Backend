@@ -86,9 +86,9 @@ public class ArticleModifyService {
     public void modifyRatingAverage(Book book, double new_rating, double old_rating){
 
         // 새 점수들의 합 = (기존 점수들의 합) - (바뀌기 이전 평점) + (바뀐 평점)
-        double new_rating_sum = (book.getRatingAverage() * book.getRatingCount()) - old_rating + new_rating;
-        double new_rating_average = new_rating_sum / book.getRatingCount();
-        new_rating_average = Math.round(new_rating_average * 100) / 100.0;
+        float new_rating_sum = (float) ((book.getRatingAverage() * book.getRatingCount()) - old_rating + new_rating);
+        float new_rating_average = new_rating_sum / book.getRatingCount();
+        new_rating_average = (float) (Math.round(new_rating_average * 100) / 100.0);
 
         Book updatedBook = book.toBuilder()
                 .ratingAverage(new_rating_average)

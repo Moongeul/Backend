@@ -1,6 +1,6 @@
 package com.core.book.api.book.controller;
 
-import com.core.book.api.book.dto.BookInfoDTO;
+import com.core.book.api.book.dto.BookInfoDetailDTO;
 import com.core.book.api.book.dto.BookResponseDTO;
 import com.core.book.api.book.service.BookService;
 import com.core.book.common.exception.BadRequestException;
@@ -62,15 +62,15 @@ public class BookController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "해당 도서의 검색 결과가 없습니다.")
     })
     @GetMapping("/api/v1/book/info")
-    public ResponseEntity<ApiResponse<BookInfoDTO>> bookInfo(
+    public ResponseEntity<ApiResponse<BookInfoDetailDTO>> bookInfo(
             @RequestParam("isbn") String isbn){
 
-        BookInfoDTO bookInfo = bookService.bookInfo(isbn);
+        BookInfoDetailDTO bookInfoDetail = bookService.bookInfo(isbn);
 
-        if(bookInfo == null){
+        if(bookInfoDetail == null){
             throw new NotFoundException(ErrorStatus.BOOK_SEARCH_NOTFOUND_EXCEPTION.getMessage());
         }
 
-        return ApiResponse.success(SuccessStatus.BOOK_SEARCH_SUCCESS, bookInfo);
+        return ApiResponse.success(SuccessStatus.BOOK_SEARCH_SUCCESS, bookInfoDetail);
     }
 }

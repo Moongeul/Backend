@@ -28,7 +28,7 @@ public class Book {
     private String pubdate; // 출판연도
 
     @Column(name = "rating_average")
-    private double ratingAverage; // 평점 (전체 평균)
+    private float ratingAverage; // 평점 (전체 평균)
 
     @Column(name = "rating_count")
     private int ratingCount; // 평점 개수
