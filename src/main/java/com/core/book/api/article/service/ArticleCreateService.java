@@ -7,6 +7,7 @@ import com.core.book.api.article.entity.*;
 import com.core.book.api.article.repository.PhraseArticleRepository;
 import com.core.book.api.article.dto.*;
 import com.core.book.api.article.repository.QnaArticleRepository;
+import com.core.book.api.article.repository.QuotationArticleRepository;
 import com.core.book.api.article.repository.ReviewArticleRepository;
 import com.core.book.api.book.dto.UserBookTagDTO;
 import com.core.book.api.book.entity.Book;
@@ -19,6 +20,7 @@ import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ public class ArticleCreateService {
 
     private final PhraseArticleRepository phraseArticleRepository;
     private final ReviewArticleRepository reviewArticleRepository;
+    private final QuotationArticleRepository quotationArticleRepository;
     private final MemberRepository memberRepository;
     private final ReadBooksRepository readBooksRepository;
     private final BookRepository bookRepository;
@@ -38,6 +41,7 @@ public class ArticleCreateService {
     private final UserBookTagService userBookTagService;
 
     // 감상평 게시글 생성
+    @Transactional
     public void createReviewArticle(ReviewArticleCreateDTO reviewArticleCreateDTO, Long userId) {
         // 해당 유저를 찾을 수 없을 경우 예외처리
         Member member = memberRepository.findById(userId)
@@ -116,8 +120,8 @@ public class ArticleCreateService {
         return response;
     }
 
-
     // 인상깊은구절 게시글 생성
+    @Transactional
     public void createPhraseArticle(PhraseArticleCreateDTO phraseArticleCreateDTO, Long userId) {
         // 해당 유저를 찾을 수 없을 경우 예외처리
         Member member = memberRepository.findById(userId)
@@ -161,6 +165,7 @@ public class ArticleCreateService {
     }
 
     // QnA 게시글 생성
+    @Transactional
     public void createQnaArticle(QnaArticleCreateDTO qnaArticleCreateDTO, Long userId) {
         // 해당 유저를 찾을 수 없을 경우 예외처리
         Member member = memberRepository.findById(userId)
@@ -201,5 +206,34 @@ public class ArticleCreateService {
         }
 
         qnaArticleRepository.save(qnaArticle);
+    }
+
+    // 인용 게시글 생성
+    @Transactional
+    public void createQuotationArticle(QuotationArticleCreateDTO quotationArticleCreateDTO, Long userId) {
+        // 현재 사용자 조회
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        // 인용할 감상평 게시글 조회
+        ReviewArticle reviewArticle = reviewArticleRepository.findById(quotationArticleCreateDTO.getReviewArticleId())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));
+
+        QuotationArticle quotationArticle = QuotationArticle.builder()
+                .content(quotationArticleCreateDTO.getContent())
+                .likeCnt(0)
+                .quoCnt(0)
+                .commentCnt(0)
+                .type(ArticleType.QUOTATION)
+                .member(member)
+                .reviewArticle(reviewArticle)
+                .book(reviewArticle.getBook())
+                .build();
+
+        quotationArticleRepository.save(quotationArticle);
+
+        // 양방향 연관관계 설정: 감상평 게시글에 인용 게시글 추가
+        reviewArticle.addQuotationArticle(quotationArticle);
+        reviewArticleRepository.save(reviewArticle);
     }
 }

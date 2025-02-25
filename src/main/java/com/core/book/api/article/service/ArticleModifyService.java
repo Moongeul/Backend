@@ -10,6 +10,7 @@ import com.core.book.api.article.repository.PhraseArticleRepository;
 import com.core.book.api.article.dto.*;
 import com.core.book.api.article.entity.*;
 import com.core.book.api.article.repository.QnaArticleRepository;
+import com.core.book.api.article.repository.QuotationArticleRepository;
 import com.core.book.api.article.repository.ReviewArticleRepository;
 import com.core.book.api.book.dto.UserBookTagDTO;
 import com.core.book.api.book.entity.Book;
@@ -20,6 +21,7 @@ import com.core.book.common.exception.NotFoundException;
 import com.core.book.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,12 +32,14 @@ public class ArticleModifyService {
 
     private final ReviewArticleRepository reviewArticleRepository;
     private final PhraseArticleRepository phraseArticleRepository;
+    private final QuotationArticleRepository quotationArticleRepository;
     private final ReadBooksRepository readBooksRepository;
     private final BookRepository bookRepository;
     private final QnaArticleRepository qnaArticleRepository;
     private final UserBookTagService userBookTagService;
 
     // 감상평 게시글 수정
+    @Transactional
     public void modifyReviewArticle(Long articleId, ReviewArticleCreateDTO reviewArticleCreateDTO, Long userId) {
 
         // 게시글 조회
@@ -98,6 +102,7 @@ public class ArticleModifyService {
     }
 
     // 인상깊은구절 게시글 수정
+    @Transactional
     public void modifyPhraseArticle(Long articleId, PhraseArticleCreateDTO phraseArticleCreateDTO, Long userId) {
 
         // 게시글 조회
@@ -142,6 +147,7 @@ public class ArticleModifyService {
     }
 
     // QnA 게시글 수정
+    @Transactional
     public void modifyQnaArticle(Long articleId, QnaArticleCreateDTO qnaArticleCreateDTO, Long userId) {
 
         // 게시글 조회
@@ -170,5 +176,24 @@ public class ArticleModifyService {
         }
 
         qnaArticleRepository.save(qnaArticle);
+    }
+
+    // 인용 게시글 수정
+    @Transactional
+    public void modifyQuotationArticle(Long articleId, QuotationArticleModifyDTO quotationArticleModifyDTO, Long userId) {
+
+        QuotationArticle quotationArticle = quotationArticleRepository.findById(articleId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));
+
+        // 게시글 작성자와 수정 요청자가 다르면 예외 처리
+        if (!quotationArticle.getMember().getId().equals(userId)) {
+            throw new NotFoundException(ErrorStatus.ARTICLE_MODIFY_NOT_SAME_USER_EXCEPTION.getMessage());
+        }
+
+        QuotationArticle updatedArticle = quotationArticle.toBuilder()
+                .content(quotationArticleModifyDTO.getContent())
+                .build();
+
+        quotationArticleRepository.save(updatedArticle);
     }
 }
