@@ -19,7 +19,11 @@ public interface ArticleLikeRepository extends JpaRepository<ArticleLike, Long> 
     Optional<ArticleLike> findByArticleIdAndMemberId(Long articleId, Long userId);
     List<ArticleLike> findByArticle(Article article);
 
-    @Query("SELECT al FROM ArticleLike al WHERE al.member = :member AND al.article.type IN :types")
+    @Query("SELECT al FROM ArticleLike al " +
+            "JOIN FETCH al.article a " +
+            "LEFT JOIN FETCH a.book " +
+            "WHERE al.member = :member " +
+            "AND a.type IN :types")
     Page<ArticleLike> findByMemberAndArticleTypeIn(@Param("member") Member member,
                                                    @Param("types") List<ArticleType> types,
                                                    Pageable pageable);
