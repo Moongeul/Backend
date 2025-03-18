@@ -24,37 +24,43 @@ public class QuotationArticle extends Article{
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "review_article_id")
-    private ReviewArticle reviewArticle;
+    @JoinColumn(name = "quoted_article_id")
+    private Article quotedArticle;
 
     // 댓글 수 증가
     @Override
-    public QuotationArticle increaseCommentCount() {
-        return this.toBuilder()
-                .commentCnt(this.getCommentCnt() + 1)
-                .build();
+    public void increaseCommentCount() {
+        this.commentCnt++;
     }
 
     // 댓글 수 감소
     @Override
-    public QuotationArticle decreaseCommentCount() {
-        return this.toBuilder()
-                .commentCnt(this.getCommentCnt() - 1)
-                .build();
+    public void decreaseCommentCount() {
+        this.commentCnt--;
     }
 
     // 좋아요 증가
-    public Article increaseLikeCount() {
-        return this.toBuilder()
-                .likeCnt(this.getLikeCnt() + 1)
-                .build();
+    @Override
+    public void increaseLikeCount() {
+        this.likeCnt++;
     }
 
     // 좋아요 감소
-    public Article decreaseLikeCount() {
-        return this.toBuilder()
-                .likeCnt(this.getLikeCnt() - 1)
-                .build();
+    @Override
+    public void decreaseLikeCount() {
+        this.likeCnt--;
+    }
+
+    // 인용 수 증가
+    @Override
+    public void increaseQuoCount() {
+        this.quoCnt++;
+    }
+
+    // 인용 수 감소
+    @Override
+    public void decreaseQuoCount() {
+        this.quoCnt--;
     }
 
     @Override

@@ -85,24 +85,4 @@ public class ArticleViewController {
         return ApiResponse.success(SuccessStatus.GET_ARTICLE_SUCCESS, qnaArticleDetailDTO);
     }
 
-    @Operation(
-            summary = "인용 게시글 목록 조회 API",
-            description = "감상평 게시글의 id를 기반으로 인용 게시글 목록을 조회합니다."
-    )
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 조회 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다.")
-    })
-    @GetMapping("/quotation/{reviewArticleId}")
-    public ResponseEntity<ApiResponse<QuotationArticleListResponseDTO>> getQuotationArticles(
-            @PathVariable Long reviewArticleId,
-            @RequestParam int page,
-            @RequestParam int size,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
-        QuotationArticleListResponseDTO quotationArticleListResponseDTO =
-                articleViewService.getQuotationArticlesByReviewArticleId(reviewArticleId, page, size, userDetails);
-        return ApiResponse.success(SuccessStatus.GET_ARTICLE_LIST_SUCCESS, quotationArticleListResponseDTO);
-    }
-
 }

@@ -4,11 +4,8 @@ import com.core.book.api.article.dto.PhraseArticleContentDTO;
 import com.core.book.api.article.dto.PhraseArticleCreateDTO;
 import com.core.book.api.article.dto.ReviewArticleCreateDTO;
 import com.core.book.api.article.entity.*;
-import com.core.book.api.article.repository.PhraseArticleRepository;
+import com.core.book.api.article.repository.*;
 import com.core.book.api.article.dto.*;
-import com.core.book.api.article.repository.QnaArticleRepository;
-import com.core.book.api.article.repository.QuotationArticleRepository;
-import com.core.book.api.article.repository.ReviewArticleRepository;
 import com.core.book.api.book.dto.UserBookTagDTO;
 import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.repository.BookRepository;
@@ -31,6 +28,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ArticleCreateService {
 
+    private final ArticleRepository articleRepository;
     private final PhraseArticleRepository phraseArticleRepository;
     private final ReviewArticleRepository reviewArticleRepository;
     private final QuotationArticleRepository quotationArticleRepository;
@@ -215,8 +213,8 @@ public class ArticleCreateService {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
-        // 인용할 감상평 게시글 조회
-        ReviewArticle reviewArticle = reviewArticleRepository.findById(quotationArticleCreateDTO.getReviewArticleId())
+        // 인용할 게시글 조회
+        Article quotedArticle = articleRepository.findById(quotationArticleCreateDTO.getQuotedArticleId())
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));
 
         QuotationArticle quotationArticle = QuotationArticle.builder()
@@ -226,14 +224,13 @@ public class ArticleCreateService {
                 .commentCnt(0)
                 .type(ArticleType.QUOTATION)
                 .member(member)
-                .reviewArticle(reviewArticle)
-                .book(reviewArticle.getBook())
+                .quotedArticle(quotedArticle)
+                .book(quotedArticle.getBook())
                 .build();
 
         quotationArticleRepository.save(quotationArticle);
 
-        // 양방향 연관관계 설정: 감상평 게시글에 인용 게시글 추가
-        reviewArticle.addQuotationArticle(quotationArticle);
-        reviewArticleRepository.save(reviewArticle);
+        // 인용 수 증가
+        quotedArticle.increaseQuoCount();
     }
 }

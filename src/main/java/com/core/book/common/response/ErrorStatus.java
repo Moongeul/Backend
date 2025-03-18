@@ -39,6 +39,7 @@ public enum ErrorStatus {
     MISSING_COMMENT_ID(HttpStatus.BAD_REQUEST,"댓글 ID가 입력되지 않았습니다."),
     BOOKSHELF_MODIFY_NOT_SAME_USER_EXCEPTION(HttpStatus.BAD_REQUEST, "책장 소유자와 수정 요청자가 다릅니다."),
     BOOKSHELF_DELETE_NOT_SAME_USER_EXCEPTION(HttpStatus.BAD_REQUEST, "책장 소유자와 삭제 요청자가 다릅니다."),
+    NOT_ALLOW_GET_OTHER_USER_INFO(HttpStatus.BAD_REQUEST,"사용자에 의해 비공개 설정 되었습니다."),
 
     /**
      * 401 UNAUTHORIZED

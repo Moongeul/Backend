@@ -6,6 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface QuotationArticleRepository extends JpaRepository<QuotationArticle, Long> {
-    Page<QuotationArticle> findByReviewArticleId(Long reviewArticleId, Pageable pageable);
+    Page<QuotationArticle> findByQuotedArticleId(Long quotedArticleId, Pageable pageable);
 
 }

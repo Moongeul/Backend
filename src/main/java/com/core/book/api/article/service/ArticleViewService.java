@@ -298,25 +298,27 @@ public class ArticleViewService {
     }
 
     // 인용 게시글 목록 조회
-    public QuotationArticleListResponseDTO getQuotationArticlesByReviewArticleId(Long reviewArticleId, int page, int size, UserDetails userDetails) {
+    public QuotationArticleListResponseDTO getQuotationArticlesByQuotedArticleId(Long quotedArticleId, int page, int size) {
+
+        // 원 게시글 존재 여부 확인
+        articleRepository.findById(quotedArticleId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<QuotationArticle> quotationPage = quotationArticleRepository.findByReviewArticleId(reviewArticleId, pageable);
+        Page<QuotationArticle> quotationPage = quotationArticleRepository.findByQuotedArticleId(quotedArticleId, pageable);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         List<QuotationArticleResponseDTO> quotations = quotationPage.getContent().stream().map(quotation -> {
-
-            // 인용 게시글 작성자 정보
             Member quotationWriter = quotation.getMember();
             String formattedDate = quotation.getCreatedAt().format(formatter);
 
-            // 인용한 감상평 게시글 정보
-            ReviewArticle originalReview = quotation.getReviewArticle();
-            if (originalReview == null) {
+            Article originalArticle = quotation.getQuotedArticle();
+            if (originalArticle == null) {
                 throw new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage());
             }
-            Member originalWriter = originalReview.getMember();
-            Book book = originalReview.getBook();
+            Member originalWriter = originalArticle.getMember();
+            Book book = originalArticle.getBook();
 
             return QuotationArticleResponseDTO.builder()
                     .quotationArticleId(quotation.getId())
@@ -328,15 +330,16 @@ public class ArticleViewService {
                     .quoCnt(quotation.getQuoCnt())
                     .date(formattedDate)
                     .content(quotation.getContent())
-                    .originalArticleId(originalReview.getId())
+                    .originalArticleId(originalArticle.getId())
                     .originalMemberId(originalWriter.getId())
+                    .originalMemberNickname(originalWriter.getNickname())
                     .originalMemberProfileImage(originalWriter.getImageUrl())
-                    .originalArticleType(originalReview.getType())
-                    .bookId(book.getIsbn())
-                    .bookImage(book.getBookImage())
-                    .bookTitle(book.getTitle())
-                    .bookAuthor(book.getAuthor())
-                    .originalContent(originalReview.getContent())
+                    .originalArticleType(originalArticle.getType())
+                    .bookId(book != null ? book.getIsbn() : null)
+                    .bookImage(book != null ? book.getBookImage() : null)
+                    .bookTitle(book != null ? book.getTitle() : null)
+                    .bookAuthor(book != null ? book.getAuthor() : null)
+                    .originalContent(originalArticle.getContent())
                     .build();
         }).collect(Collectors.toList());
 
