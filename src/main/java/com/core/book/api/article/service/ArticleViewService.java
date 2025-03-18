@@ -80,7 +80,7 @@ public class ArticleViewService {
         return new ArticleListResponseDTO(articles, articlePage.isLast(), page);
     }
 
-    private ArticleListDTO convertToListDTO(Article article, UserDetails userDetails) {
+    public ArticleListDTO convertToListDTO(Article article, UserDetails userDetails) {
 
         Member member = article.getMember();
 

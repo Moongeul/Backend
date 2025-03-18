@@ -305,7 +305,7 @@ public class MemberController {
 
     @Operation(
             summary = "타인 사용자 정보 조회 API",
-            description = "사용자의 ID를 통해 해당 사용자의 정보를 조회합니다."
+            description = "사용자의 ID를 통해 해당 사용자의 정보를 조회합니다. / 만약 해당 사용자가 팔로워수를 안보이게 했다면 -1로 나옵니다!"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "타인 사용자 정보 조회 성공"),
