@@ -58,4 +58,40 @@ public class MyPageController {
         ArticleListResponseDTO response = myPageService.getUserCommentedArticles(userId, page, size, userDetails);
         return ApiResponse.success(SuccessStatus.GET_ARTICLE_LIST_SUCCESS, response);
     }
+
+    @Operation(summary = "내가 작성한 게시글 목록 조회 API",
+            description = "내가 작성한 Review, Phrase, QnA 게시글들을 조회합니다.")
+    @GetMapping("/my/articles")
+    public ResponseEntity<ApiResponse<ArticleListResponseDTO>> getMyArticles(
+            @RequestParam int page,
+            @RequestParam int size,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        ArticleListResponseDTO response = myPageService.getMyArticles(page, size, userDetails);
+        return ApiResponse.success(SuccessStatus.GET_ARTICLE_LIST_SUCCESS, response);
+    }
+
+    @Operation(summary = "내가 좋아요한 게시글 목록 조회 API",
+            description = "내가 좋아요 한 Review, Phrase, QnA 게시글들을 조회합니다.")
+    @GetMapping("/my/liked-articles")
+    public ResponseEntity<ApiResponse<ArticleListResponseDTO>> getMyLikedArticles(
+            @RequestParam int page,
+            @RequestParam int size,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        ArticleListResponseDTO response = myPageService.getMyLikedArticles(page, size, userDetails);
+        return ApiResponse.success(SuccessStatus.GET_ARTICLE_LIST_SUCCESS, response);
+    }
+
+    @Operation(summary = "내가 댓글을 남긴 게시글 목록 조회 API",
+            description = "내가 댓글을 남긴 Review, Phrase, QnA 게시글들을 조회합니다.")
+    @GetMapping("/my/commented-articles")
+    public ResponseEntity<ApiResponse<ArticleListResponseDTO>> getMyCommentedArticles(
+            @RequestParam int page,
+            @RequestParam int size,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        ArticleListResponseDTO response = myPageService.getMyCommentedArticles(page, size, userDetails);
+        return ApiResponse.success(SuccessStatus.GET_ARTICLE_LIST_SUCCESS, response);
+    }
 }

@@ -142,4 +142,84 @@ public class MyPageService {
         return new ArticleListResponseDTO(dtos, isLast, page);
     }
 
+    // 내가 작성한 게시글 조회
+    public ArticleListResponseDTO getMyArticles(int page, int size, UserDetails userDetails) {
+
+        // 사용자 정보 조회
+        Member member = memberRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+        Long userId = member.getId();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        List<ArticleType> targetTypes = Arrays.asList(ArticleType.REVIEW, ArticleType.PHRASE, ArticleType.QNA);
+
+        // 게시글 조회
+        Page<Article> articlePage = articleRepository.findByUserIdAndTypes(userId, targetTypes, pageable);
+
+        List<ArticleListDTO> articles = articlePage.getContent().stream()
+                .map(a -> articleViewService.convertToListDTO(a, userDetails))
+                .collect(Collectors.toList());
+
+        return new ArticleListResponseDTO(articles, articlePage.isLast(), page);
+    }
+
+    // 내가 좋아요 누른 게시글 조회
+    public ArticleListResponseDTO getMyLikedArticles(int page, int size, UserDetails userDetails) {
+
+        // 사용자 정보 조회
+        Member member = memberRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("article.createdAt").descending());
+        List<ArticleType> targetTypes = Arrays.asList(ArticleType.REVIEW, ArticleType.PHRASE, ArticleType.QNA);
+
+        // 내 좋아요 목록
+        Page<ArticleLike> likedPage = articleLikeRepository.findByMemberAndArticleTypeIn(member, targetTypes, pageable);
+
+        List<ArticleListDTO> articles = likedPage.getContent().stream()
+                .map(like -> articleViewService.convertToListDTO(like.getArticle(), userDetails))
+                .collect(Collectors.toList());
+
+        return new ArticleListResponseDTO(articles, likedPage.isLast(), page);
+    }
+
+    // 내가 댓글 단 게시글 조회
+    public ArticleListResponseDTO getMyCommentedArticles(int page, int size, UserDetails userDetails) {
+
+        // 사용자 정보 조회
+        Member member = memberRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
+        Long userId = member.getId();
+
+        // Review와 Phrase 게시글은 Comment 엔티티 사용
+        List<ArticleType> reviewAndPhraseTypes = Arrays.asList(ArticleType.REVIEW, ArticleType.PHRASE);
+        List<Article> articlesFromComment =
+                commentRepository.findDistinctArticleByMemberIdAndArticleTypeIn(userId, reviewAndPhraseTypes);
+
+        // QnA 게시글은 QnaComment 엔티티 사용
+        List<Article> articlesFromQnaComment =
+                qnaCommentRepository.findDistinctQnaArticleByMemberId(userId);
+
+        // 두 리스트를 union 처리 (중복 제거)
+        Set<Article> unionSet = new HashSet<>();
+        unionSet.addAll(articlesFromComment);
+        unionSet.addAll(articlesFromQnaComment);
+
+        // unionSet을 List로 변환 후, Article의 생성일(createdAt) 내림차순 정렬
+        List<Article> combined = new ArrayList<>(unionSet);
+        combined.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+
+        // 수동 페이징 처리
+        int start = page * size;
+        int end = Math.min(start + size, combined.size());
+        List<Article> subList = (start < combined.size()) ? combined.subList(start, end) : Collections.emptyList();
+
+        List<ArticleListDTO> dtos = subList.stream()
+                .map(a -> articleViewService.convertToListDTO(a, userDetails))
+                .collect(Collectors.toList());
+
+        boolean isLast = (end >= combined.size());
+        return new ArticleListResponseDTO(dtos, isLast, page);
+    }
+
 }
