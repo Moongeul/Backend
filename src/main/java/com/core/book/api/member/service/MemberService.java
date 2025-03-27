@@ -374,8 +374,20 @@ public class MemberService {
         Member targetMember = memberRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.USER_NOTFOUND_EXCEPTION.getMessage()));
 
-        int followedCount = targetMember.getFollowing().size(); // 팔로잉 수 계산
-        int followerCount = targetMember.getFollowers().size(); // 팔로워 수 계산
+        InfoOpen infoOpen = infoOpenRepository.findByMember(targetMember)
+                .orElse(null);
+
+        int followedCount;
+        int followerCount;
+        // 팔로워 공개 여부가 false인 경우 -1로 설정
+        if (infoOpen != null && Boolean.FALSE.equals(infoOpen.getFollowOpen())) {
+            followedCount = -1;
+            followerCount = -1;
+        } else {
+            followedCount = targetMember.getFollowing().size();
+            followerCount = targetMember.getFollowers().size();
+        }
+
         int readBooksCount = readBooksRepository.findReadBooksByMemberId(userId).size(); // 읽은책 수 계산
         int wishBooksCount = wishBooksRepository.findWishBooksByMemberId(userId).size(); // 읽고싶은책 수 계산
 
