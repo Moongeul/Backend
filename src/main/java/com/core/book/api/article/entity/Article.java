@@ -10,6 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -26,20 +29,26 @@ public abstract class Article extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ArticleType type;
 
-    private long likeCnt; // 좋아요 수
-    private long commentCnt; // 댓글 수
-    private long quoCnt; // 인용 수
+    protected long likeCnt; // 좋아요 수
+    protected long commentCnt; // 댓글 수
+    protected long quoCnt; // 인용 수
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
     private Book book;
 
+    @OneToMany(mappedBy = "quotedArticle", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuotationArticle> quotationArticles = new ArrayList<>();
+
     public abstract String getContent();
     public abstract Member getMember();
 
-    public abstract Article increaseCommentCount();
-    public abstract Article decreaseCommentCount();
+    public abstract void increaseCommentCount();
+    public abstract void decreaseCommentCount();
 
-    public abstract Article increaseLikeCount();
-    public abstract Article decreaseLikeCount();
+    public abstract void increaseLikeCount();
+    public abstract void decreaseLikeCount();
+
+    public abstract void increaseQuoCount();
+    public abstract void decreaseQuoCount();
 }

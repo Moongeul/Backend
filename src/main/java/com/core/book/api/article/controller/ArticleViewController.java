@@ -1,9 +1,6 @@
 package com.core.book.api.article.controller;
 
-import com.core.book.api.article.dto.ArticleListResponseDTO;
-import com.core.book.api.article.dto.PhraseArticleDetailDTO;
-import com.core.book.api.article.dto.QnaArticleDetailDTO;
-import com.core.book.api.article.dto.ReviewArticleDetailDTO;
+import com.core.book.api.article.dto.*;
 import com.core.book.api.article.service.ArticleViewService;
 import com.core.book.common.response.ApiResponse;
 import com.core.book.common.response.SuccessStatus;

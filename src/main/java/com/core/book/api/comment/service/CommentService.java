@@ -58,8 +58,7 @@ public class CommentService {
         commentRepository.save(comment);
 
         // 댓글 수 증가
-        Article updatedArticle = article.increaseCommentCount();
-        articleRepository.save(updatedArticle);
+        article.increaseCommentCount();
     }
 
     //댓글 조회
@@ -111,8 +110,7 @@ public class CommentService {
 
         // 댓글 수 감소
         Article article = comment.getArticle();
-        Article updatedArticle = article.decreaseCommentCount();
-        articleRepository.save(updatedArticle);
+        article.decreaseCommentCount();
     }
 
     // QnA 답변(댓글) 생성
@@ -144,10 +142,8 @@ public class CommentService {
                 .build();
         qnaCommentRepository.save(qnaComment);
 
-        // QnAArticle 댓글 수 증가 로직
-        // (QnaArticle의 increaseCommentCount() 호출 후 빌더로 객체를 새로 생성하여 저장)
-        QnaArticle updatedQnaArticle = qnaArticle.increaseCommentCount();
-        articleRepository.save(updatedQnaArticle);
+        // 댓글 수 증가 로직
+        qnaArticle.increaseCommentCount();
     }
 
     // QnA 답변(댓글) 조회
@@ -197,12 +193,9 @@ public class CommentService {
 
         qnaCommentRepository.delete(qnaComment);
 
-        // QnAArticle 댓글 수 감소 로직
-        // (QnaArticle의 decreaseCommentCount() 호출 후 빌더로 객체를 새로 생성하여 저장)
+        // 댓글 수 감소
         QnaArticle qnaArticle = qnaComment.getQnaArticleContent().getQnaArticle();
-
-        QnaArticle updatedQnaArticle = qnaArticle.decreaseCommentCount();
-        articleRepository.save(updatedQnaArticle);
+        qnaArticle.decreaseCommentCount();
 
     }
 }

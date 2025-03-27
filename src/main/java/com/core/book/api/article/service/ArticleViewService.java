@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ArticleViewService {
 
+    private final QuotationArticleRepository quotationArticleRepository;
     private final ReviewArticleRepository reviewArticleRepository;
     private final PhraseArticleRepository phraseArticleRepository;
     private final ArticleLikeRepository articleLikeRepository;
@@ -293,6 +294,59 @@ public class ArticleViewService {
                 .followerCount(followerCount)
                 .date(formattedDate)
                 .myLike(myLike)
+                .build();
+    }
+
+    // 인용 게시글 목록 조회
+    public QuotationArticleListResponseDTO getQuotationArticlesByQuotedArticleId(Long quotedArticleId, int page, int size) {
+
+        // 원 게시글 존재 여부 확인
+        articleRepository.findById(quotedArticleId)
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage()));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<QuotationArticle> quotationPage = quotationArticleRepository.findByQuotedArticleId(quotedArticleId, pageable);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        List<QuotationArticleResponseDTO> quotations = quotationPage.getContent().stream().map(quotation -> {
+            Member quotationWriter = quotation.getMember();
+            String formattedDate = quotation.getCreatedAt().format(formatter);
+
+            Article originalArticle = quotation.getQuotedArticle();
+            if (originalArticle == null) {
+                throw new NotFoundException(ErrorStatus.ARTICLE_NOT_FOUND_EXCEPTION.getMessage());
+            }
+            Member originalWriter = originalArticle.getMember();
+            Book book = originalArticle.getBook();
+
+            return QuotationArticleResponseDTO.builder()
+                    .quotationArticleId(quotation.getId())
+                    .memberId(quotationWriter.getId())
+                    .profileImage(quotationWriter.getImageUrl())
+                    .nickname(quotationWriter.getNickname())
+                    .likeCnt(quotation.getLikeCnt())
+                    .commentCnt(quotation.getCommentCnt())
+                    .quoCnt(quotation.getQuoCnt())
+                    .date(formattedDate)
+                    .content(quotation.getContent())
+                    .originalArticleId(originalArticle.getId())
+                    .originalMemberId(originalWriter.getId())
+                    .originalMemberNickname(originalWriter.getNickname())
+                    .originalMemberProfileImage(originalWriter.getImageUrl())
+                    .originalArticleType(originalArticle.getType())
+                    .bookId(book != null ? book.getIsbn() : null)
+                    .bookImage(book != null ? book.getBookImage() : null)
+                    .bookTitle(book != null ? book.getTitle() : null)
+                    .bookAuthor(book != null ? book.getAuthor() : null)
+                    .originalContent(originalArticle.getContent())
+                    .build();
+        }).collect(Collectors.toList());
+
+        return QuotationArticleListResponseDTO.builder()
+                .quotations(quotations)
+                .isLast(quotationPage.isLast())
+                .page(page)
                 .build();
     }
 }

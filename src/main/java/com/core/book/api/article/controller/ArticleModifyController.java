@@ -2,6 +2,7 @@ package com.core.book.api.article.controller;
 
 import com.core.book.api.article.dto.PhraseArticleCreateDTO;
 import com.core.book.api.article.dto.QnaArticleCreateDTO;
+import com.core.book.api.article.dto.QuotationArticleModifyDTO;
 import com.core.book.api.article.dto.ReviewArticleCreateDTO;
 import com.core.book.api.article.service.ArticleModifyService;
 import com.core.book.api.member.service.MemberService;
@@ -95,6 +96,30 @@ public class ArticleModifyController {
 
         Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
         articleModifyService.modifyQnaArticle(id, qnaArticleCreateDTO, userId);
+
+        return ApiResponse.success_only(SuccessStatus.MODIFY_ARTICLE_SUCCESS);
+    }
+
+    @Operation(
+            summary = "인용 게시글 수정 API",
+            description = "인용 게시글을 수정합니다. (TYPE : QUOTATION)"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "게시글 작성자와 수정 요청자가 다릅니다.")
+    })
+    @PutMapping("/quotation/{QuoatationArticleId}")
+    public ResponseEntity<ApiResponse<Void>> modifyQuotationArticle(
+            @PathVariable Long QuoatationArticleId,
+            @RequestBody QuotationArticleModifyDTO quotationArticleModifyDTO,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        if (quotationArticleModifyDTO.getContent() == null || quotationArticleModifyDTO.getContent().isEmpty()) {
+            throw new NotFoundException(ErrorStatus.VALIDATION_CONTENT_MISSING_EXCEPTION.getMessage());
+        }
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        articleModifyService.modifyQuotationArticle(QuoatationArticleId, quotationArticleModifyDTO, userId);
 
         return ApiResponse.success_only(SuccessStatus.MODIFY_ARTICLE_SUCCESS);
     }

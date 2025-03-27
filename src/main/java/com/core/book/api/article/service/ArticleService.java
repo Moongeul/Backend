@@ -34,14 +34,14 @@ public class ArticleService {
 
         if (existingLike.isPresent()) {
             articleLikeRepository.delete(existingLike.get());
-            article = article.decreaseLikeCount();
+            article.decreaseLikeCount();
         } else {
             ArticleLike articleLike = ArticleLike.builder()
                     .article(article)
                     .member(member)
                     .build();
             articleLikeRepository.save(articleLike);
-            article = article.increaseLikeCount();
+            article.increaseLikeCount();
         }
 
         articleRepository.save(article);

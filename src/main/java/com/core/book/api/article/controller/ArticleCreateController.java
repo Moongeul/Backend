@@ -2,6 +2,7 @@ package com.core.book.api.article.controller;
 
 import com.core.book.api.article.dto.PhraseArticleCreateDTO;
 import com.core.book.api.article.dto.QnaArticleCreateDTO;
+import com.core.book.api.article.dto.QuotationArticleCreateDTO;
 import com.core.book.api.article.dto.ReviewArticleCreateDTO;
 import com.core.book.api.article.service.ArticleCreateService;
 import com.core.book.api.member.service.MemberService;
@@ -129,6 +130,29 @@ public class ArticleCreateController {
 
         Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
         articleCreateService.createQnaArticle(qnaArticleCreateDTO, userId);
+
+        return ApiResponse.success_only(SuccessStatus.CREATE_ARTICLE_SUCCESS);
+    }
+
+    @Operation(
+            summary = "인용 게시글 생성 API",
+            description = "감상평 게시글을 인용하는 인용 게시글을 생성합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "게시글 생성 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "게시글이 존재하지 않습니다.")
+    })
+    @PostMapping("/quotation")
+    public ResponseEntity<ApiResponse<Void>> createQuotationArticle(
+            @RequestBody QuotationArticleCreateDTO quotationArticleCreateDTO,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        if (quotationArticleCreateDTO.getContent() == null || quotationArticleCreateDTO.getContent().isEmpty()) {
+            throw new NotFoundException(ErrorStatus.VALIDATION_CONTENT_MISSING_EXCEPTION.getMessage());
+        }
+
+        Long userId = memberService.getUserIdByEmail(userDetails.getUsername());
+        articleCreateService.createQuotationArticle(quotationArticleCreateDTO, userId);
 
         return ApiResponse.success_only(SuccessStatus.CREATE_ARTICLE_SUCCESS);
     }
