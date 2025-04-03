@@ -2,9 +2,10 @@ package com.core.book.api.article.service;
 
 import com.core.book.api.article.entity.*;
 import com.core.book.api.article.repository.*;
+import com.core.book.api.book.entity.Book;
 import com.core.book.api.book.entity.UserBookTag;
+import com.core.book.api.book.repository.BookRepository;
 import com.core.book.api.book.repository.UserBookTagRepository;
-import com.core.book.api.comment.entity.Comment;
 import com.core.book.api.comment.entity.QnaComment;
 import com.core.book.api.comment.repository.CommentRepository;
 import com.core.book.api.comment.repository.QnaCommentRepository;
@@ -29,6 +30,7 @@ public class ArticleDeleteService {
     private final QnaArticleRepository qnaArticleRepository;
     private final QuotationArticleRepository quotationArticleRepository;
     private final UserBookTagRepository userBookTagRepository;
+    private final BookRepository bookRepository;
 
     // 게시글에 연관된 좋아요 삭제
     @Transactional
@@ -104,6 +106,32 @@ public class ArticleDeleteService {
         deleteArticleLikesForArticle(reviewArticle);
 
         reviewArticleRepository.delete(reviewArticle);
+
+        updateRatingAverageAfterDeletion(reviewArticle.getBook(), reviewArticle.getRating());
+    }
+
+    // 평점이 삭제된 경우 평균 평점 갱신
+    public void updateRatingAverageAfterDeletion(Book book, double removed_rating) {
+        int ratingCount = book.getRatingCount();
+
+        if (ratingCount <= 1) {
+            // 평점이 1개뿐이면 삭제 후 평균을 0으로 설정
+            book = book.toBuilder()
+                    .ratingAverage(0.0f)
+                    .ratingCount(0)
+                    .build();
+        } else {
+            // 새로운 평균 평점 계산
+            float new_rating_average = (float) ((book.getRatingAverage() * ratingCount - removed_rating) / (ratingCount - 1));
+            new_rating_average = (float) (Math.round(new_rating_average * 100) / 100.0);
+
+            book = book.toBuilder()
+                    .ratingAverage(new_rating_average)
+                    .ratingCount(ratingCount - 1)
+                    .build();
+        }
+
+        bookRepository.save(book);
     }
 
     // 인상깊은구절 게시글 삭제
