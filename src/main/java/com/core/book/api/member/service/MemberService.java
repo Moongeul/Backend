@@ -303,7 +303,7 @@ public class MemberService {
     }
 
     @Transactional
-    @CacheEvict(value = {"followers", "following", "userInfo"}, key = "#userId")
+    //@CacheEvict(value = {"followers", "following", "userInfo"}, key = "#userId")
     public boolean followOrUnfollowMember(Long userId, Long followingId) {
         // 팔로우 하는 유저를 찾을 수 없을 경우 예외처리
         Member follower = memberRepository.findById(userId)
@@ -330,7 +330,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "following", key = "#userId")
+    //@Cacheable(value = "following", key = "#userId")
     public List<FollowedUserDTO> getFollowedUsers(Long userId) {
         // 해당 유저를 찾을 수 없을 경우 예외처리
         Member member = memberRepository.findById(userId)
@@ -346,7 +346,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "followers", key = "#userId")
+    //@Cacheable(value = "followers", key = "#userId")
     public List<FollowerUserDTO> getFollowers(Long userId) {
         // 해당 유저를 찾을 수 없을 경우 예외처리
         Member member = memberRepository.findById(userId)
