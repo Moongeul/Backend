@@ -2,102 +2,79 @@ name: Moongeul CI/CD
 
 on:
   push:
-    branches: [ "develop" ]
+    branches:
+      - develop   # CI
+      - main      # CD
 
 permissions:
   contents: read
 
 jobs:
-  # Spring Boot 애플리케이션을 빌드하여 도커허브에 푸시하는 과정
+  # ─── CI: develop/main 공통 ─────────────────────────────────────
   build-docker-image:
     runs-on: ubuntu-latest
+    # develop 또는 main 일 때만 실행
+    if: |
+      github.ref == 'refs/heads/develop' ||
+      github.ref == 'refs/heads/main'
     steps:
-    - uses: actions/checkout@v4
-    # 1. Java 17 세팅
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+      - uses: actions/checkout@v4
 
-    # 2-1. application.yml 파일 생성
-    - name: Create application.yml
-      run: |
-        mkdir -p src/main/resources
-        echo "${{ secrets.APPLICATION_YML }}" > src/main/resources/application.yml
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    # 2-2. application-book.yml 파일 생성
-    - name: Create application-book.yml
-      run: |
-        mkdir -p src/main/resources
-        echo "${{ secrets.APPLICATION_BOOK_YML }}" > src/main/resources/application-book.yml
+      - name: Create application.yml files
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICATION_YML }}"                > src/main/resources/application.yml
+          echo "${{ secrets.APPLICATION_BOOK_YML }}"           > src/main/resources/application-book.yml
+          echo "${{ secrets.APPLICATION_JWT_YML }}"            > src/main/resources/application-jwt.yml
+          echo "${{ secrets.APPLICATION_OAUTH2_YML }}"         > src/main/resources/application-oauth.yml
+          echo "${{ secrets.APPLICATION_PROHIBIT_NICKNAME_YML }}" > src/main/resources/application-prohibit_nickname.yml
+          echo "${{ secrets.APPLICATION_AWS_YML }}"            > src/main/resources/application-aws.yml
 
-    # 2-3. application-jwt.yml 파일 생성
-    - name: Create application-jwt.yml
-      run: |
-        mkdir -p src/main/resources
-        echo "${{ secrets.APPLICATION_JWT_YML }}" > src/main/resources/application-jwt.yml
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
-    # 2-4. application-oauth.yml 파일 생성
-    - name: Create application-oauth.yml
-      run: |
-        mkdir -p src/main/resources
-        echo "${{ secrets.APPLICATION_OAUTH2_YML }}" > src/main/resources/application-oauth.yml
+      - name: Build with Gradle
+        run: ./gradlew clean bootJar
 
-    # 2-5. application-prohibit_nickname.yml 파일 생성
-    - name: Create application-prohibit_nickname.yml
-      run: |
-        mkdir -p src/main/resources
-        echo "${{ secrets.APPLICATION_PROHIBIT_NICKNAME_YML }}" > src/main/resources/application-prohibit_nickname.yml
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action:${{ github.ref_name }} .
 
-    # 2-6. application-aws.yml 파일 생성
-    - name: Create application-aws.yml
-      run: |
-        mkdir -p src/main/resources
-        echo "${{ secrets.APPLICATION_AWS_YML }}" > src/main/resources/application-aws.yml
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-    # 3. Gradle 설정
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action:${{ github.ref_name }}
 
-    # 4. Spring Boot 애플리케이션 빌드
-    - name: Build with Gradle
-      run: ./gradlew clean bootJar
-
-    # 5. Docker 이미지 빌드
-    - name: docker image build
-      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action .
-
-    # 6. DockerHub 로그인
-    - name: docker login
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-    # 7. Docker Hub 이미지 푸시
-    - name: docker Hub push
-      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action
-
-# 위 과정에서 푸시한 이미지를 ec2에서 풀받아서 실행시키는 과정 
   run-docker-image-on-ec2:
-    # build-docker-image (위)과정이 완료되어야 실행됩니다.
     needs: build-docker-image
     runs-on: self-hosted
-
+    # main 브랜치에서만 실행
+    if: github.ref == 'refs/heads/main'
     steps:
-      # 1. 최신 이미지를 풀받습니다
-      - name: docker pull
-        run: sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action
-      
-      # 2. 기존의 컨테이너를 중지시킵니다
-      - name: docker stop container
-        run: sudo docker stop $(sudo docker ps -q) 2>/dev/null || true
+      - name: Pull latest Docker image
+        run: sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action:main
 
-      # 3. 최신 이미지를 컨테이너화하여 실행시킵니다
-      - name: docker run new container
-        run: sudo docker run --name moongeul --rm -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action
+      - name: Stop existing container (if any)
+        run: |
+          sudo docker stop moongeul || true
+          sudo docker rm  moongeul || true
 
-      # 4. 미사용 이미지를 정리합니다
-      - name: delete old docker image
+      - name: Run new container
+        run: |
+          sudo docker run \
+            --name moongeul \
+            --rm -d \
+            -p 8080:8080 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/book_cicd_action:main
+
+      - name: Clean up unused images
         run: sudo docker system prune -f
