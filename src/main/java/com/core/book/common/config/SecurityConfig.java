@@ -42,7 +42,8 @@ public class SecurityConfig {
                         CorsConfiguration config = new CorsConfiguration();
                         config.setAllowedOrigins(Arrays.asList(
                                 "https://moongeul.kro.kr",
-                                "http://localhost:8100"
+                                "http://localhost:3000",
+                                "https://moongeul.vercel.app"
                         ));
                         config.setAllowedMethods(Collections.singletonList("*"));
                         config.setAllowCredentials(true);
